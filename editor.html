@@ -1,0 +1,304 @@
+<html>
+<head>
+<title>CellSpace editor</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<!-- JGame -->
+<script type="text/javascript" src="jgame/jgstate.js"></script>
+<script type="text/javascript" src="jgame/jgcanvas.js"></script>
+<script type="text/javascript" src="jgame/jg.js"></script>
+<script type="text/javascript" src="jgame/jgobject.js"></script>
+<script type="text/javascript" src="jgame/jgaudio.js"></script>
+<script type="text/javascript" src="jgame/jgtiles.js"></script>
+<script type="text/javascript" src="jgame/jgmenu.js"></script>
+<script type="text/javascript" src="jgame/gl.js"></script>
+<script type="text/javascript" src="jgame/gldraw.js"></script>
+<script type="text/javascript" src="jgame/jgspritebatch.js"></script>
+
+<script type="text/javascript" src="jgame/gamemessages.js"></script>
+<script type="text/javascript" src="jgame/genericgameobjects.js"></script>
+<script type="text/javascript" src="jgame/persistentstate.js"></script>
+
+<!-- CellSpace -->
+<script type="text/javascript" src="cellspace/Main.js"></script>
+<script type="text/javascript" src="cellspace/Cell.js"></script>
+<script type="text/javascript" src="cellspace/CellMap.js"></script>
+<script type="text/javascript" src="cellspace/Game.js"></script>
+<script type="text/javascript" src="cellspace/GameParser.js"></script>
+<script type="text/javascript" src="cellspace/Level.js"></script>
+<script type="text/javascript" src="cellspace/Rule.js"></script>
+
+<!-- JGame-Cellspace glue -->
+<script type="text/javascript" src="cellspace-main.js"></script>
+
+<!--  jsonform -->
+<script type="text/javascript" src="jsonform/jquery.min.js"></script>
+<script type="text/javascript" src="jsonform/underscore.js"></script>
+<script type="text/javascript" src="jsonform/jsonform.js"></script>
+<link rel="stylesheet" href="jsonform/jsonform.css">
+
+<!-- codemirror -->
+<link rel="stylesheet" href="codemirror/codemirror.css">
+<script src="codemirror/codemirror.js"></script>
+<script src="codemirror/cellspace.js"></script>
+
+
+<style>
+
+/*http://stackoverflow.com/questions/17506469/how-to-make-html5-canvas-full-page-size-with-cocos2d*/
+
+* { margin:0; padding:0; } /* to remove the top and left whitespace */
+html, body { width:100%; height:100%; } /* just to be sure these are full screen*/
+canvas#game-canvas { display:block; /*cursor:none;*/ } /* To remove the scrollbars */
+
+
+.CodeMirror {
+	height: 950px;
+}
+/*.CodeMirror-scroll {
+  overflow-y: hidden;
+  overflow-x: auto;
+}*/
+
+.overlay {
+	position:absolute;
+	z-index: 1000;
+	display: none;
+	background-color: #eee;
+	padding: 10px;
+	border: 2px solid black;
+	left: 10%;
+	top: 5%;
+}
+.menu {
+	list-style:none;
+}
+.menu li {
+	cursor: pointer;
+	background-color: #ccc;
+	margin: 3px;
+	padding: 4px;
+}
+.menu li.sep, .menu li.sep:hover {
+	height: 10px;
+	background-color: #eee;
+	color: #000;
+	cursor: default;
+}
+.menu li:hover {
+	background-color: #000;
+	color: #ccc;
+}
+.form {
+	list-style:none;
+}
+
+.alert {
+	position:absolute;
+	z-index: 1001;
+	padding: 10px;
+	border: 2px solid black;
+	background-color: #eee;
+
+}
+
+.console {
+	overflow:scroll; 
+	height:70%;
+	font-size: 80%;
+}
+
+.cs-error {
+    background: none repeat scroll 0 0 #FFFFAA;
+    color: #AA0000;
+    font-family: arial;
+    padding: 2px 5px 3px;
+}
+.cs-error-icon {
+    background-color: #FF0000;
+    border-radius: 50%;
+    color: #FFFFFF;
+    font-weight: bold;
+    margin-right: 7px;
+    padding: 0 3px;
+}
+
+
+img.pauseoverlay {
+	position:absolute;
+	width: 50%;
+	height: 50%;
+	display: none;
+	cursor: pointer;
+}
+
+.anchorbutton {
+	font-family: "Ubuntu";
+	padding: 3px 4px 2px 4px;
+	color: #000;
+	background-color: #e2e2e2;
+    background: -webkit-gradient(linear, left top, left bottom, from(#eeeeee), to(#dddddd));
+    background: -moz-linear-gradient(top,  #eeeeee,  #dddddd);
+	text-decoration: none;
+	border: 1px outset #888888;
+	border-radius: 4px;
+}
+
+
+</style>
+
+
+</head>
+<body onload="webGLStart();" style="height:100%;">
+
+<div id="introdialog" class="overlay" style="display:block; text-align:center;">
+<i>Welcome to the CellSpace IDE</i>
+<br>
+<br>
+Click on a line number to bring up the code wizard.
+<br>
+<br>
+Save and Load will save to / load from the browser cache.
+<br>
+<br>
+To load and save your work to/from your local file system,<br>
+use Download and Upload.
+<br>
+<br>
+The graphics and sound URLs are subject to CORS limitations,<br>
+so it's recommended you use <a href="http://dataurl.net/">data URLs</a>.
+<br>
+<br>
+A sprite editor is provided. It has CellScript import/export functions.<br>
+These are based on a tilemap statement with a data URL that you can<br>
+copy/paste as text.
+<br>
+<br>
+<b><a target="_blank" href="manual">Check out the manual</a> for more information.</b>
+<br>
+<br>
+Happy CellScripting!
+<br>
+<br>
+
+<button style="width: 300px; font-size: 150%;" onclick="document.getElementById('introdialog').style.display='none'">OK</button>
+
+</div>
+
+
+<div id="contextmenu" class="overlay">
+<b style="color: red; cursor:pointer; font-size:110%; border: 2px solid red;
+border-radius: 50%;"
+onclick="closeContextMenu(true)">&nbsp;X&nbsp;</b>
+<i>Code creation wizard</i>
+<ul class="menu">
+<li class="sep">
+<li onclick="opendialog('globals')">Global game settings
+<li onclick="opendialog('tilemap')">Define the tile map
+<li onclick="opendialog('display')">Display settings
+<li class="sep">
+<li onclick="opendialog('cell')">New cell type
+<li onclick="opendialog('cellgroup')">New group of cell types
+<li onclick="opendialog('cellanim')">New cell animation
+<li class="sep">
+<li onclick="opendialog('rule')">New rule
+<li class="sep">
+<li onclick="opendialog('leveldefaults')">Default level settings
+<li onclick="opendialog('level')">New level
+</div>
+
+<!--<div id="res" class="alert"></div>-->
+
+<div id="globalsdialog" class="overlay">
+<form id="globals" class="vertical"></form>
+</div>
+
+<div id="tilemapdialog" class="overlay">
+tilemap:
+<form id="tilemap" class="vertical"></form>
+</div>
+
+<div id="displaydialog" class="overlay">
+display:
+<form id="display" class="vertical"></form>
+</div>
+
+<div id="celldialog" class="overlay">
+cell:
+<form id="cell" class="vertical"></form>
+</div>
+
+<div id="cellgroupdialog" class="overlay">
+group:
+<form id="cellgroup" class="vertical"></form>
+</div>
+
+<div id="cellanimdialog" class="overlay">
+<form id="cellanim" class="vertical"></form>
+</div>
+
+<div id="ruledialog" class="overlay">
+<form id="rule" class="vertical"></form>
+</div>
+
+<div id="leveldefaultsdialog" class="overlay">
+<form id="leveldefaults" class="vertical"></form>
+</div>
+
+<div id="leveldialog" class="overlay">
+<form id="level" class="vertical"></form>
+</div>
+
+
+
+
+<div id="editdiv" style="float:left; width:50%; height:100%">
+	<textarea id="source"></textarea>
+</div>
+
+
+<div style="width:50%; height:100%; overflow: hidden; float:right;">
+	<div style="width:100%; height:50%; overflow: hidden;">
+		<img id="pauseoverlay" src="editor/images/play-icon.png"
+		 class="pauseoverlay" onclick="buttonPauseWebGL(false);"></img>
+		<canvas id="game-canvas" tabindex="1" style="border: none; display:block;"></canvas>
+	</div>
+
+	<div style="width:100%; height:50%; overflow: hidden; ">
+		<div style="float:left; padding:15px; width:48%; height:100%;">
+			<button onclick="initCSGameFromTextArea();">Run Code</button>
+			<button onclick="buttonFullScreen(true);">Fullscreen</button>
+			<button onclick="buttonPauseWebGL(true);">Pause</button>
+			<button onclick="buttonPauseWebGL(false);">Resume</button>
+			<div style="margin-bottom:10px;"></div>
+			<button onclick="buttonSaveLocalStorage();">Save</button>
+			<button onclick="buttonLoadLocalStorage();">Load</button>
+			<!--Load Example: 
+			<select id="exampleselect" onchange="selectLoadExample()">
+			<option name="">...</option>
+			<option name="simpleboulder">Simple Boulder</option>
+			</select>-->
+			<a id="downloadlink" class="anchorbutton" href="#" target="_blank"
+			 onclick="downloadGameSource();">Download</a>
+			<label for="pngfile" class="anchorbutton">Upload</label>
+			<input type="file" style="display:none;" id="pngfile"
+			onchange="uploadGameSource(this)" accept="*/*"></input>
+
+			<!--<button onclick="saveGameSource();">Save source</button>-->
+			<div style="margin-bottom:10px;"></div>
+			<a class="anchorbutton"
+			 href="http://tmtg.net/tinyspriteeditor/tinyspriteeditor.html"
+			 target="_blank">Sprite editor</a>
+			<button onclick="document.getElementById('introdialog').style.display='block'">Help</button>
+			<div id="console" class="console" >
+			</div>
+		</div>
+		<div style="float:right; width:43%; height:90%;">
+			<canvas id="tileindexes" style="width:100%; height:100%;"></canvas>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript" src="editor/editor.js"></script>
+<script type="text/javascript" src="editor/forms.js"></script>
+</body></html>

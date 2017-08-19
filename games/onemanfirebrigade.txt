@@ -1,0 +1,388 @@
+globals:
+var fires=0;
+
+gametitle: One Man Fire Brigade
+gamedesc:
+An LD#28 entry by Boris van Schooten<br>
+Extinguish all the fires.<br>
+You are invulnerable to fire, but the<br>
+humans must not get trapped by it.<br>
+Use cursor keys to move, and WSAD to spray.<br>
+
+
+tilemap: 16 16 8 8 false data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAADe0lEQVR4nO3ZPXLbMBCG4T2TTpFTKF26VL6JqhTufBMW6nKAnCCdT5CZTWEBBpe7APgnydL7zGAk0vzfj4BIi6x0Op00tePxqCKi5bxW69iFFm2OpetF29mTLmxr1t3mvMri7xAA/fVDc5txwKrf/+bWsV7t76rTC741PRwOuZ3PZ1VVPZ/PeZ5UAvD727K2ybmkwpcBOB6PansG+1ksX70wVwhAdDfkC6zBhe88ll6jENSa2XcuqL69NO94fXvZNgCtHXa06rZmBGB8otMAhPvU6fxRobVYRuPtSDBvjrnFFzE9QAqBd7eXxd8sAHO6+0uXP+ohyhMpi21b42BHBW81s61JF+9N2wC4ofkTHmd07KP1Zw4Beb1UzCgE4tz5mwVgGAY9nU6aPnsCkL4Pw5Avcq34jQDMKr4TglGBxflum11GUvE/AxAFoxw+0vy83JohIG3TGw6cbv+2PUAtAOkAKyGY3sE7BEAlDsBo+VR427xwpPmX76pqC7B4CLCfrTv/JgHwnhLSSfQEIOgRRkVtFb0WgLAN/vdJMYtP2+z8PO0Uf+0QkJbxin+vAZDy5Lxi7xkAscUdnACUraMHiILg9BSTACwdAmp3/s0DEL0ncDbZ0/27Q4AsC8DHNlKh//2c3vGD/zepDQG9zZz7FkOAd+eXPwxl6wDUnvNb7wnSSaRWu/ODAw4DUJsWLwA2BGXhU7MBKEMQjflpnv+3fAxrhwBp3PnlD8N7eg/QHON7ngTyBWgEoGiTbYy6/bLocfE/9z8uqFfkSdjt/tcOAa0x3+sJguvZr/Wc3/NUsEEA8sXoCEB9fdsbOGO/EwAJpude5MVDQFT8KAS7BqB8zGu9J0gn4bR8glcMwMc2Gq1zO3OtGgJstx+13d8EiglARw/QvDBXDoBIGk5uUPwFw8Bt/xlUC0DnY2HXBZpxsPYuWdIVe9vaq/jRfnramnXb56Ovovq620njXkSFnjsfX1QqqC1qbR4BeDBeYaNpiv+gbIG97xT/weVCv5tG8Z9HLnpymb71cWEHZdc+uvutd2c5eoSvjwBggiHgifEj8InxGPjEeBH0xHgV/OT4ZxBcFBoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADyC/48fpA+hp1KQAAAAAElFTkSuQmCC
+
+cell: -   0 - false - false
+cell: #   1 - false
+cell: P   2 - false
+cell: H   3 - false
+cell: F   4 - false
+cell: W   5 R true
+cell: B   6 - false
+cell: C   7 - false
+cell: X   8 - false
+
+group: %  #
+
+rule: playermove
+. P -W   . - P
+condfunc: playerdir("right1");
+transform: rot4
+priority: 2
+
+rule: playershoot
+. P -    . . W
+outdir:
+- - R
+delay: 1
+condfunc: playerdir("right2");
+transform: rot4
+
+rule: playerpushbreak
+P C -    - P C
+transform: rot4
+condfunc: playerdir("right1");
+
+
+rule: playershoot2
+. P F    . . W
+outdir:
+- - R
+delay: 1
+condfunc: playerdir("right2");
+transform: rot4
+outfunc: fires--;
+
+rule: watermove
+. W -     . . W
+conddir: R
+outdir: - - R
+transform: rot4
+delay: 1
+priority: 2
+
+rule: waterdie
+. W .   . - .
+delay: 1
+transform: rot4
+probability: 0.5
+
+rule: firespread
+. F -   . F F
+probability: 0.2
+transform: rot4
+delay: 10
+outfunc: fires++;
+
+rule: firedouse
+. W F    . - -
+transform: rot4
+delay: 1
+priority: 3
+outfunc: fires--;
+
+rule: barrelexplode
+. B F   . X .
+transform: rot4
+
+rule: doexplode1
+X # .   . - .
+transform: rot4
+
+rule: doexplode2
+X . .   . . .
+. # .   . - .
+. . .   . . .
+transform: rot4
+
+rule: chainexplode1
+X B .    . X .
+transform: rot4
+
+rule: chainexplode2
+X . .   . . .
+. B .   . - .
+. . .   . . .
+transform: rot4
+
+
+rule: endexplode
+!# !# !#   . . .
+!# X  !#   . - .
+!# !# !#   . . .
+
+
+rule: humanrun1
+- H F    H - .
+priority: 2
+outdir: L - -
+transform: rot4
+
+rule: humanrun2
+. - .    . H .
+. H F    . - .
+. . .    . . .
+priority: 2
+outdir:
+- U -
+- - -
+- - -
+transform: miry rot4
+
+rule: humanherd1
+- H P    H - .
+outdir: L - -
+priority: 5
+transform: rot4
+
+rule: humanherd2
+. - .    . H .
+. H P    . - .
+. . .    . . .
+outdir:
+- U -
+- - -
+- - -
+priority: 4
+transform: miry rot4
+
+rule: humanspread1
+- H H    H - .
+conddir: L
+outdir: L - -
+priority: 4
+delay: 1
+transform: rot4
+
+rule: humanspread1b
+- H H    H - .
+outdir: L - -
+priority: 4
+delay: 1
+transform: rot4
+
+rule: humanspread2
+. - .    . H .
+# H H    . - .
+. . .    . . .
+outdir:
+- U -
+- - -
+- - -
+priority: 2
+delay: 1
+transform: miry rot4
+
+
+
+rule: humandie
+. H F    . F .
+outfunc: lose();
+transform: rot4
+
+
+level: #
+--------#--------------#--------
+-P------##------------##--------
+---------------------------H----
+--------##------------##--------
+-----H--#--------------#--------
+--------#------#F#-----#--------
+###-############F###########-###
+--#-#---#--------------#---#-#--
+--------#--------------#--------
+-------##----###-##----#--------
+---H---FF-------F-#----##-------
+-------##----#-F-------FF-------
+--------#----##-###----##-------
+--------#--------------#--------
+--#-#---#--------------#---#-#--
+###-###########F############-###
+--------#-----#F#------#--------
+--------#--------------#--------
+--------##------------##--------
+--H-----------------------------
+--------##------------##-----H--
+--------#--------------#--------
+
+title: Introduction
+desc:
+Extinguish the fire using your water spray.<br>
+Tip: you can spray in two directions<br>
+at once.<br>
+Tip: stop the fire from spreading into<br>
+adjacent rooms.
+init:
+fires=10;
+win:
+fires==0
+
+
+level: #
+################################
+#P----------#--------#---------#
+#-----------#--------#------F--#
+#-----------#--------#---------#
+#-----------#----C-------------#
+#---H-------#--------#---------#
+#######--##########--####-##---#
+#-------------#------------#---#
+#-------H-----#------------#---#
+#-------------------C----------#
+#-------------#-----------F#--F#
+#-------------#------------#---#
+#F-----------F########-#####---#
+###############----------------#
+#-------------#----------------#
+#--H----------#------------C---#
+#-------------#---F------------#
+#-------------####-########-####
+#----H--------#----------------#
+#---------------------C--------#
+#------------------------------#
+################################
+
+title: Fire breaks
+desc:
+Push the movable blocks around<br>
+to block the fire.<br>
+Use them wisely.
+init:
+fires=6;
+win:
+fires==0
+
+level: #
+----H--------------------------F
+-P-------H------#-------------F-
+--H-------------#---------------
+----------------#######-####-###
+-H------P-------#---------------
+------------------------------F-
+#####-###########---------#----F
+------------#---------F---#-----
+------------#--------F----#-----
+-P----------#---#---------#-----
+----------------#---------#-----
+------------#---#----#######--##
+---####-#####---#--------#------
+---------#---------------------F
+---------#------#-------------F-
+-----F---#------#--------####--#
+----F----###--#########-##------
+###--#####-----F----------------
+----------------F-----#---######
+----------------------#---------
+---------#------------#--F------
+---------#------------#---F-----
+title: Teamwork
+desc:
+Make the thee firefighters work<br>
+together to control the fire.
+init:
+fires=14;
+win:
+fires==0
+
+
+level: #
+--------------------------------
+--------------#--#--------------
+--------------#--#--------------
+---------######--######---------
+---------#----#--#----#---------
+---------#----#--#----#---------
+---------#---F#--#F---#---------
+############F##-P##F############
+---------#---F#--#F---#---------
+----#--------F#--#F--------#----
+---------#----#--#----#---------
+F###-#-########--########-#-###F
+F-#--#--#-H#--------#H-#--#--#-F
+F----#-----#-----------#-----#-F
+--#-----#-----------#-----#-----
+--#--#--#--#--------#--#--#--#--
+--#--#-----#-----------#-----#--
+--#-----#-----------#-----#--#--
+--#-H#--#--#--------#--#--#H-#--
+############--------############
+--------------------------------
+----H----------##----------H----
+
+title: Trapped
+desc:
+Push the people to a safe place<br>
+before extinguishing the fire.
+init:
+fires=14;
+win:
+fires==0
+
+level: #
+----H#----#--H-#----#-----------
+-P---#---------#----------#-----
+----------#----#----#-----#-----
+-H---#-H--#----#----#----B#----F
+############-#####-#############
+-----#---B#--BB#----#-----#----F
+---------------#----------#-----
+-----#----#---------#B----------
+######----#----######B----#-----
+-BBB###-########BBBB###-########
+----#---------------#------#---F
+----------#-C--C--C--------#----
+----#-----#---------#------#----
+##-#####################-#####-#
+----#BBB--#-----BBBB#BBB-BB#----
+--------------------#-----------
+F---#-----#---------#------#----
+#############-#######-#######-##
+-----BB#-------#B------#BB------
+---------------#B---------------
+-------#-------#B------#--------
+F------#-------#-------#-------F
+
+title: Exploding barrels
+desc:
+Barrels will explode when set on fire,<br>
+blowing up sections of wall.<br>
+Choose which walls to save.
+init:
+fires=6;
+win:
+fires==0
+
+level: #
+----------------CFFFF-----------
+-H-------H------C---------------
+----H-----------C-----CCCCC-CCCC
+--------------------------------
+P---------------C---------------
+---CCCCCCCCCCC--C-------C-------
+----------------C-------C-------
+--------C-------C-------C-------
+--------C-------C---------------
+--------C----------------C------
+--------C----------------C-----F
+--------C---------C------C-----F
+--------C---------C------C-----F
+CCCCCC--C---------C----C-------F
+----------------C------C--------
+------CCCCCCC---C------C----CCCC
+------CFFFF-----C---------------
+------C---------C---CCCCCCC-----
+------C---------C---C-----------
+------C-------------------------
+----------------C---C-----------
+FFFF------------C---C-------FFFF
+
+title: Fire wall
+desc:
+Push the blocks around<br>
+to contain the fire.
+init:
+fires=20;
+win:
+fires==0
+
+

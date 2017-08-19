@@ -1,0 +1,527 @@
+globals:
+var candy=0;
+var stone=0;
+var jumptimer=0;
+
+
+gametitle: Crush the Candy King
+gamedesc:
+Get all the candy
+<br>
+and raze all the buildings.
+<br><br>
+Use cursor keys or A/D to move.
+<br>
+Press space to jump.
+<br>
+
+tilemap: 16 16 8 8 false data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAD7UlEQVR4nO3ZPU4bQRjG8bfaA2zJBVLQUXEMaheUOQJSCnf0kZCQkGg4ABIFN6DiBm7d5QARsqgmzY6Zfb3ztTOzdpL/TxqhGI/Z+Hk8O7sWKfT29mZKRunf/ny6MR+v99ljd3tl3q/Pi0fCYRpn5Jg1r+970/d90fua5VgFsPM/Xu/N59NN9ni/PjfPlxIM1/d79/HIYZofv77th6SHOWte3/fmtxHz28hyJYgFfHd3V70A7nxbgN3tVdbQQcbK4HtO5FAXK4AN3xhzWgWovQLo+bUKUOkUYPTICDI2z3tK2Ie/luOuALFPe2kBpubXKMBUEVLL4RzeKDQ9JBJ+aG7otfq+N2b9Fb79afcCzfcES60AvvluAURkFHLo36UrgJ07HF5WaEpW+Pr13ALYYR+zq4F9rCDm/GBqFiC0rziRPcDBch0ITZehqAAiXzt/O/arwaBpCVoXIDb/WCvAnAJ4Ahw9FpsTW1H6vjfmxfn0DwVoti9ICXlqb2AfK31tXQAZQhbn06Z/FypAbimcw/WG73vMzmtZAHf8VStA6vypAoRG6Qqg50wcesryP3kK8M3NLsD6MHx7Cqi+MWxRgJz5NQoQWwlCRbEh2hH65HtCCz4/twAizsbwZRhD+E1OCalLfmoBUufZv7H0CqBLokOKLfGetzGnQLFLShE53Bi6l4hVbxbVXAHmlKjFjaCcYuiQZhZA9HMzVpCo0ZXBuvJ+IPcT7yvA3PmtbgRl7gGSz/GRt7NpAaqHLzIvOLcwqa/hK1nJt3oNbgVPOakCVL8SKD0FlI7nSykapSVJfJtywtOrSPJ5PyRr578SMUaN1bz/QGhpxKnZB392Mf45jE28CObhuwkOyShB13Wm6zpKswRv+OkliIafU4Ku68x2uzXb7ZYStDYK/+Fx/yWCeXhMLUFy+CklsOFblKCxUciaCt8W4KezSckNP1QCHT4laGy04Tu7OCyAWgE2TgGGVaBaAXzhU4KGRuGLHJ4CPCuAswrMCT07fErQiNErQGADqMNPLYBELgNTw6cEDeiAY+GnrgCSeO1vw9/tdqOh6d9Tgko2ugCeMRV+6h5AAmWw1/ru8G0CReTguQu/Xf+eqbt+sfBLrgIkvjIEC7DEe/LfCa0CvvBXMwuQcC+AAixt5YSrQ9fhq0+/VfNGEAU4htVE0FPBT4Rv1boVvL8FrEdkHkqtnJA36qda9n1qfA8wudkbNnwUYAluERKDd+mNXvIlIQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAt/AP74/inzDqm+AAAAAElFTkSuQmCC
+
+cell: -   0 - no - no
+cell: #   1 - no - yes
+cell: /   2 - no - yes
+cell: \   2 r no - yes
+cell: %   3 - no - yes
+cell: X   4 - no - yes
+cell: Y   4 - no - yes
+cell: @   5 - mirx - yes
+cell: A   6 - no - yes
+cell: C   7 - no - yes
+cell: *   8 - no - yes
+cell: M   9 l rot4 - yes
+cell: ^  10 - no - no
+group: W  #%XY
+
+
+rule: boulderfall1
+. . .    . . .
+. * .    . - .
+. - .    . * .
+transform: mirx
+
+rule: boulderfall2
+. . .    . . .
+. * .    . - .
+. - .    . * .
+conddir: L
+outdir:
+- - -
+- - -
+- L -
+transform: mirx
+
+priority: 2
+
+rule: boulderslider
+. . .    . . .
+. * -    . - .
+. \ -    . . *
+outdir:
+- - -
+- - -
+- - R
+priority: 2
+
+rule: boulderslidel
+. . .    . . .
+- * .    . - .
+- / .    * . .
+outdir:
+- - -
+- - -
+L - -
+priority: 2
+
+rule: boulderroll
+. * -   . - *
+conddir: R
+outdir:
+- - -
+- - R
+- - -
+transform: mirx
+
+
+
+rule: playermove
+. .    .    . . .
+. @    -    . - @
+. W*C^ .    . . .
+condfunc: playerdir("right")
+transform: mirx
+outdir: - - R
+delay: 3 trigger player
+
+rule: playerslider
+. . .    . . .
+. @ -    . - .
+. \ -    . . @
+priority: 2
+outdir:
+- - -
+- - -
+- - R
+delay: 3 trigger player
+
+rule: playerslider
+. . .    . . .
+- @ .    . - .
+- / .    @ . .
+priority: 2
+outdir:
+- - -
+- - -
+L - -
+delay: 3 trigger player
+
+
+rule: playerget
+. @ C    . - @
+condfunc: playerdir("right")
+transform: rot4
+outfunc: candy--;
+outdir: - - R
+delay: 3 trigger player
+
+rule: playerget2
+. . .    . . .
+. @ .    . - .
+. C .    . @ .
+outfunc: candy--;
+delay: 3 trigger player
+
+rule: playerpush_boul
+@ * -    - @ *
+condfunc: playerdir("right")
+outdir:
+- - -
+- - R
+- - -
+transform: mirx
+delay: 3 trigger player
+
+rule: playerpush_rubble
+@ Y -    - @ Y
+condfunc: playerdir("right")
+transform: mirx
+outdir: - R -
+delay: 3 trigger player
+
+
+
+rule: playerliftstart
+. . .   . . .
+. @ ^   . - A
+. . .   . . .
+condfunc: playerdir("right")
+transform: mirx
+delay: 3 trigger player
+
+rule: playerlift
+. ^ .   . A .
+. A .   . ^ .
+. . .   . . .
+delay: 3 trigger player
+
+rule: playerliftend
+. - .   . @ .
+. A .   . ^ .
+. . .   . . .
+delay: 3 trigger player
+
+
+
+rule: playerfall
+. . .    . . .
+. @ .    . - .
+. - .    . @ .
+priority: 3
+delay: 3 trigger player
+
+
+rule: playerjump
+. -    .    . . .
+. @    .    . . .
+. W*C^ .    . . .
+condfunc: keypress(" ") && jumptimer<=0
+outfunc:  jumptimer = 6*3;
+priority: 4
+delay: 1 trigger player
+
+rule: playerjumpup
+. - .   . @ .
+. @ .   . - .
+. . .   . . .
+condfunc: jumptimer>=3*3
+priority: 6
+delay: 3 trigger player
+
+rule: playerjumpupceil
+. . .   . . .
+. @ .   . . .
+. . .   . . .
+condfunc: jumptimer>=3*3
+priority: 4
+delay: 3 trigger player
+
+rule: playerjumpupceillr
+. . .   . . .
+. @ -   . - @
+. . .   . . .
+condfunc: jumptimer>=3*3 && playerdir("right")
+transform: mirx
+priority: 5
+delay: 3 trigger player
+
+rule: playerjumpuplr
+. - -   . . @
+. @ -   . - .
+. . .   . . .
+condfunc: jumptimer>=3*3 && playerdir("right")
+transform: mirx
+priority: 7
+delay: 3 trigger player
+
+rule: playerjumpdown
+. . .   . . .
+. @ .   . - .
+. - .   . @ .
+condfunc: jumptimer > 0 && jumptimer<3*3
+priority: 6
+delay: 3 trigger player
+
+rule: playerjumpdownlr
+. . .   . . .
+. @ -   . - .
+. - -   . . @
+condfunc: jumptimer > 0 && jumptimer<3*3 && playerdir("right")
+transform: mirx
+priority: 7
+delay: 3 trigger player
+
+
+
+rule: bouldercrush
+. * %    . - X
+conddir: R
+transform: mirx
+outfunc: stone--;
+
+
+rule: bouldercrushmonster
+. * M    . C -
+conddir: R
+transform: rot4
+delay: 1
+priority: 9
+
+
+
+rule: collapse1
+. . .   . . .
+. % .   . X .
+. X .   . . .
+outfunc: stone--;
+
+rule: collapse2
+.  .  .   . . .
+X  %  .   . X .
+. !%# .   . . .
+transform: mirx
+outfunc: stone--;
+
+rule: collapse3
+. X .    . Y .
+
+rule: collapse3
+. . .   . . .
+. Y .   . - .
+. - .   . Y .
+
+rule: collapse4
+. . .   . . .
+. Y -   . - .
+. Y -   . . Y
+transform: mirx
+
+rule: monsterm1
+. .  .    . . .
+. M  -    . - M
+. W^ W^   . . .
+outdir:
+- - -
+- - R
+- - -
+transform: mirx
+delay: 5
+
+rule: monsterm2
+. .  .    . . .
+. M  -    . - M
+. W^ W^   . . .
+conddir: R
+outdir:
+- - -
+- - R
+- - -
+priority: 2
+transform: mirx
+delay: 5
+
+rule: playerdie
+@ M .   M - .
+delay: 1
+priority: 9
+transform: mirx
+outfunc: lose();
+
+
+
+rule: candyfall
+. . .   . . .
+. C .   . - .
+. - .   . C .
+
+rule: playergetcandy
+. @ C    . - @
+transform: mirx
+condfunc: playerdir("right")
+outfunc: candy--;
+
+
+level: #
+
+--------------------------------
+--------------------------------
+C-------------------------------
+CC-M------------M---------------
+##########################------
+--------------------------------
+----------------------------####
+-*-----------*------------------
+##-#####-################---*---
+---%---%--#----------------###^#
+---%---%--#---------------#---^-
+###########--------------#----^-
+----------#----C--------#-C---^-
+----------#----%-------#--%---^-
+-----M---C#----%------#---%---^-
+^--########-*--%----------%---^-
+^---------###--%----------%---^-
+^---------####################^-
+^C---M------------------------^-
+#########---------------------^-
+-@----------------------------^-
+################################
+
+title: Introduction
+desc:
+Avoid the monsters.<br>
+Push the red bombs to destroy buildings.<br>
+
+init:
+candy=7;
+stone=12;
+jumptimer=0;
+tick:
+if (jumptimer > 0) jumptimer--;
+win:
+candy==0 && stone==0
+
+
+level: #
+------------@-------------------
+----------%%%---%%%-------------
+----------%--CCC--%-------------
+----------%--CCC--%-------------
+--------%%%%%%%%%%%%%-----------
+--------%-----%-----%-----------
+--------%-----%-----%-----------
+-----%%%%%%%%%%%%%%%%%%%--------
+-----%-----------------%--------
+--*--%-----------------%-*------
+#############################---
+--------------------------------
+--------------------------------
+-----*--------------------------
+----%%%-%%%---------------------
+----%-----%-------------*-------
+----%-*---%-----------%-%%------
+-%-%%%%%%-%%%%-------%%--%%-----
+-%-----%-----%------%%----%%----
+-%-----%-----%-----%%------%%---
+-%--*--%-----%-*---%--------%-*-
+################################
+
+title: Demolition
+desc: 
+Only a direct hit with a bomb<br>
+will destroy a standing wall.
+
+init:
+candy=6;
+stone=99;
+jumptimer=0;
+tick:
+if (jumptimer > 0) jumptimer--;
+win:
+candy==0 && stone==0
+
+
+level: #
+--------------------------------
+@-*-----*-*-----*----*--*----*--
+#####-######-######-#######-####
+--------------------------------
+--------M-----------------------
+-----######-----------M---------
+-------------------#######------
+-------------M------------------
+----------#######---------------
+-------M------------------------
+----#######---------------------
+--------------------M-----------
+-----------------######---------
+--M-----------M-----------------
+#####-------#####---------M-----
+--------M-------------##########
+-------#####--------------------
+--------------------------------
+-----------------M--------------
+--------------########----------
+--------------------------------
+################################
+
+title: Bowling
+desc: 
+Roll a bomb into a monster to kill it.<br>
+Killing a monster will yield candy.
+
+init:
+candy=7;
+stone=0;
+jumptimer=0;
+tick:
+if (jumptimer > 0) jumptimer--;
+win:
+candy==0 && stone==0
+
+
+level: #
+--------------------------------
+^#\-----------------------------
+^##\----------------*---*-------
+^--------M---------###-###-###-^
+^--/#######\-------------------^
+^-/#########\-----\---\---\---/^
+^------#----------#\---------/#^
+^\-----#----/#\----#\--/-------^
+^#\----#---/###\-----------/\--^
+^C---M-#C----M---C#--/---------^
+^#################--/#\------/-^
+^-----M------------###----\----^
+###################----/----\--^
+----------------#----------/#-##
+----------------#--*------------
+-*---------M---C#-^##\-----/##^-
+###----##########-^###\---/###^-
+-M-----*------C---^-C-#\-/#-C-^-
+######^#\-----%---^-%-------%-^-
+------^##\----%---^-%-------%-^-
+-@----^-------%---^-%-------%-^-
+################################
+
+title: Snakes and ladders
+desc: 
+You cannot jump or move when on a slide.<br>
+Kill monsters when possible to get extra candy.
+init:
+candy=9;
+stone=9;
+jumptimer=0;
+tick:
+if (jumptimer > 0) jumptimer--;
+win:
+candy==0 && stone==0
+
+
+level: #
+--------------------------------
+---CCCCCCCCC-CC--CC-CCCCCCCCC---
+---%%%%%%%%%%%%--%%%%%%%%%%%%---
+---%------------------------%---
+---%------------------------%---
+---%------------------------%---
+---%------------%%%%----%%%%%---
+---%------------%-----------%---
+---%-------*----%-----------%---
+---%-*---%%%%---%--------*--%---
+---%%%%%%%%-----%-###########---
+---%-----*---####---------------
+---%---%%%%%%---------------%---
+---%---%%%%%%---------------%---
+---%---%%%%%%---------------%---
+---%--------%---*-----------%---
+---%-##############---%%%%%%%---
+---%------------------------%---
+---%---------%%%--%%%%%%----%---
+---%---------%%%-----%------%---
+---%--*-*-@---%---*--%------%---
+################################
+
+title: Get out alive
+desc:
+You are inside the king's castle.<br>
+Blow it up, but don't get buried by debris.
+
+init:
+candy=22;
+stone=121;
+jumptimer=0;
+tick:
+if (jumptimer > 0) jumptimer--;
+win:
+candy==0 && stone==0
+
+
+

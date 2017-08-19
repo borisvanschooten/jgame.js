@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Getting started with JSON Form</title>
+	<link rel="stylesheet" style="text/css" href="deps/opt/bootstrap.css" />
+	<style>
+	.vertical input[type="text"] {
+		width: 95%;
+	}
+	.vertical .control-group {
+		width: 850px;
+		padding-bottom: 15px;
+		overflow: hidden;
+	}
+	.vertical .control-label {
+		float:left;
+		width: 120px;
+		text-align: right;
+		padding-right: 10px;
+	}
+	.vertical .controls {
+		width: 720px;
+		float:left;
+	}
+	.vertical .help-inline {
+		display: block;
+		font-style: italic;
+		color: #555;
+	}
+
+	.horizontal .control-group {
+		display: inline;
+	}
+	.horizontal .control-label {
+		float:left;
+		text-align: right;
+		padding-right: 5px;
+		padding-left: 15px;
+	}
+	.horizontal .controls {
+		float:left;
+	}
+	.horizontal .help-inline {
+		display: block;
+		font-style: italic;
+		color: #555;
+	}
+	</style>
+</head>
+<body>
+	<form id="vert" class="vertical"></form>
+	<form id="horiz" class="horizontal"></form>
+	<div id="res" class="alert"></div>
+	<script type="text/javascript" src="jquery.min.js"></script>
+	<script type="text/javascript" src="underscore.js"></script>
+	<script type="text/javascript" src="jsonform.js"></script>
+	<script type="text/javascript">
+		$('form#vert').jsonForm({
+			schema: {
+				gametitle: {
+					title: 'gametitle:',
+					type: 'string',
+					description: "Name of your game",
+				},
+				gamedesc: {
+					title: 'gamedesc:',
+					type: 'string',
+					description: "Long description, use &lt;br&gt; for line breaks",
+				},
+				globals: {
+					title: 'globals:',
+					type: 'string',
+					description: "Javascript code called at beginning of each level",
+				},
+			},
+			form: [
+				{
+					key: "gametitle", 
+					placeholder: "Optional",
+				},
+				{
+					key: "gamedesc",
+					type: "textarea",
+					width: "95%",
+					height: "80px",
+					placeholder: "Optional",
+				},
+				{
+					key: "globals", 
+					type: "textarea",
+					width: "95%",
+					height: "80px",
+					placeholder: "Optional",
+				},
+				{
+					"type": "submit",
+					"title": "Insert code",
+				}
+			],
+			/*form: [
+				{
+					key: "gamedesc",
+					type: "textarea",
+				},	
+			],*/
+			onSubmit: function (errors, values) {
+				if (errors) {
+					$('#res').html('<p>I beg your pardon?</p>');
+				}
+				else {
+					$('#res').html(JSON.stringify(values));
+				}
+			}
+		});
+		$('form#horiz').jsonForm({
+			schema: {
+				cellsym: {
+					type: 'string',
+					title: 'symbol',
+					required: true
+				},
+				tilenr: {
+					type: 'number',
+					title: 'tile#',
+				},
+				imgop: {
+					type: 'string',
+					title: 'imgop',
+					enum: ["-","L","R","U","X","Y","LX","RX","LY","RY"],
+				},
+				directional: {
+					type: 'string',
+					title: 'directional',
+					enum: ["yes","no"],
+				},
+				initialdir: {
+					type: 'string',
+					title: 'initial dir',
+					enum: ["-","L","R","U"],
+				},
+				shouldanim: {
+					type: 'string',
+					title: 'animate',
+					enum: ["yes","no"],
+				},
+			},
+			onSubmit: function (errors, values) {
+				if (errors) {
+					$('#res').html('<p>I beg your pardon?</p>');
+				}
+				else {
+					$('#res').html(JSON.stringify(values));
+				}
+			}
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,569 @@
+globals:
+var score=0;
+var candy=0;
+var fires=0;
+var zerogrowth=0;
+
+gametitle:
+Candy Cane Dash
+
+gamedesc:
+
+Get all the candy!<br>
+Use cursor keys or WSAD to move.<br>
+Press ESC to restart a level.
+
+tilemap: 16 16 16 16 no generictileset.png
+
+cell: -  0 - no - no
+cell: *  80 - no - yes
+cell: +  80 - no - yes
+cell: #  19 - no - yes
+cell: $  25 - no - yes
+cell: @  8 - no - yes
+cell: =  86 - no - yes
+cell: D  117 - no - yes
+cell: M  152 L rot4  - yes
+cell: S  83 - no - yes
+cell: ~  26 - no - yes
+cell: C  47 - no - yes
+cell: Q  96 - no - yes
+cell: >  66 R no - yes
+cell: ^  66 - no - yes
+cell: <  66 L no - yes
+cell: "  73 - no - yes
+cell: B  44 - no - yes
+cell: G  29 - no - yes
+cell: T  31 - no - yes
+cell: F  102 - no - yes
+cell: /  100 - no - yes
+cell: \  100 L no - yes
+
+group: %  *D
+group: &  ~*+#$=DCF\/TG
+
+rule: countfire
+. F .   . . .
+delay: 1  priority: 1
+outfunc: fires++
+
+rule: grassignite
+. " G   . - F
+conddir: R
+transform: ROT4
+priority: 3 delay: 1
+
+rule: treeburn
+F T .   . F .
+transform: ROT4
+probability: 0.5
+priority: 2 delay: 16
+outfunc: lose()
+
+rule: grassburn
+F G .   . F .
+transform: ROT4
+probability: 0.5
+priority: 2 delay: 16
+
+rule: fireout
+.  !TG  .    . . .
+!TG F  !TG   . - .
+.  !TG  .    . . .
+transform: ROT4
+probability: 0.1
+priority: 1 delay: 8
+
+rule: dousefire
+~ F .   - - .
+priority: 11 delay: 1
+transform: ROT4
+
+
+
+rule: gunshotr
+. > -  . . "
+delay: 15
+outdir:
+- - -
+- - R
+- - -
+
+rule: gunshotl
+- < .  " . .
+delay: 15
+outdir:
+- - -
+L - -
+- - -
+
+rule: gunshotu
+. - .  . " .
+. ^ .  . . .
+. . .  . . .
+delay: 15
+outdir:
+- U -
+- - -
+- - -
+
+rule: bulletgo
+. " -  . - "
+delay: 1
+conddir: R
+outdir:
+- - -
+- - R
+- - -
+transform: ROT4
+priority: 2
+
+rule: bulletdie
+. " !-    . - .
+conddir: R
+delay: 1
+transform: ROT4
+
+rule: bullethitballoon
+. " Q  . - D
+conddir: R
+transform: ROT4
+delay: 1 priority: 9
+
+rule: bullethitplayer
+. " @  . - "
+conddir: R
+transform: ROT4
+delay: 1 priority: 9
+outfunc: lose();
+
+rule: bulletbounce1
+. . .   . . .
+. " \   . - .
+. . -   . . "
+conddir: R
+outdir:
+- - -
+- - -
+- - D
+transform: ROT2
+delay: 1 priority: 9
+
+rule: bulletbounce2
+. . .   . . .
+. " .   . - .
+. \ -   . . "
+conddir: D
+outdir:
+- - -
+- - -
+- - R
+transform: ROT2
+delay: 1 priority: 9
+
+rule: bulletbounce3
+. . -   . . "
+. " /   . - .
+. . .   . . .
+conddir: R
+outdir:
+- - U
+- - -
+- - -
+transform: ROT2
+delay: 1 priority: 9
+
+rule: bulletbounce4
+. / -   . . "
+. " .   . - .
+. . .   . . .
+conddir: U
+outdir:
+- - R
+- - -
+- - -
+transform: ROT2
+delay: 1 priority: 9
+
+rule: playerswitchmirror1
+. . .   . . . 
+. @ /   . . \
+. . .   . . .
+
+priority: 4
+transform: ROT4
+condfunc: playerdir("right")
+
+rule: playerswitchmirror2
+. @ \   . . /
+
+priority: 4
+transform: ROT4
+condfunc: playerdir("right")
+
+
+
+
+
+
+rule: balloonbounce
+. Q -   . . . 
+. Q -   . - Q
+. . .   . . .
+transform: MIRX
+priority: 4
+
+rule: balloonmove
+. &Q .   . . . 
+. Q  -   . - Q
+. .  .   . . .
+transform: MIRX
+priority: 4 delay: 6
+probability: 0.2
+
+rule: balloonrise
+. - .   . Q . 
+. Q .   . - .
+. . .   . . .
+priority: 5
+
+rule: playerpushballoon
+. . .   . . . 
+@ Q -   - @ Q
+. . .   . . .
+priority: 4
+transform: MIRX
+condfunc: playerdir("right")
+
+
+rule: waterfall
+. . .   . . .
+. ~ .   . - .
+. - .   . ~ .
+delay: 1
+
+rule: waterflow
+. .  .   . . .
+. ~  -   . - ~
+. &@ .   . . .
+transform: MIRX
+delay: 1 probability: 0.9
+outdir:
+- - -
+- - R
+- - -
+
+rule: waterflowdir
+. . .   . . .
+. ~ -   . - ~
+. & .   . . .
+transform: MIRX
+priority: 2 delay: 1 probability: 0.9
+conddir: R
+outdir:
+- - -
+- - R
+- - -
+
+rule: waterpush
+. . .   . . .
+~ C -   - ~ C
+& & .   . . .
+priority: 10
+transform: MIRX
+
+
+rule: cratesink
+. . .   . . .
+. C .   . ~ .
+. ~ .   . C .
+delay: 3
+
+rule: cratefall
+. . .   . . .
+. C .   . - .
+. - .   . C .
+delay: 3
+
+
+rule: rockbounce
+. .  .   . . . 
+. *+ -   . - +
+. %  -   . . .
+transform: MIRX
+priority: 4
+
+rule: rockfall
+. .  .   . . . 
+. *+ .   . - .
+. -  .   . + .
+priority: 4
+
+rule: rockland
+. + .   . * .
+priority: 3
+
+rule: rockkill
+. . .   . . . 
+. + .   . - .
+. @ .   . + .
+priority: 8
+outfunc: lose();
+
+rule: rockmonsterkill
+. . .   . . . 
+. + .   . - .
+. M .   . D .
+priority: 9
+
+rule: diamondmonsterkill
+. . .   . . . 
+. D .   . D .
+. M .   . D .
+priority: 9
+
+
+rule: diamondbounce
+. . .   . . . 
+. D -   . - D
+. % -   . . .
+priority: 5
+transform: MIRX
+
+rule: diamondfall
+. . .   . . . 
+. D .   . - .
+. - .   . D .
+
+priority: 4
+
+
+rule: playermove
+. @ -   . - @
+
+priority: 9
+transform: ROT4
+condfunc: playerdir("right")
+delay: 3 trigger player
+
+rule: playerdig
+. @ =   . - @
+
+priority: 9
+transform: ROT4
+condfunc: playerdir("right")
+delay: 3 trigger player
+
+rule: playerget
+. @ D   . - @
+
+priority: 9
+transform: ROT4
+condfunc: playerdir("right")
+outfunc: candy--;
+delay: 3 trigger player
+
+rule: playerpush
+@ * -   - @ *
+
+priority: 2
+transform: MIRX
+condfunc: playerdir("right")
+delay: 3 trigger player
+
+
+rule: monstermove
+. M -  . - M
+outdir:
+- - -
+- - R
+- - -
+delay: 6 priority: 1
+transform: ROT4
+
+rule: monsterkill
+. M @   . - M
+priority: 4
+transform: ROT4
+outfunc: lose();
+
+
+rule: slimegrow
+. S -   . S S
+outfunc: zerogrowth=0
+priority: 2 delay: 24 probability: 0.35
+transform: ROT4
+
+rule: slimedie
+. S .   . * .
+condfunc: zerogrowth > 200
+
+
+
+level: #
+@===============================
+====*=*=##==*=*=#=*=*=#**==*=*==
+===*D*D*-#===**=#=*=*=#==**=*===
+====*D*D*#==***=#=*DDD#--*==**==
+===*D*D*=#==D*D=#=*DDD#*D*=*====
+##############################==
+==*=====*=*===DD*===**=====*====
+===*=*=*==*==*DD=**===*=*=======
+===*=*=*===*=*DD====**==***=====
+==##############################
+================================
+=*=*=*=*=*=*=*====*=*=*=*=*=*=*=
+================================
+===--------------------------===
+===-===-===-========-===-===-===
+===-===-===-========-===-===-===
+===-===-===-========-===-===-===
+===-===-===-========-===-===-===
+===-===-===-========-===-===-===
+===-===-===-========-===-===-===
+===M-M-M----------------M-M-M===
+================================
+title: Classic boulderdash
+desc:
+Get all the candy.
+<br>
+You can push the boulders.
+<br>
+Hit the monsters with boulders to get more candy.
+
+init: candy=27;
+tick:
+win: candy<=0
+
+level: #
+~~~~~~~~~~~############*########
+~~~~~~~~~~~==================###
+~~~~~~~~~~~########=#=#####==###
+~~~~~~~~~~#########===###------#
+DD~~~~~~~~==========####--------
+###################=#####------#
+###################=######D--D##
+#~~~C~~~#---#~~~###=*=----######
+#D~~#~~D=---=~~~###=*#---------#
+##=#######=###=####=##-------DD#
+#~~~#---#---C---###=############
+#~~~=--D#D--#--D###=========DD##
+##=#######=###############=#####
+#---#~~~#~~~#~~D##########=#####
+#---#~~~=~~~C~~~#####~~~~~C=====
+##=#######=###=######~~~~~###=##
+#---=---C---#---######D~D####=##
+#---#--D#---=---#######=#####=##
+##############=########=#####=##
+#------------------------------#
+#---------------@--------------#
+##----------------------------##
+title: The water system
+desc:
+Water will push away crates.
+
+init: candy=17
+tick:
+win: candy<=0
+
+level: #
+--------------------------------
+--------------------------------
+--------------------------------
+----$$$$$$$$$$$$$===============
+----$-Q-$-Q-$-Q-$=======$===---<
+----$-----------$===========----
+----$-----------$===========----
+------\-------\-$===========----
+>-------/-------$===========----
+----------/---/-$QQQQ=======----
+------\-/-------$QQQQ=======----
+-----/----/-----$QQQQ=======----
+-$$$$$$$$$$$$$$$$$$$$$$$$$$$----
+-$Q$$$$$Q$$$$Q$$QQQQQQQQQQQQ=--<
+-=*=====*===***$---------------<
+-==============$$$$$$$$$$$$$----
+-=\==/==/======$Q-Q-Q-Q---$$----
+-============*=$----------------
+-====\--/====/=$------/-----/---
+-$$$$$$$-$$$$$$$---/------/-----
+-------------------------------@
+--------^-----------------^-^---
+title: Shooting gallery
+desc:
+Switch the mirrors by walking into them.
+<br>
+Pop balloons to obtain candy.
+
+init: candy=34;
+tick:
+win: candy<=0
+
+level: #
+@----====S============*=S-$----S
+-----====================-$-----
+-----=S===S====*******===-$-----
+-----===================--$-----
+-----==S=====$-----------$------
+-----===S===S$=DDDDDDDDDD$------
+-----=====$$$$$$$$$$$$$$$$------
+--------------------------------
+------------$~~~~~$-----------DD
+*******-----$~~~~~$--===========
+********----$~~~~~$--===========
+*********---$~~~~~$--=QQQQQQQ===
+**********--$=$$$$$--=QQQQQQQ===
+D=========---*-------=QQQQQQQ===
+==========---$-------=QQQQQQQ===
+--------------*------=QQQQQQQ===
+------------$-$------$$=$$$$$$$$
+----------------------$-$-D-$S--
+-----------$-$-$------$-$-$-$-$-
+---------------$------$-$-$-$-$-
+---------------$-----$$-$-$-$-$-
+S--------------$-----S$-D-$---$-
+title: Trap the slime
+desc:
+Trap all the slime.<br>
+The slime will turn into boulders.<br>
+Hint: the player can block water.
+
+init: candy=15
+tick:  zerogrowth++;
+win: candy<=0
+
+level: #
+--#~~~~~#~~~~~#~~~~~~~~~~~~~~~~~
+@-#~~~~~#~~~~~#~~~~~~~~~~~~~~~~~
+---##~#######~##############~###
+>-=GGGGGGGGGGG--------FG--=GGG=-
+--#-------------#------G--------
+--########-#####GGGGGGGG--------
+---------=-----=G-----------#---
+---------#######GGGGGGGT--------
+-TGGGGGGGGGF---#########--#-----
+-###############---------#------
+------------------------#--#-#--
+-----------------------#--------
+#######################---------
+==========*==*=========*===T===T
+=======*==*=====*====*=====G===G
+=====*==*==*==*==*=*==*==*=G===G
+=====######################G===G
+GGGGGGGGGGGGGGGGGGGGGG-GGGGGGGGG
+G-----------#--------G-G--------
+GGGGGGGGGGGG#GGGGFGGGG-GGGGGGGGG
+-----------G#G-----------------G
+TGGGGGGGGGGG#GGGGGGGGGGGGGGGGGGG
+title: Fire fighter
+desc:
+Douse the fire with water
+<br>
+before it reaches the trees.
+
+init: 
+tick: fires=0
+win: fires==0
+
+
+

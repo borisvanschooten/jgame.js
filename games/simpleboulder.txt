@@ -1,0 +1,130 @@
+globals:
+var gems=0;
+
+gametitle: Simple Boulderdash Clone
+gamedesc:
+This is an example game.<br>
+Pick up all the gems and avoid the monsters.
+<br><br>
+Controls:
+<br><br>
+Keyboard: use W,S,A,D to move
+<br><br>
+Touchscreen: Swipe to move a step<br>
+Swipe and hold to move continuously
+
+gamebackground: #648
+
+tilemap: 16 16 16 16 no generictileset.png
+
+display: 48 48
+
+background: #444
+
+empty: .
+cell: -  -1 - no - no
+cell: *  80 - no - yes
+cell: =  86 - no - no
+cell: #  19 - no - no
+cell: @   8 - no - yes
+cell: M 147 - rot4 - yes
+cell: D 116 - no - yes
+
+
+rule: boulderfall
+. . .    . . .
+. * .    . - .
+. - .    . * .
+priority: 2
+
+rule: boulderbounce
+. . .    . . .
+. * -    . - *
+. * -    . . .
+transform: mirx
+
+
+rule: playermove
+@ - .   - @ .
+condfunc: playerdir("right")
+transform: rot4
+delay: 3 trigger player
+outdir: - R -
+
+rule: playerdig
+@ = .   - @ .
+condfunc: playerdir("right")
+transform: rot4
+delay: 3 trigger player
+outdir: - R -
+
+rule: playerget
+@ D .   - @ .
+condfunc: playerdir("right")
+transform: rot4
+outdir: - R -
+outfunc: gems--;
+delay: 3 trigger player
+
+rule: playerpush
+@ * -    - @ *
+condfunc: playerdir("right")
+transform: mirx
+delay: 3 trigger player
+outdir: - R -
+
+
+rule: monsterorient
+. M .    . . .
+outdir:
+- R -
+transform: rot4
+
+rule: monstermove
+. M -    . - M
+conddir: R
+outdir:
+- - R
+transform: rot4
+priority: 2
+
+rule: playerdie
+. M @    . - M
+priority: 3
+transform: rot4
+outfunc: lose()
+
+
+level: #
+
+================================
+=@==================*****=======
+====*****===========*****=======
+====*=D=*=====***===**D**=======
+====*=D=*=====*D*===*****=======
+====*****=====*D*===*****=======
+==============***===========***=
+============================*D*=
+============================***=
+#############################===
+======*====*==*====*====*=======
+========*==*====*==*=*====*==*==
+===#############################
+===**======M------------========
+===**=------==D==-=====M-------=
+===**=-=D==-=====-=====-===D==-=
+===**=-====-=----M------======-=
+===**=--------===D==-=D-======-=
+===**=-==D===-======-==--------=
+===**=-======--------=========-=
+===**=M-------======----------M=
+===**===========================
+
+title: Level one
+desc: 
+This is level one.
+
+init: gems=countCells("D");
+win: gems<=0
+
+

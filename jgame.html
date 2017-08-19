@@ -1,0 +1,44 @@
+<html>
+<!-- Copyright (c) 2014 by Boris van Schooten tmtg.net boris@13thmonkey.org -->
+<!-- Released under BSD license. See LICENSE for details. -->
+<head>
+<title>JGame</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<script type="text/javascript" src="jgame/jgcanvas.js"></script>
+<script type="text/javascript" src="jgame/jgstate.js"></script>
+<script type="text/javascript" src="jgame/jgobject.js"></script>
+<script type="text/javascript" src="jgame/jgaudio.js"></script>
+<script type="text/javascript" src="jgame/jgtiles.js"></script>
+<script type="text/javascript" src="jgame/jgmenu.js"></script>
+<script type="text/javascript" src="jgame/gl.js"></script>
+<script type="text/javascript" src="jgame/gldraw.js"></script>
+<script type="text/javascript" src="jgame/jgspritebatch.js"></script>
+
+<script type="text/javascript" src="jgame/persistentstate.js"></script>
+<script type="text/javascript" src="jgame/gamemessages.js"></script>
+<script type="text/javascript" src="jgame/genericgameobjects.js"></script>
+
+<script type="text/javascript" src="jgame-games/jgame-main.js"></script>
+<script type="text/javascript" src="jgame-games/jgame-loader.js"></script>
+<style>
+
+/*http://stackoverflow.com/questions/17506469/how-to-make-html5-canvas-full-page-size-with-cocos2d*/
+
+* { margin:0; padding:0; } /* to remove the top and left whitespace */
+html, body { width:100%; height:100%; } /* just to be sure these are full screen*/
+canvas { display:block; cursor:none; } /* To remove the scrollbars */
+</style>
+
+</head>
+
+
+<body oncontextmenu="return false;">
+<canvas  tabindex="1" id="game-canvas" style="border: none; width: 100px; height: 100px;"></canvas>
+</body>
+
+
+<script>
+document.getElementById("game-canvas").focus();
+</script>
+</html>

@@ -1,0 +1,143 @@
+globals:
+var gems=0;
+
+gametitle: Simple Boulderdash Clone
+gamedesc:
+This is an example game.<br>
+Pick up all the gems and avoid the monsters.
+<br><br>
+Controls:
+<br><br>
+Keyboard: use W,S,A,D to move
+<br><br>
+Touchscreen: Swipe to move a step<br>
+Swipe and hold to move continuously
+
+gamebackground: caveii02-1920x1080-dark.jpg
+
+tilemap: bouldersprites.png 128 128 8 8 true
+
+display: 96 96
+
+background: caveii02-1920x1080-dark.jpg
+
+empty: .
+cell: -   -1 - false - false
+cell: *  3 - false
+cell: =  1 - false
+cell: #  0 - false
+cell: @  32 - mir-rot
+cell: M 40 - mirx
+cell: D 2 - false   
+
+cellanim: move M M -1 dst - 0.333333 40 41 42
+cellanim: move @ @ -1 dst - 0.5 32 33 34 35 36 37 38 39
+
+rule: boulderfall
+. . .    . . .
+. * .    . - .
+. - .    . * .
+priority: 2
+
+rule: boulderbounce
+. . .    . . .
+. * -    . - *
+. * -    . . .
+transform: mirx
+outfunc: playSound("dig-land"+randomstep(1,3,1));
+
+rule: playermove
+@ - .   - @ .
+condfunc: playerdir("right")
+transform: rot4
+delay: 3 trigger player
+outdir: - R -
+outfunc: panto(x,y);
+
+rule: playerdig
+@ = .   - @ .
+condfunc: playerdir("right")
+transform: rot4
+delay: 3 trigger player
+outdir: - R -
+outfunc:
+	panto(x,y);
+	playSound("dig"+randomstep(1,3,1));
+
+rule: playerget
+@ D .   - @ .
+condfunc: playerdir("right")
+transform: rot4
+outdir: - R -
+outfunc: 
+	gems--;
+	panto(x,y);
+	playSound("coin1");
+delay: 3 trigger player
+
+rule: playerpush
+@ * -    - @ *
+condfunc: playerdir("right")
+transform: mirx
+delay: 3 trigger player
+outdir: - R -
+outfunc: 
+	panto(x,y);
+	playSound("dig"+randomstep(1,3,1));
+
+
+rule: monsterorient
+. M .    . . .
+outdir:
+- R -
+transform: rot4
+
+rule: monstermove
+. M -    . - M
+conddir: R
+outdir:
+- - R
+transform: rot4
+priority: 2
+
+rule: playerdie
+. M @    . - M
+priority: 3
+transform: rot4
+outfunc: 
+	lose();
+	playSound("nomouch1");
+
+
+level: #
+
+================================
+=@==================*****=======
+====*****===========*****=======
+====*=D=*=====***===**D**=======
+====*=D=*=====*D*===*****=======
+====*****=====*D*===*****=======
+==============***===========***=
+============================*D*=
+============================***=
+#############################===
+======*====*==*====*====*=======
+========*==*====*==*=*====*==*==
+===#############################
+===**======M------------========
+===**=------==D==-=====M-------=
+===**=-=D==-=====-=====-===D==-=
+===**=-====-=----M------======-=
+===**=--------===D==-=D-======-=
+===**=-==D===-======-==--------=
+===**=-======--------=========-=
+===**=M-------======----------M=
+===**===========================
+
+title: Level one
+desc: 
+This is level one.
+
+init: gems=countCells("D");
+win: gems<=0
+

@@ -1,0 +1,105 @@
+.vertical .control-group {
+	width: 850px;
+	padding-bottom: 15px;
+	overflow: hidden;
+	clear: both;
+}
+.vertical .control-label {
+	float:left;
+	width: 120px;
+	text-align: right;
+	padding-right: 10px;
+}
+.vertical .controls {
+	width: 720px;
+	float:left;
+}
+.vertical .help-inline {
+	display: block;
+	font-style: italic;
+	color: #555;
+}
+.vertical .btn-primary {
+	margin-left: 120px;
+}
+.vertical .btn {
+	font-size: 110%;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.horizontal .control-group {
+	display: inline;
+}
+.horizontal .control-label {
+	float:left;
+	text-align: right;
+	padding-right: 5px;
+	padding-left: 15px;
+}
+.horizontal .controls {
+	float:left;
+}
+.horizontal .help-inline {
+	display: block;
+	font-style: italic;
+	color: #555;
+}
+
+.control-group input[type="text"] {
+	width: 95%;
+}
+
+.control-group.cellsym input {
+	width: 30px;
+}
+
+.control-group.cellgroup input {
+	width: 80px;
+}
+
+.control-group.number input {
+	width: 70px;
+}
+
+.control-group.name input {
+	width: 120px;
+}
+
+
+.vertical .control-group.inline {
+	width: 300px;
+	float:left;
+	clear: none;
+}
+.vertical .control-group.inline .control-label {
+	width: 80px;
+}
+.vertical .control-group.inline .controls {
+	width: 200px;
+	float:left;
+}
+
+
+.vertical .control-group.inline-small {
+	width: 210px;
+	float:left;
+	clear: none;
+}
+.vertical .control-group.inline-small-first {
+	width: 260px;
+	float:left;
+	clear: none;
+}
+.vertical .control-group.inline-small .control-label {
+	width: 60px;
+}
+.vertical .control-group.inline-small-first .control-label {
+}
+.vertical .control-group.inline-small-first .controls,
+.vertical .control-group.inline-small .controls {
+	width: 130px;
+	float:left;
+}
+
+

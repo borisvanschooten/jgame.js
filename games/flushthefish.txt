@@ -1,0 +1,472 @@
+globals:
+var bombtimer=0;
+var bombs=0;
+var sharks=0;
+var fish=0;
+var plants=0;
+
+gametitle: Flush the fish
+gamedesc:
+Flush all the goldfish to the bottom,<br>
+but don't let them get eaten by sharks!<br>
+Use cursor keys to move.<br>
+Press , or . to throw a bomb.
+
+
+tilemap: 16 16 8 8 false data:image/png;base64,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
+
+cell: - 0 - no - no
+cell: ~ 1 - no - yes
+cell: % 5 - no - yes
+cell: # 4 - no - yes
+cell: B 8 - no - yes
+cell: X 9 - no - yes
+cell: S 3 - no - yes
+cell: F 2 - no - yes
+cell: @ 10 - no - yes
+cell: ^ 6 - no - yes
+cell: P 7 - no - yes
+
+rule: waterfall
+. . .   . . .
+. ~ .   . - .
+. - .   . ~ .
+delay: 1 priority: 3
+
+rule: waterflow
+. .  .   . . .
+. ~  -   . - ~
+. !- .   . . .
+transform: MIRX
+delay: 1 probability: 0.9
+outdir:
+- - -
+- - R
+- - -
+
+rule: waterflowdir
+. .  .   . . .
+. ~  -   . - ~
+. !- .   . . .
+transform: MIRX
+priority: 2 delay: 1 probability: 0.9
+conddir: R
+outdir:
+- - -
+- - R
+- - -
+
+rule: waterpushshark
+. . .   . . .
+~ S -   - ~ S
+. . .   . . .
+priority: 9  delay: 1
+transform: MIRX
+
+rule: waterpushfish
+. . .   . . .
+~ F -   - ~ F
+. . .   . . .
+priority: 9  delay: 1
+transform: MIRX
+
+rule: waterflush
+. . .    . . .
+. ~ .    . - .
+. ^ .    . . .
+priority: 10
+
+rule: playerswim
+. @ ~   . ~ @
+condfunc: playerdir("right")
+transform: rot4
+priority: 4
+anim: from-center
+delay: 3 trigger player
+
+rule: playerwalk
+. .    .   . . .
+. @    -   . - @
+. #%~P .   . . .
+condfunc: playerdir("right")
+transform: mirx
+priority: 4
+delay: 3 trigger player
+
+rule: playerclimb
+. -~ -~      . . @
+. @ #%P    . - .
+. . .      . . .
+condfunc: playerdir("right")
+transform: mirx
+priority: 4
+delay: 3 trigger player
+
+
+rule: playerfall
+. . .   . . .
+. @ .   . - .
+. - .   . @ .
+priority: 5
+delay: 2 trigger player
+
+rule: playerfallwater
+.    . .      . . .
+!~FP @ !~FP   . ~ .
+.    ~ .      . @ .
+priority: 5
+delay: 3 trigger player
+
+rule: playerbomb_l
+-~ @ .   B . .
+condfunc: bombs==0 && keypress("z")
+outfunc: 
+	bombs=1;
+	bombtimer=12;
+delay: 3 trigger player
+
+rule: playerbomb_r
+. @ -~   . . B
+condfunc: bombs==0 && keypress("x")
+outfunc:
+	bombs=1;
+	bombtimer=12;
+delay: 3 trigger player
+
+
+
+rule: fishmove
+. F ~   . ~ F
+transform: ROT4
+anim: from-center
+
+rule: fishfall
+. . .    . . .
+. F .    . - .
+. - .    . F .
+priority: 10  delay: 1
+
+rule: fishflee
+.  .   .    . . .
+!~ F   -    . - F
+.  !-~ .    . . .
+delay: 1
+transform: mirx
+outdir:
+- - -
+- - R
+- - -
+
+rule: fishfleedir
+.  .   .    . . .
+!~ F   -    . - F
+.  !-~ .    . . .
+conddir: R
+priority: 2 delay: 1 probability: 0.9
+transform: mirx
+outdir:
+- - -
+- - R
+- - -
+
+rule: fishflush
+. . .    . . .
+. F .    . - .
+. ^ .    . . .
+outfunc: fish--
+priority: 10
+
+
+
+
+rule: sharkmove
+. S ~   . ~ S
+transform: ROT4
+anim: from-center
+
+rule: sharkfall
+. . .    . . .
+. S .    . - .
+. - .    . S .
+priority: 10  delay: 1
+
+rule: sharkflee
+.  .   .    . . .
+!~ S   -    . - S
+.  !-~ .    . . .
+delay: 1
+transform: mirx
+outdir:
+- - -
+- - R
+- - -
+
+rule: sharkfleedir
+.  .   .    . . .
+!~ S   -    . - S
+.  !-~ .    . . .
+conddir: R
+priority: 2 delay: 1 probability: 0.9
+transform: mirx
+outdir:
+- - -
+- - R
+- - -
+
+rule: sharkflush
+. . .    . . .
+. S .    . - .
+. ^ .    . . .
+outfunc: sharks--
+priority: 10
+
+
+rule: sharkeatfish1
+. . .    . . .
+. S F    . ~ S
+. . .    . . .
+transform: rot4
+priority: 11
+delay: 1
+outfunc: lose()
+
+rule: sharkeatfish2
+. . F    . . S
+. S .    . ~ .
+. . .    . . .
+transform: rot4
+delay: 1
+priority: 11
+outfunc: lose()
+
+rule: sharkeatplayer
+. . .    . . .
+. S @    . - S
+. . .    . . .
+transform: rot4
+priority: 11
+delay: 1
+outfunc: lose()
+
+
+
+rule: bombfall
+. . .    . . .
+. B .    . - .
+. -~ .    . B .
+priority: 2
+delay: 2
+
+rule: bombbounce
+. .   .     . . .
+. B   -~    . - B
+. #%P -~    . . .
+transform: mirx
+priority: 2
+delay: 2
+
+rule: bombtick
+. B .   . . .
+condfunc: bombtimer>0
+outfunc: bombtimer--
+
+rule: bombexplode
+. B .    . X . 
+condfunc: bombtimer<=0
+outfunc: bombs=0;
+priority: 10 delay: 1
+
+
+rule: doexplode1
+. # X    . - .
+delay: 1
+transform: rot4
+
+rule: doexplode2
+. . .    . . .
+. # .    . - .
+. . X    . . .
+delay: 1
+transform: rot4
+
+rule: endexplode
+. X .   . - .
+delay: 2
+
+
+rule: plantgrow
+. P ~   . P P
+delay: 24  probability: 0.125
+transform: rot4
+outfunc: plants++
+
+rule: fisheatplant
+. F P    . ~ F
+transform: rot4
+priority: 9
+outfunc: plants--
+
+level: #
+#------------------------------#
+#~~~~~~~F~~~~~~@~~~~~F~~~~~~~~~#
+#F~~~~F~~~F~~~~~~~~~~~~~~~F~~~~#
+#~~~~~~~~F~~~~~~~~F~~~~~F~~~~F~#
+################################
+--------------------------------
+%-------%----------------------%
+%-------%----------------------%
+%-------%~~~~S~~~~~~~~~~~S~S~~~%
+%-------%S~~~~~~S~~~S~~~~~~~S~S%
+%-------%%%%%%%%%%%%%%%%%%%%%%%%
+#------------------------------#
+#------------------------------#
+#------------------------------#
+################################
+--------------------------------
+%----------------------%--------
+%----------------------%--------
+%~~~~S~S~~~~~S~~~~S~~S~%--------
+%~S~~~S~~~S~~~~S~~~S~~~%--------
+%%%%%%%%%%%%%%%%%%%%%%%%--------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+title: Zig Zag
+init:
+	bombs=0;
+	bombtimer=0;
+	fish=10
+win: 
+	fish<=0
+
+level: #
+#--------------@---------------#
+#~~~~~~~F~~~########~F~~~~~~~~~#
+#F~~~~F~~~F~##----##~~~~~~F~~~~#
+#~~~~~~~~F~~##----##~~~~F~~~~F~#
+#~~~~~~~~~~~##----##~~~~~~~~~~~#
+#~~~~~~~~~~~##----##~~~~~~~~~~~#
+#~~~F~~~~~~~##----##~~~F~~~F~~~#
+##############----##############
+--------------------------------
+--------------------------------
+%-------%--------------%-------%
+%-------%--------------%-------%
+%~S~~S~S%--------------%~S~S~~~%
+%~~S~~~~%--------------%~~~~S~S%
+%%%%%%%%%##############%%%%%%%%%
+--------------------------------
+%-----------%------%-----------%
+%-----------%------%-----------%
+%~~~~S~S~~~~%------%~S~~~~S~~S~%
+%~S~~~S~~~S~%------%~~~S~~~S~~~%
+%%%%%%%%%%%%%------%%%%%%%%%%%%%
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+title: Drill Straight Down
+init:
+	bombs=0;
+	bombtimer=0;
+	fish=12;
+win: 
+	fish<=0
+
+
+level: #
+#~F~~~#~~~@~~#~~~~#~~~~~~#~F~~F#
+#~~~F~#~~~~~~#~~~~#~~~~~~#~~~~~#
+#F~~~~#~~~~~~#~~~~#~~~~~~#~~F~~#
+##############~~~~##############
+-----------##########-----------
+------------#------#------------
+------------#------#------------
+#-----------#------#-----------#
+#-----------#------#-----------#
+#-----------#------#-----------#
+#########%%%%%%##%%%%%%#########
+--------------------------------
+--------------------------------
+%---------%----------%---------%
+%---------%----------%---------%
+%~~~~~S~~~%----------%S~~~~S~~~%
+%~S~~S~~S~%----------%~~~S~~~S~%
+%%%%%%%%%%%##########%%%%%%%%%%%
+--------------------------------
+--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+title: Swimming pools
+desc:
+Hint: you cannot climb walls,<br>
+but you can move freely in water.
+init:
+	bombs=0;
+	bombtimer=0;
+	fish=6;
+win: 
+	fish<=0
+level: #
+---------------@----------------
+---------------##---------------
+--------------#--#--------------
+-------------#----#-------------
+------------#------#------------
+-----------#--------#-----------
+--------------------------------
+----------#----------##---------
+---------#-#--------#--#--------
+--------#---#------#----#-------
+-------#-----------------#------
+--------------------------------
+---#~~~~#-#~~~~##~~~~#-#~~~~#---
+---#~F~~#-#~~~F##~~~~#-#F~~~#---
+---#~~~F#-#~~~~##~S~~#-#~~F~#---
+---#~~~~#-#~~F~##S~~~#-#~~~~#---
+----####---####--####---####----
+-#----------------------------#-
+-#----------------------------#-
+-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~#-
+--##%%%%%%%%%%%%%%%%%%%%%%%%##--
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+title: Stairways
+desc:
+Hint: bombs will bounce down ledges.
+init:
+	bombs=0;
+	bombtimer=0;
+	fish=6;
+win: 
+	fish<=0
+
+level: #
+#------------------@-----------%
+#~~~~~~~~~~~~~~~~~~%~~F~~F~~F~~%
+#~~~~~~~~~~~~~~~~~%%%F~~F~~~F~~%
+#################%%%%%########%%
+----------%-------------------%%
+----------%------------------%%%
+----------%--------%---------%%%
+----------%--------%---------%%%
+----------%~P~P~P~P%P~P~P~P~P%%%
+----------%%%####%%%%%#######%%%
+--------------------------------
+--------------------------------
+%---------%%-------------------#
+%---------%%-------------------#
+%S~~~~S~~~PP-------------------#
+%####%##########################
+%----%-------------------------%
+%----%---------###-------------%
+%----%-P-----P-###P---P---P----%
+%----%#########################%
+%%%%%%--------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+title: Eat the plants
+desc:
+You must make the fish eat all the plants<br>
+to finish this level.
+init:
+	bombs=0;
+	bombtimer=0;
+	fish=6;
+	plants=14;
+win: 
+	fish<=0 && plants<=0
+
