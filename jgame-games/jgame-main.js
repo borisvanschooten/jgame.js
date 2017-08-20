@@ -193,6 +193,13 @@ function texteasing(timer) {
 // ---------------------------------------------------------------------
 
 function StdGame() {
+	// init globals
+	gametime=0;
+	totalgametime=0;
+	thislevel=null;
+	thisleveldef=null;
+
+	// init internal variables
 	this.gamebasespeed = 1000/60;
 	this.lastTime = 0;
 	this.timeElapsed = 1000/60;
@@ -214,6 +221,7 @@ function StdGame() {
 	this.apiAccessToken=null;
 	this.persistentstate=null;
 	this.gamestate_loaded=false;
+	this.pausedWebGL = false;
 }
 
 
@@ -239,6 +247,7 @@ StdGame.prototype.resizeCanvas = function() {
 
 
 StdGame.prototype.webGLStart = function() {
+	if (GameConfig.gamedir) gamedir = GameConfig.gamedir;
 	JGAudio.setRootDir(gamedir);
 	setTextureRootDir(gamedir);
 
@@ -337,8 +346,7 @@ StdGame.prototype.webGLStart = function() {
 
 StdGame.prototype.webGLFrame = function() {
 	// anim handling
-
-	requestGLFrame(SG.webGLFrame);
+	if (!SG.pausedWebGL) requestGLFrame(SG.webGLFrame);
 
 	var timeNow = new Date().getTime();
 	if (this.lastTime != 0) {
@@ -712,6 +720,12 @@ StdGame.prototype.drawNewLevelChunk = function (xcen,ytop,easing,chunk) {
 // entry point, call this to start the game
 function webGLStart() {
 	SG.webGLStart();
+}
+
+function pauseWebGL(paused) {
+	if (!paused && SG.pausedWebGL)
+		requestGLFrame(SG.webGLFrame); // restart frame requests
+	SG.pausedWebGL = paused;
 }
 
 
@@ -1185,6 +1199,10 @@ function TileSprite(name,unique,tx,ty,colid) {
 	this.anim = null; // start, end, speed, vertical
 	this.tx = tx;
 	this.ty = ty;
+	this.oldtx = this.tx;
+	this.oldty = this.ty;
+	// true = occupy origin tile while moving to destination
+	this.occupyOrigin=false;
 }
 
 TileSprite.prototype = new JGObject();
@@ -1211,6 +1229,9 @@ TileSprite.prototype.moveFunc = function() {
 			this.y = this.dest.ty*tiley;
 			this.xspeed = 0;
 			this.yspeed = 0;
+			if (this.occupyOrigin) {
+				tilemap.setTileCid(0, TILEAND,this.oldtx,this.oldty);
+			}
 		}
 	}
 	if (this.anim) {
@@ -1257,9 +1278,11 @@ TileSprite.prototype.goTo = function(tx,ty,steps) {
 	if (tx == this.tx && ty==this.ty) return;
 	if (this.colid) {
 		setTileSpriteIndex(this,true);
-		tilemap.setTileCid(0, TILEAND,this.tx,this.ty);
+		if (!this.occupyOrigin) tilemap.setTileCid(0, TILEAND,this.tx,this.ty);
 		tilemap.setTileCid(this.colid, TILEAND, tx,ty);
 	}
+	this.oldtx = this.tx;
+	this.oldty = this.ty;
 	this.tx = tx;
 	this.ty = ty;
 	if (this.colid) {

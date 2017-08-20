@@ -14,7 +14,8 @@ function clearConsole() {
 }
 
 // override reportConsole to go to div
-IOAPI.reportConsole = reportConsole;
+// Cellspace's IOAPI defines a callback function for console reports
+if (window.IOAPI) IOAPI.reportConsole = reportConsole;
 
 // load source from local storage
 setGameSource(localStorage.getItem("tmtg.net.CellSpaceIDE.src"));
@@ -23,7 +24,7 @@ setGameSource(localStorage.getItem("tmtg.net.CellSpaceIDE.src"));
 var gameFileName = PersistentState.getUrlParameter("edit");
 
 if (gameFileName) {
-	httpGet("games/"+gameFileName,function(err,res) {
+	httpGet("cellspace-games/"+gameFileName,function(err,res) {
 		if (err) {
 			setGameSource("");
 		} else {
@@ -97,6 +98,17 @@ function initCSGameFromTextArea() {
 	} else {
 		reportConsole("Compiler","Compile aborted.");
 	}
+}
+
+function initStdGameFromTextArea() {
+	clearConsole();
+	reportConsole("Compiler","Compiling game ...");
+	(1,eval)(
+		editor.getValue()
+		+"SG = new StdGame();"
+		+"webGLStart();"
+		+"pauseWebGL(false);"
+	);
 }
 
 function setGameSource(src) {

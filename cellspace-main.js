@@ -157,7 +157,7 @@ function httpGet(theUrl,callback) {
 			}
 		}
 	}
-	xmlhttp.open("GET", theUrl, false );
+	xmlhttp.open("GET", theUrl, true);
 	xmlhttp.send();
 }
 
@@ -408,7 +408,7 @@ function webGLStart() {
 	var gamesrc = PersistentState.getUrlParameter("game");
 	//if (!gamesrc) gamesrc = "simpleboulder";
 	if (gamesrc) {
-		httpGet("games/"+gamesrc,function(err,res) {
+		httpGet("cellspace-games/"+gamesrc,function(err,res) {
 			if (err) {
 				alert("Error loading game source");
 			} else {

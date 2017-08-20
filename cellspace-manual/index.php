@@ -105,10 +105,9 @@ function printRule($inputs,$outputs, $code) {
 
 <h2>Code</h2>
 
-<a href="cellspace-src.zip"><h3>Download the code here!</h3></a> It needs to
-be run on a Web server with PHP.  Just unzip it in your Web server directory of
-choice.
-
+<a href="https://github.com/borisvanschooten/jgame.js"><h3>Get the code
+here!</h3></a>  Some parts require PHP, the editor itself doesn't. It does
+need to be run on a web server due to CORS restrictions.
 <h2>Sections</h2>
 
 
@@ -121,40 +120,40 @@ choice.
 </ul>
 
 <h2>CellSpace editor</h2>
-<ul><li><a href="../editor.html">The CellSpace editor</a></ul>
+<ul><li><a href="../cellspace-editor.html">The CellSpace editor</a></ul>
 
 <h2><a name="examples"></a>Example games</h2>
 
 <ul> 
 
 <li> <a href="../games/simpleboulder.txt">Simpleboulder</a>
-<a href="../editor.html?edit=simpleboulder.txt">[EDIT]</a>
-<a href="../play.html?game=simpleboulder.txt">[PLAY]</a>
+<a href="../cellspace-editor.html?edit=simpleboulder.txt">[EDIT]</a>
+<a href="../cellspace-play.html?game=simpleboulder.txt">[PLAY]</a>
 - the tutorial example.
 
 <li> <a href="../games/simpleboulder.txt">Simpleboulder Enhanced</a>
-<a href="../editor.html?edit=simpleboulder-enhanced.txt">[EDIT]</a>
-<a href="../play.html?game=simpleboulder-enhanced.txt">[PLAY]</a>
+<a href="../cellspace-editor.html?edit=simpleboulder-enhanced.txt">[EDIT]</a>
+<a href="../cellspace-play.html?game=simpleboulder-enhanced.txt">[PLAY]</a>
 - almost exactly the same, but with a hi-res tileset
 
 <li> <a href="../games/candycanedash.txt">Candy Cane Dash</a>
-<a href="../editor.html?edit=candycanedash.txt">[EDIT]</a>
-<a href="../play.html?game=candycanedash.txt">[PLAY]</a>
+<a href="../cellspace-editor.html?edit=candycanedash.txt">[EDIT]</a>
+<a href="../cellspace-play.html?game=candycanedash.txt">[PLAY]</a>
 demonstrates various mechanics, including growing slime and water physics.
 
 <li><a href="../games/flushthefish.txt">Flush the Fish</a>
-<a href="../editor.html?edit=flushthefish.txt">[EDIT]</a>
-<a href="../play.html?game=flushthefish.txt">[PLAY]</a> is a water
+<a href="../cellspace-editor.html?edit=flushthefish.txt">[EDIT]</a>
+<a href="../cellspace-play.html?game=flushthefish.txt">[PLAY]</a> is a water
 physics based game
 
 <li><a href="../games/onemanfirebrigade.txt">One Man Fire Brigade</a>
-<a href="../editor.html?edit=flushthefish.txt">[EDIT]</a>
-<a href="../play.html?game=flushthefish.txt">[PLAY]</a>
+<a href="../cellspace-editor.html?edit=onemanfirebrigade.txt">[EDIT]</a>
+<a href="../cellspace-play.html?game=onemanfirebrigade.txt">[PLAY]</a>
 is a game where you have to fight a growing wildfire
 
 <li><a href="../games/crushthecandyking.txt">Crush the Candy King</a>
-<a href="../editor.html?edit=crushthecandyking.txt">[EDIT]</a>
-<a href="../play.html?game=crushthecandyking.txt">[PLAY]</a>
+<a href="../cellspace-editor.html?edit=crushthecandyking.txt">[EDIT]</a>
+<a href="../cellspace-play.html?game=crushthecandyking.txt">[PLAY]</a>
 is a physics platform game featuring a destructible environment.
 
 </ul>
@@ -192,7 +191,7 @@ fire, and much more.
 
 A CellSpace game is specified in a programming language called CellScript. The
 CellSpace engine is based on HTML5 and WebGL, and will run on most web
-browsers. An <a href="../editor.html">online IDE</a> is available for
+browsers. An <a href="../cellspace-editor.html">online IDE</a> is available for
 developing games easily.  Check out the links on the right to edit/play
 the example games.
 
