@@ -292,8 +292,10 @@ var linenorm2 = new Float32Array(MAXBUFLEN);
 var linedir = new Float32Array(MAXBUFLEN);
 
 
+var _gldraw_inited=false;
 
 function gldrawInit() {
+	if (_gldraw_inited) return;
 	// create programs
 	drawLine.program = new ShaderProgram(gl, linestrip_vs, linestrip_fs, true);
 	drawLineSegments.program = new ShaderProgram(gl, linesegmentstrip_vs, linestrip_fs, true);
@@ -322,6 +324,8 @@ function gldrawInit() {
 	glBuffers.nrBuffer = gl.createBuffer();
 	glBuffers.sizeBuffer = gl.createBuffer(); // unused?
 	glBuffers.spriteidxBuffer = gl.createBuffer();
+
+	_gldraw_inited=true;
 }
 
 

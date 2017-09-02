@@ -3,6 +3,8 @@
 // This file is part of jgame.js - a 2D game engine
 
 
+/** @class
+* SIngleton class for playing audio. */
 function JGAudio() { }
 
 // false, null -> init
@@ -62,6 +64,10 @@ JGAudio._loadFile = function(basefilename) {
 	return ret;
 }
 
+/** Load a sample from a filename.
+* @param name name of sample
+* @param basefilename path to sample without file extension (i.e. ".mp3" is omitted)
+*/
 JGAudio.load = function (name,basefilename) {
 	if (JGAudio._sounds[name]) return;
 	JGAudio._init();
@@ -91,6 +97,15 @@ JGAudio.load = function (name,basefilename) {
 	}
 }
 
+/** Play sample.  When channel is defined, will stop any sample already
+* playing on that channel.  
+* 
+* @param {string} name  name of sample
+* @param {string} [channel] channel name
+* @param {boolean} [loop]  loop sample. Channel must be defined for a sample
+*        to loop.
+* @param {float} [amplitude=0.6]  
+*/
 JGAudio.play = function(name,channel,loop,amplitude) {
 	if (!amplitude) amplitude = 0.6;
 	if (channel) JGAudio.stop(channel);
@@ -131,7 +146,9 @@ JGAudio.play = function(name,channel,loop,amplitude) {
 	}
 }
 
-// 1.0 = original playback rate
+/** Set playback rate of a channel.  1.0 = normal playback rate.
+* @param {string} channel  channel to change
+* @param {float} value
 JGAudio.setPlaybackRate = function(channel,value) {
 	var playing = JGAudio._playing[channel];
 	if (!playing) return;
@@ -142,6 +159,11 @@ JGAudio.setPlaybackRate = function(channel,value) {
 	}
 }
 
+/** Stop any sample playing on the gven channel.
+* Only samples on a channel can be stopped.
+*
+* @param {string} channel
+*/
 JGAudio.stop = function(channel) {
 	//console.log("STOP"+channel);
 	JGAudio._playingLoops[channel] = false;
@@ -165,6 +187,10 @@ JGAudio.stop = function(channel) {
 	JGAudio._playing[channel] = null;
 }
 
+/** Enable audio on a channel.  If no channel is supplied, enable audio with
+ * no given channel. 
+ * @param {string} [channel] 
+ */
 JGAudio.enable = function(channel) {
 	if (channel) {
 		if (JGAudio._playingLoops[channel]) {
@@ -177,6 +203,10 @@ JGAudio.enable = function(channel) {
 	}
 }
 
+/** Disable audio on a channel. Any sound playing on the channel is stopped.
+* If no channel is supplied, disable playing all audio with no given channel.
+* @param {string} [channel] 
+*/
 JGAudio.disable = function(channel) {
 	if (channel) {
 		var loop = JGAudio._playingLoops[channel];

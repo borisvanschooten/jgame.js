@@ -1,5 +1,7 @@
 <?php
 
+// UNSAFE! Disabled.
+exit;
 $filename = $_GET['file'];
 $contents = file_get_contents('php://input');
 

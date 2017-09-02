@@ -1,22 +1,15 @@
-// jgame-main.js:
+/** JGame standard game layout functions. 
+*/
 
-// move sprite tex filename to spritesheet
-// automatically set tilex, tiley
-// use texture loader to get api similar to audio
+// jgame-main.js TODO:
 
 // implement lives 
 // clean up draw phase functions
 // make collisions configurable
 // make title font color, mouse color configurable
-// configure tilemap through gameconfig, size through level and leveldef
 
 // IDE:
 // tinyspriteeditor can import/export spritesheet and tilemap json
-// config editor to edit config (separate file)
-// -> or use code wizard in code editor to generate config chunks
-// code editor to edit the rest
-// -> functions defined in config can be created in editor
-// -> tools for adding objects
 
 
 // ---------------------------------------------------------------------
@@ -24,28 +17,29 @@
 // ---------------------------------------------------------------------
 
 
-// screen size (fixed, don't change)
+/** Logical screen size in pixels (fixed, don't change).
+* All draw operations use coordinates in this coordinate system.  */
 var width=1920, height=1080;
 
-// handle to canvas input
+/** handle to canvas input */
 var eng;
 
-// gl context
+/** GL context */
 var gl;
 
 
-// time since start of level
+/** Time since start of level */
 var gametime=0;
-// time since start of game
+/** time since start of game */
 var totalgametime=0;
 
 var frameskip=0;
 
-// (difficulty) level
+/** (difficulty) level */
 var level=0;
-// reference to level structure
+/** reference to level structure */
 var thislevel=null;
-// reference to leveldef structure
+/** reference to leveldef structure */
 var thisleveldef=null;
 
 
@@ -69,11 +63,11 @@ var spritebatch, particlebatch, fontbatch;
 // scroll offsets, subtract from coordinates when drawing sprites
 var screenxofs = 0,screenyofs = 0;
 
-// tilemap is created at start of level.
+/** tilemap is created at start of level. Use this to manipulate the tilemap.*/
 var tilemap;
-// tile width, height in physical coordinates. Is derived from tilemap.
-var tilex=90; // 21.3
-var tiley=90; // 12
+/** Tile width, height in logical screen pixels. Is derived from tilemap. */
+var tilex=90,tiley=90;
+/**  in physical coordinates. Is derived from tilemap. */
 var nrtilesx,nrtilesy;
 
 // font color of several standard texts
@@ -81,19 +75,19 @@ var nrtilesx,nrtilesy;
 var font_color = [1,1,1,1];
 
 
-// stores persistent data. You can add your own as needed.
+/** stores persistent data. You can add your own as needed. */
 var GameState = {
 	levels: {}, /* levelnr: { complete:true, score: 0 } */
 	instructions: {}
 }
 
-// root directory of game
+/** root directory of game code and assets */
 var gamedir="";
 
 
-// indicates that gamepad is available
+/** indicates that gamepad is available */
 var gamepadcontrols = false;
-// indicates that touch screen is available
+/** indicates that touch screen is available */
 var touchcontrols = false;
 
 // XXX MenuObj depends on this. Move to JGInput.
@@ -101,16 +95,17 @@ var mousebutflank=false;
 
 
 // gamepad state, move to jginput.
-// m = move (analog left)
-// f = fire (analog right)
-// d = digital pad
+
+/** Gamepad state, move (analog left stick) */
 var gamepadmx = 0, gamepadmy = 0;
+/** Gamepad state fire (analog right stick) */
 var gamepadfx = 0, gamepadfy = 0;
+/** Gamepad state, digital pad */
 var gamepaddx = 0,gamepaddy = 0;
 
-// true = one of the buttons is pressed
+/** true = one of the main buttons is pressed */
 var gamepadbut = false;
-// previous state of gamepadbut
+/** previous state of gamepadbut */
 var prevgamepadbut = false;
 
 // some useful defs
@@ -140,11 +135,13 @@ var unit_arrow = [
 // GLOBAL FUNCTIONS. Useful functions for your game.
 // ---------------------------------------------------------------------
 
+/** Get handle to texture as defined in GameConfig.textures for GL operations */
 function getTexture(texid) {
 	return TexLoader.texById[texid];
 }
 
 
+/** Get realtime taken since start of level in seconds */
 function getGameTimeTaken() {
 	if (SG.gameendtimestamp) {
 		return SG.gameendtimestamp - SG.gamestarttimestamp;
@@ -153,6 +150,7 @@ function getGameTimeTaken() {
 	}
 }
 
+/** Convert time in seconds to human readable string */
 function timestampToString(time) {
 	var min = Math.floor(time/1000/60);
 	var sec = Math.floor(time/1000) - 60*min;
@@ -160,6 +158,8 @@ function timestampToString(time) {
 }
 
 
+/** Returns true once every period frames (1 frame = 1/60 sec) between start
+ * and end. */
 function checkTime(start,end,period) {
 	return (gametime >= start && gametime < end && gametime%period<gamespeed);
 }
@@ -271,7 +271,7 @@ StdGame.prototype.webGLStart = function() {
 	//ld33bg = new CustomBG();
 	this.apiAccessToken = PersistentState.getUrlParameter("token");
 	this.persistentstate = new PersistentState(
-		"https://tmtg.net/api/",
+		null, //"https://tmtg.net/api/",
 		this.apiAccessToken);
 
 	if (PersistentState.getUrlParameter("resetgame")) {
@@ -1173,9 +1173,11 @@ function paintFrameLevelDone(timer) {
 // Tile sprites
 // --------------------------------------------------------------------
 
-// low 8 bits = sprites
-// high 8 bits = tiles
-var TILEAND = 0xff00;
+/** @constant
+* Bitmask for tilesprites, bit 9 and higher of tile collision ID = tile IDs */
+var TILEAND = 0xffffff00;
+/** @constant
+* Bitmask for tilesprites, low 8 bits of tile collision ID = sprite IDs */
 var TILEANDOBJ = 0xff;
 
 var tilespriteidxes = {};
@@ -1188,6 +1190,37 @@ function setTileSpriteIndex(obj,clear) {
 	}
 }
 
+/** @class
+* @desc Subclass of JGObject used for tile-based sprites.  These are sprites that
+* move from tile to tile.  When on a tile, the tile's ID is OR'ed with the
+* object's collision ID. This way you can use tile IDs to detect the presence
+* of objects.  
+* <p>
+* The sprite collision IDs are assumed to be in the range 0-255 (bit 0-7,
+* bitmask is TILEANDOBJ) while tile IDs can use the higher bits (bitmask
+* TILEAND).
+* <p/>
+* Move a TileSprite to a new tile by calling the goTo function.  The
+* TileSprite will move when you call moveFunc() in your move() function.
+* When the sprite has stopped moving and is ready to go to a new tile, the
+* this.transition field becomes zero. Check this.transition to see if the
+* sprite is ready to make its next move.
+* <p/>
+* Fields:
+* <ul>
+* <li>tx: current tile x coordinate
+* <li>ty: current tile y coordinate
+* <li>transition: a value > 0 indicates the object is moving to a new tile
+* <li>sprite: sprite # that is drawn in paintFunc
+* <li>anim: define to get an animation that runs as the sprite moves
+*   Fields: {startsprite,endsprite,speed,animate_vertical}
+* <li>flipx: flip the sprite in the x axis
+* <li>flipy: flip the sprite in the y axis
+* <li>occupyOrigin: set to true to make the sprite to keep occupying the
+*   original tile while it is moving to a new tile
+* </ul>
+ @classdesc ClassDesc
+*/
 function TileSprite(name,unique,tx,ty,colid) {
 	JGObject.apply(this,[name,unique,tilex*tx,tiley*ty, colid]);
 	this.transition=0;
@@ -1202,12 +1235,14 @@ function TileSprite(name,unique,tx,ty,colid) {
 	this.oldtx = this.tx;
 	this.oldty = this.ty;
 	// true = occupy origin tile while moving to destination
+	// TODO: setTileSpriteIndex to make sure that the sprite can also be
+	// looked up at its origin
 	this.occupyOrigin=false;
 }
 
 TileSprite.prototype = new JGObject();
 
-// call in constructor
+/** You must call this in constructor to init variables. */
 TileSprite.prototype.init = function() {
 	if (this.colid) {
 		tilemap.setTileCid(this.colid,TILEAND,this.tx,this.ty);
@@ -1219,7 +1254,8 @@ TileSprite.prototype.init = function() {
 	this.y = tilex*this.ty;
 }
 
-// call in move() function
+//** Call this in the move() function to handle transition from one tile to
+/* another. */
 TileSprite.prototype.moveFunc = function() {
 	if (this.transition > 0) {
 		this.transition--;
@@ -1244,7 +1280,7 @@ TileSprite.prototype.moveFunc = function() {
 	}
 }
 
-// call in paint() function
+/** Call this in paint() function to draw a standard animated sprite. */
 TileSprite.prototype.paintFunc = function(gl) {
 	spritebatch.addSprite(this.sprite,this.x-screenxofs,this.y-screenyofs,true,
 		this.flipx ? -tilex : tilex, this.flipy ? -tiley: tiley,
@@ -1254,6 +1290,12 @@ TileSprite.prototype.paintFunc = function(gl) {
 
 // helpers
 
+/** Set tile ID relative to this object's position. Leave TileSprite IDs
+* intact unless the given tile ID contains bits in the TileSprite ID range.
+* @param tileid - ID to set
+* @param xofs - number of tiles from this object in x direction
+* @param yofs - number of tiles from this object in y direction
+*/
 TileSprite.prototype.setTile = function(tileid,xofs,yofs) {
 	if (tileid==null) tileid = this.colid;
 	if (!xofs) xofs=0;
@@ -1272,7 +1314,12 @@ TileSprite.prototype.dispose = function() {
 	}
 }
 
+/** Move this sprite to a new tile coordinate.
+* @param tx tile x coordinate
+* @param ty tile x coordinate
+* @param steps how many frames to take in the transition */
 TileSprite.prototype.goTo = function(tx,ty,steps) {
+	// TODO: check if premature call to goTo will clear old destination tile
 	// clear bits set by colid
 	//tilemap.setTileCid(0, (TILEANDOBJ^this.colid) | TILEAND, this.tx,ty);
 	if (tx == this.tx && ty==this.ty) return;
@@ -1302,11 +1349,18 @@ TileSprite.prototype.goTo = function(tx,ty,steps) {
 	this.transition = steps;
 }
 
+/** Get TileSprite object at given coordinate. 
+* @param tx tile x coordinate
+* @param ty tile x coordinate */
 TileSprite.prototype.getSprite = function(tx,ty) {
 	//console.log(JSON.stringify(tilespriteidxes));
 	return tilespriteidxes[tx+","+ty];
 }
 
+/** Get tile ID at position relative to this object.
+* @param xofs number of tiles from this object in x direction
+* @param yofs number of tiles from this object in y direction
+* @andmask mask to AND with before returning result. */
 TileSprite.prototype.getEnv = function(xofs,yofs,andmask) {
 	if (!andmask) andmask = 0xffff;
 	return tilemap.getTileCidPos(this.tx+xofs,this.ty+yofs) & andmask;

@@ -6,7 +6,6 @@
 <!-- JGame -->
 <script type="text/javascript" src="jgame/jgstate.js"></script>
 <script type="text/javascript" src="jgame/jgcanvas.js"></script>
-<script type="text/javascript" src="jgame/jg.js"></script>
 <script type="text/javascript" src="jgame/jgobject.js"></script>
 <script type="text/javascript" src="jgame/jgaudio.js"></script>
 <script type="text/javascript" src="jgame/jgtiles.js"></script>
@@ -38,9 +37,9 @@
 <link rel="stylesheet" href="jsonform/jsonform.css">
 
 <!-- codemirror -->
-<link rel="stylesheet" href="codemirror/codemirror.css">
-<script src="codemirror/codemirror.js"></script>
-<script src="codemirror/cellspace.js"></script>
+<link rel="stylesheet" href="node_modules/codemirror/lib/codemirror.css">
+<script src="node_modules/codemirror/lib/codemirror.js"></script>
+<script src="editor/codemirror/cellspace.js"></script>
 
 
 <style>
@@ -299,6 +298,9 @@ group:
 	</div>
 </div>
 
+<script>
+var editorlanguage="cellscript";
+</script>
 <script type="text/javascript" src="editor/editor.js"></script>
 <script type="text/javascript" src="editor/forms.js"></script>
 <script type="text/javascript" src="editor/cellspace-forms.js"></script>

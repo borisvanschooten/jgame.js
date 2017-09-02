@@ -1,0 +1,16 @@
+{
+	"name": "jgame",
+	"version": "2.0.0",
+	"license": "BSD-2-Clause",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/borisvanschooten/jgame.js.git"
+	},
+	"scripts": {
+		"jsdoc": "rm -R jsdocs/;jsdoc -d=jsdocs jgame/*.js jgame-games/jgame-main.js"
+	},
+	"dependencies": {
+		"codemirror": "5.14.2",
+		"jshint": "2.9.5"
+	}
+}

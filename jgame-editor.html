@@ -6,7 +6,6 @@
 <!-- JGame -->
 <script type="text/javascript" src="jgame/jgstate.js"></script>
 <script type="text/javascript" src="jgame/jgcanvas.js"></script>
-<script type="text/javascript" src="jgame/jg.js"></script>
 <script type="text/javascript" src="jgame/jgobject.js"></script>
 <script type="text/javascript" src="jgame/jgaudio.js"></script>
 <script type="text/javascript" src="jgame/jgtiles.js"></script>
@@ -30,9 +29,20 @@
 <link rel="stylesheet" href="jsonform/jsonform.css">
 
 <!-- codemirror -->
-<link rel="stylesheet" href="codemirror/codemirror.css">
-<script src="codemirror/codemirror.js"></script>
-<script src="codemirror/cellspace.js"></script>
+<link rel="stylesheet" href="node_modules/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="node_modules/codemirror/addon/lint/lint.css">
+<script src="node_modules/codemirror/lib/codemirror.js"></script>
+<script src="node_modules/jshint/dist/jshint.js"></script>
+<script src="node_modules/codemirror/addon/search/search.js"></script>
+<script src="node_modules/codemirror/addon/search/searchcursor.js"></script>
+<script src="node_modules/codemirror/addon/search/jump-to-line.js"></script>
+<script src="node_modules/codemirror/addon/lint/lint.js"></script>
+<script src="node_modules/codemirror/addon/lint/javascript-lint.js"></script>
+<script src="node_modules/codemirror/addon/comment/continuecomment.js"></script>
+<script src="node_modules/codemirror/addon/comment/comment.js"></script>
+<script src="node_modules/codemirror/addon/edit/matchbrackets.js"></script>
+<script src="node_modules/codemirror/mode/javascript/javascript.js"></script>
+<!--<script src="codemirror/cellspace.js"></script>-->
 
 
 <style>
@@ -191,6 +201,10 @@ onclick="closeContextMenu(true)">&nbsp;X&nbsp;</b>
 <li class="sep">
 <li onclick="opendialog('jgobject')">Define standard game object
 <li onclick="opendialog('tilesprite')">Define TileSprite game object
+<li class="sep">
+<li onclick="opendialog('drawsprite')">Draw sprite
+<li onclick="opendialog('addsprite')">Add sprite to sprite batch
+<li onclick="opendialog('drawspritetext')">Draw text (using sprites)
 </div>
 
 <!--<div id="res" class="alert"></div>-->
@@ -213,6 +227,18 @@ onclick="closeContextMenu(true)">&nbsp;X&nbsp;</b>
 
 <div id="tilespritedialog" class="overlay">
 <form id="tilesprite" class="vertical"></form>
+</div>
+
+<div id="drawspritedialog" class="overlay">
+<form id="drawsprite" class="vertical"></form>
+</div>
+
+<div id="addspritedialog" class="overlay">
+<form id="addsprite" class="vertical"></form>
+</div>
+
+<div id="drawspritetextdialog" class="overlay">
+<form id="drawspritetext" class="vertical"></form>
 </div>
 
 
@@ -263,7 +289,9 @@ onclick="closeContextMenu(true)">&nbsp;X&nbsp;</b>
 		</div>
 	</div>
 </div>
-
+<script>
+var editorlanguage="javascript";
+</script>
 <script type="text/javascript" src="editor/editor.js"></script>
 <script type="text/javascript" src="editor/forms.js"></script>
 <script type="text/javascript" src="editor/stdgame-forms.js"></script>

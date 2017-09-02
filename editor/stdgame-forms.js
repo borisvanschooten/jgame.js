@@ -379,7 +379,7 @@ createJsonForm("tilesprite", {
 		unique: {
 			title: 'unique:',
 			type: 'string',
-			description: "Is there only one object of this type in the game?",
+			description: "Are there multiple objects of this type in the game?",
 			enum: ["false","true"],
 		},
 		cid: {
@@ -454,6 +454,315 @@ createJsonForm("tilesprite", {
 
 			insertCodeFromContextMenu(code);
 			$('#tilespritedialog').css("display","none");
+		}
+	}
+});
+
+
+createJsonForm("drawsprite", {
+	schema: {
+		xpos: {
+			title: 'xpos:',
+			type: 'string',
+			description: "X position",
+		},
+		ypos: {
+			title: 'ypos:',
+			type: 'string',
+			description: "Y position",
+		},
+		width: {
+			title: 'width:',
+			type: 'string',
+			description: "width",
+			default: "tilex",
+		},
+		height: {
+			title: 'height:',
+			type: 'string',
+			description: "height",
+			default: "tiley",
+		},
+		angle: {
+			title: 'angle:',
+			type: 'string',
+			description: "angle",
+		},
+		texture: {
+			title: 'texture:',
+			type: 'string',
+			description: "Name of texture",
+		},
+		texture2: {
+			title: 'texture2:',
+			type: 'string',
+			description: "Name of second texture to cross-fade",
+		},
+		color: {
+			title: 'color:',
+			type: 'string',
+			description: "For single texture, this is array[4] of 0...1 RGBA values; For cross-fading, this is a scalar 0...1 alpha value.",
+		},
+		topleft: {
+			title: 'topleft:',
+			type: 'string',
+			description: "Is sprite drawn at top left or centered?",
+			enum: ["false","true"],
+		},
+	},
+	form: [
+		{
+			key: "xpos", 
+		},
+		{
+			key: "ypos", 
+		},
+		{
+			key: "width", 
+		},
+		{
+			key: "height", 
+		},
+		{
+			key: "angle", 
+			placeholder: "Optional",
+		},
+		{
+			key: "texture", 
+		},
+		{
+			key: "texture2", 
+			placeholder: "Optional",
+		},
+		{
+			key: "color", 
+			placeholder: "Optional",
+		},
+		{
+			key: "topleft", 
+		},
+		{
+			"type": "submit",
+			"title": "Insert code",
+		}
+	],
+	onSubmit: function (errors, val) {
+		if (errors) {
+			alert(errors);
+		} else {
+			var code = ""
+			+"\t\tdrawSprite("+val.xpos+","+val.ypos+", "
+			+val.width+","+val.height+", "
+			+(val.angle ? val.angle : "0.0")+", "
+			+"getTexture(\""+val.texture+"\"),"
+			+( val.texture2 ? "getTexture(\""+val.texture2+"\")":"null")+", "
+			+( val.color ? val.color : "null")+ ", "
+			+val.topleft+");\n";
+
+			insertCodeFromContextMenu(code);
+			$('#drawspritedialog').css("display","none");
+		}
+	}
+});
+
+
+
+createJsonForm("addsprite", {
+	schema: {
+		sprite: {
+			title: 'sprite:',
+			type: 'string',
+			description: "Sprite # in batch",
+		},
+		xpos: {
+			title: 'xpos:',
+			type: 'string',
+			description: "X position",
+			default: "this.x-screenxofs",
+		},
+		ypos: {
+			title: 'ypos:',
+			type: 'string',
+			description: "Y position",
+			default: "this.y-screenyofs",
+		},
+		topleft: {
+			title: 'topleft:',
+			type: 'string',
+			description: "Is sprite drawn at top left or centered?",
+			enum: ["false","true"],
+		},
+		width: {
+			title: 'width:',
+			type: 'string',
+			description: "width",
+			default: "tilex",
+		},
+		height: {
+			title: 'height:',
+			type: 'string',
+			description: "height",
+			default: "tiley",
+		},
+		angle: {
+			title: 'angle:',
+			type: 'string',
+			description: "angle",
+		},
+		color: {
+			title: 'color:',
+			type: 'string',
+			description: "Array[4] of 0...1 RGBA values.",
+		},
+	},
+	form: [
+		{
+			key: "sprite", 
+		},
+		{
+			key: "xpos", 
+		},
+		{
+			key: "ypos", 
+		},
+		{
+			key: "topleft", 
+		},
+		{
+			key: "width", 
+		},
+		{
+			key: "height", 
+		},
+		{
+			key: "angle", 
+			placeholder: "Optional",
+		},
+		{
+			key: "color", 
+			placeholder: "Optional",
+		},
+		{
+			"type": "submit",
+			"title": "Insert code",
+		}
+	],
+	onSubmit: function (errors, val) {
+		if (errors) {
+			alert(errors);
+		} else {
+			var code = ""
+			+"\t\tspritebatch.addSprite("+val.sprite+", "+val.xpos+","+val.ypos+", "
+			+val.topleft+", "
+			+val.width+","+val.height+", "
+			+(val.angle ? val.angle : "0.0")+", "
+			+( val.color ? val.color : "null")+ ");\n"
+
+			insertCodeFromContextMenu(code);
+			$('#drawspritedialog').css("display","none");
+		}
+	}
+});
+
+
+
+
+//function drawSpriteText(text,x,y,xscale,yscale,col,texs,widths,ofs,len)
+createJsonForm("drawspritetext", {
+	schema: {
+		text: {
+			title: 'text:',
+			type: 'string',
+			description: "Text to draw",
+			default: "\"\"",
+		},
+		xpos: {
+			title: 'xpos:',
+			type: 'string',
+			description: "X position",
+			default: "width/2",
+		},
+		ypos: {
+			title: 'ypos:',
+			type: 'string',
+			description: "Y position",
+			default: "height/2",
+		},
+		xscale: {
+			title: 'xscale:',
+			type: 'string',
+			description: "xscale",
+			default: "1.0*tilex",
+		},
+		yscale: {
+			title: 'yscale:',
+			type: 'string',
+			description: "yscale",
+			default: "1.0*tiley",
+		},
+		align: {
+			title: 'align:',
+			type: 'string',
+			description: "Text alignment, -1=left, 0=center, 1=right",
+			enum: ["-1","0","1"]
+		},
+		spacing: {
+			title: 'spacing:',
+			type: 'string',
+			description: "Letter spacing, 0=normal",
+			default: "0",
+		},
+		color: {
+			title: 'color:',
+			type: 'string',
+			description: "array[4] of 0...1 RGBA values.",
+			default: "[1.0, 1.0, 1.0, 1.0]",
+		},
+	},
+	form: [
+		{
+			key: "text", 
+		},
+		{
+			key: "xpos", 
+		},
+		{
+			key: "ypos", 
+		},
+		{
+			key: "xscale", 
+		},
+		{
+			key: "yscale", 
+		},
+		{
+			key: "align", 
+		},
+		{
+			key: "spacing", 
+		},
+		{
+			key: "color", 
+			placeholder: "Optional",
+		},
+		{
+			"type": "submit",
+			"title": "Insert code",
+		}
+	],
+	onSubmit: function (errors, val) {
+		if (errors) {
+			alert(errors);
+		} else {
+			var code = ""
+			+"\t\tdrawSpriteText("+val.text+","
+			+val.xpos+","+val.ypos+", "
+			+val.xscale+","+val.yscale+", "
+			+val.align+", "+val.spacing+", "
+			+val.color+");\n";
+
+			insertCodeFromContextMenu(code);
+			$('#drawspritetextdialog').css("display","none");
 		}
 	}
 });

@@ -52,11 +52,32 @@ function buttonPauseWebGL(pause) {
 }
 
 // init editor
-var editor = CodeMirror.fromTextArea(myTextArea, {
-	lineNumbers: true,
-	lineWrapping: true,
-	gutters:['CodeMirror-linenumbers','highlight'],
-});
+if (editorlanguage=="javascript") {
+	var editor = CodeMirror.fromTextArea(myTextArea, {
+		lineNumbers: true,
+		lineWrapping: true,
+		indentWithTabs: true,
+		indentUnit: 4,
+		matchBrackets: true,
+		continueComments: "Enter",
+		mode: "javascript",
+		lint: {
+ 			options: { asi: true}
+		},
+		gutters:['CodeMirror-linenumbers','highlight',"CodeMirror-lint-markers"],
+	});
+
+} else { // cellscript
+	var editor = CodeMirror.fromTextArea(myTextArea, {
+		lineNumbers: true,
+		lineWrapping: true,
+		indentWithTabs: true,
+		indentUnit: 4,
+		matchBrackets: true,
+		continueComments: "Enter",
+		gutters:['CodeMirror-linenumbers','highlight'],
+	});
+}
 
 function resizeEditor() {
 	var div = document.getElementById("editdiv");
@@ -103,12 +124,18 @@ function initCSGameFromTextArea() {
 function initStdGameFromTextArea() {
 	clearConsole();
 	reportConsole("Compiler","Compiling game ...");
-	(1,eval)(
-		editor.getValue()
-		+"SG = new StdGame();"
-		+"webGLStart();"
-		+"pauseWebGL(false);"
-	);
+	// stop generation of webGLFrames
+	pauseWebGL(true);
+	// wait a second to make sure it's stopped
+	setTimeout(function() {
+		// execute game code, reset StdGame
+		(1,eval)(
+			editor.getValue()
+			+"SG = new StdGame();"
+			+"webGLStart();"
+			+"buttonPauseWebGL(false);"
+		);
+	}, 500);
 }
 
 function setGameSource(src) {
