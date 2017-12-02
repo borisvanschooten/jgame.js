@@ -73,7 +73,7 @@ var leveldefs = [
 		scenery: {
 			layers: [
 			],
-			bg: 0,
+			bg: "bg0",
 			vertical: false,
 		},
 		playerofs: {x: -1000, y: 0},
@@ -84,22 +84,20 @@ var leveldefs = [
 var GameConfig = {
 	name: "particlegenerator",
 	title: "Particle Generator",
-	titlebg: 0,
+	titlebg: "bg0",
 	strings: {
 		//bonusobject: { single: "anker", plural: "ankers" }
 	},
 	sounds: {
 	},
 	textures: {
-		bg: [
-			"jgame-games/ohgj72/images/tree-bg-3-sky.jpg", // 1
-		],
-		spritesheet:"images/particles.png",
-		manual: [ ]
+		"bg0": {url: "jgame-games/ohgj72/images/tree-bg-3-sky.jpg",
+			smooth:true,wrap:false}
 	},
 	spritesheet: {
-		totalx: 180,
-		totaly: 180,
+		texture: {url: "images/particles.png",wrap:false,smooth:false},
+		countx: 15,
+		county: 15,
 		unitx: 12,
 		unity: 12
 	},

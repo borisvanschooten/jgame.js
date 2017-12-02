@@ -80,11 +80,13 @@ JGObject.updateObjects = function(g,frameskip,scrx,scry,scrwidth,scrheight) {
 				obj.remove();
 			}
 		}
-		obj.lastx = obj.x;
-		obj.lasty = obj.y;
+		var lastx = obj.x;
+		var lasty = obj.y;
 		obj.move();
 		obj.x += obj.xspeed;
 		obj.y += obj.yspeed;
+		obj.lastx = lastx;
+		obj.lasty = lasty;
 		if (!frameskip) {
 			paintObjects.push(obj);
 		}

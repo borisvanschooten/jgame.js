@@ -64,7 +64,7 @@ var spritebatch, particlebatch, fontbatch;
 var screenxofs = 0,screenyofs = 0;
 
 /** tilemap is created at start of level. Use this to manipulate the tilemap.*/
-var tilemap;
+var tilemap=null;
 /** Tile width, height in logical screen pixels. Is derived from tilemap. */
 var tilex=90,tiley=90;
 /**  in physical coordinates. Is derived from tilemap. */
@@ -293,11 +293,13 @@ StdGame.prototype.webGLStart = function() {
 		JGAudio.load(id,file);
 	}
 
-
-	tiles_tex=initTexture(gl,
-		GameConfig.tilemap.texture.url,
-		GameConfig.tilemap.texture.smooth,
-		GameConfig.tilemap.texture.wrap);
+	// TODO check how this works with SG.getLevelInfo("tilemap") used elsewhere
+	if (GameConfig.tilemap) {
+		tiles_tex=initTexture(gl,
+			GameConfig.tilemap.texture.url,
+			GameConfig.tilemap.texture.smooth,
+			GameConfig.tilemap.texture.wrap);
+	}
 	spritesheet_tex=initTexture(gl,
 		GameConfig.spritesheet.texture.url,
 		GameConfig.spritesheet.texture.smooth,
@@ -332,10 +334,12 @@ StdGame.prototype.webGLStart = function() {
 	] );
 
 	// get tilemap defaults if defined, so they can be used in the title screen
-	if (GameConfig.tilemap.tilex) tilex = GameConfig.tilemap.tilex;
-	if (GameConfig.tilemap.tiley) tiley = GameConfig.tilemap.tiley;
-	if (GameConfig.tilemap.nrtilesx) nrtilesx = GameConfig.tilemap.nrtilesx;
-	if (GameConfig.tilemap.nrtilesy) nrtilesy = GameConfig.tilemap.nrtilesy;
+	if (GameConfig.tilemap) {
+		if (GameConfig.tilemap.tilex) tilex = GameConfig.tilemap.tilex;
+		if (GameConfig.tilemap.tiley) tiley = GameConfig.tilemap.tiley;
+		if (GameConfig.tilemap.nrtilesx) nrtilesx = GameConfig.tilemap.nrtilesx;
+		if (GameConfig.tilemap.nrtilesy) nrtilesy = GameConfig.tilemap.nrtilesy;
+	}
 
 	if (GameConfig.initGame) GameConfig.initGame();
 
@@ -540,7 +544,7 @@ StdGame.prototype.startNewGame = function(continuegame) {
 	JGState.set("Game",-1);
 	JGState.add("NewLevel",450);
 	if (continuegame) return;
-	if (GameConfig.score.reset
+	if (GameConfig.score && GameConfig.score.reset
 	&&  GameConfig.gamemode && GameConfig.gamemode!="separate-levels") {
 		GameConfig.score.reset();
 	}
@@ -586,6 +590,10 @@ StdGame.prototype.drawScenery=function(speedscale,globalxofs,globalyofs,scene) {
 }
 
 StdGame.prototype.updateScreenOfs = function() {
+	if (!tilemap) {
+		screenxofs = 0;
+		screenyofs = 0;
+	}
 	var player = JGObject.getObject("player");
 	if (player) {
 		this.targetxofs = player.x - width/2 + 0.5*tilex + thisleveldef.playerofs.x;
@@ -636,7 +644,7 @@ StdGame.prototype.getLevelInfo = function(key) {
 	var ret1={}, ret2={}, ret3={};
 	if (thislevel && thislevel[key]) ret3 = thislevel[key];
 	if (thisleveldef && thisleveldef[key]) ret2 = thisleveldef[key];
-	ret1 = GameConfig[key];
+	if (GameConfig[key]) ret1 = GameConfig[key];
 	var ret = MergeRecursiveCopy(ret1,ret2);
 	var ret = MergeRecursive(ret,ret3);
 	return ret;
@@ -776,16 +784,19 @@ function startNewLevel(timer) {
 	// 1 screen = 16x9
 
 	var tmdef = SG.getLevelInfo("tilemap");
-	tilex = tmdef.tilex;
-	tiley = tmdef.tiley;
-	nrtilesx = tmdef.nrtilesx;
-	nrtilesy = tmdef.nrtilesy;
-	tilemap=new JGTileMap(gl,tilex,tiley, nrtilesx,nrtilesy,
-		tmdef.filltile,tmdef.filltilecid, tiles_tex, 
-		tmdef.unitx,
-		tmdef.unity,
-		tmdef.countx,
-		tmdef.county);
+	console.log(JSON.stringify(tmdef));
+	if (tmdef && tmdef.tilex) {
+		tilex = tmdef.tilex;
+		tiley = tmdef.tiley;
+		nrtilesx = tmdef.nrtilesx;
+		nrtilesy = tmdef.nrtilesy;
+		tilemap=new JGTileMap(gl,tilex,tiley, nrtilesx,nrtilesy,
+			tmdef.filltile,tmdef.filltilecid, tiles_tex, 
+			tmdef.unitx,
+			tmdef.unity,
+			tmdef.countx,
+			tmdef.county);
+	}
 
 	thisleveldef.newlevel();
 
@@ -848,7 +859,7 @@ function doFrameGame(timer) {
 		//var col = 0.5 + 0.5*Math.sin(gametime*0.05);
 		//gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 		SG.drawScenery(0.3,screenxofs+SG.bgxofs,screenyofs, thisleveldef.scenery);
-		tilemap.draw(gl,screenxofs,screenyofs);
+		if (tilemap) tilemap.draw(gl,screenxofs,screenyofs);
 		if (thisleveldef.paintForeground) thisleveldef.paintForeground();
 	}
 
@@ -868,7 +879,7 @@ function doFrameGame(timer) {
 	JGObject.checkCollision(1,4); // player hits goodies
 	JGObject.checkCollision(2,1); // enemy hits player
 	JGObject.checkCollision(8,2); // bullet hits enemy
-	JGObject.checkBGCollision(tilemap,0xff00,0xff); // all tiles hit all
+	if (tilemap) JGObject.checkBGCollision(tilemap,0xff00,0xff); // all tiles hit all
 
 	if (thisleveldef.doFramePost) thisleveldef.doFramePost();
 
@@ -1213,7 +1224,7 @@ function setTileSpriteIndex(obj,clear) {
 * <li>transition: a value > 0 indicates the object is moving to a new tile
 * <li>sprite: sprite # that is drawn in paintFunc
 * <li>anim: define to get an animation that runs as the sprite moves
-*   Fields: {startsprite,endsprite,speed,animate_vertical}
+*   Fields: {startsprite,endsprite,speed,vertical,always}
 * <li>flipx: flip the sprite in the x axis
 * <li>flipy: flip the sprite in the y axis
 * <li>occupyOrigin: set to true to make the sprite to keep occupying the
@@ -1226,10 +1237,11 @@ function TileSprite(name,unique,tx,ty,colid) {
 	this.transition=0;
 	this.dest = null;
 	this.sprite = 1;
+	this.animpos = 0;
 	this.flipx = false;
 	this.flipy = false;
 	this.angle = 0;
-	this.anim = null; // start, end, speed, vertical
+	this.anim = null; // start, end, speed, vertical, always
 	this.tx = tx;
 	this.ty = ty;
 	this.oldtx = this.tx;
@@ -1271,12 +1283,20 @@ TileSprite.prototype.moveFunc = function() {
 		}
 	}
 	if (this.anim) {
-		this.sprite = this.anim.start + 
-		(   Math.floor(this.anim.speed*(
-				Math.abs(this.x) + (this.anim.vertical ? Math.abs(this.y) : 0)
-			) )
-			% (this.anim.end-this.anim.start+1)
-		);
+		if (this.anim.always) {
+			this.animpos += this.anim.speed;
+		} else {
+			var s = Math.abs(this.x - this.lastx);
+			if (this.anim.vertical) {
+				var vs = Math.abs(this.y - this.lasty);
+				if (vs > s) s=vs;
+			}
+			//console.log("####"+this.x+"##"+this.lastx+"##"+(this.anim.speed*s));
+			this.animpos += this.anim.speed*s;
+		}
+		if (this.animpos >= this.anim.end + 1 - this.anim.start)
+			this.animpos -= this.anim.end + 1 - this.anim.start;
+		this.sprite = this.anim.start + Math.floor(this.animpos);
 	}
 }
 
@@ -1464,6 +1484,9 @@ var DefaultParticleConfig = {
 //From:http://stackoverflow.com/questions/171251/how-can-i-merge-properties-of-two-javascript-objects-dynamically
 /* Recursively merge properties of two objects  */
 function MergeRecursive(obj1, obj2) {
+	if (!obj1 && !obj2) return {};
+	if (!obj1) return obj2;
+	if (!obj2) return obj1;
 	var ret = {};
 	for (var p in obj2) {
 		try {

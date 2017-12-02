@@ -301,7 +301,7 @@ createJsonForm("jgobject", {
 		cid: {
 			title: 'collision ID:',
 			type: 'number',
-			description: "Can be: 1=player, 2=enemy, 4=bullet, 8=pickup",
+			description: "Can be: 1=player, 2=enemy, 4=pickup, 8=bullet",
 		},
 	},
 	form: [
@@ -385,7 +385,7 @@ createJsonForm("tilesprite", {
 		cid: {
 			title: 'collision ID:',
 			type: 'number',
-			description: "Can be: 1=player, 2=enemy, 4=bullet, 8=pickup",
+			description: "Can be: 1=player, 2=enemy, 4=pickup, 8=bullet",
 		},
 	},
 	form: [

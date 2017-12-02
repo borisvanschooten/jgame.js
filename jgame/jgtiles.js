@@ -29,15 +29,15 @@ varying vec2 uv;
 
 void main(void) {
 	vec2 xy;
-	// use epsilon = 0.001 to remove seams
+	// use epsilon = 0.01 to remove seams
 	if (aIdx==0.0) {
-		xy = vec2(-0.001,-0.001);
+		xy = vec2(-0.01,-0.01);
 	} else if (aIdx==1.0) {
-		xy = vec2(1.001,-0.001);
+		xy = vec2(1.01,-0.01);
 	} else if (aIdx==2.0) {
-		xy = vec2(-0.001,1.001);
+		xy = vec2(-0.01,1.01);
 	} else { // 3.0
-		xy = vec2(1.001,1.001);
+		xy = vec2(1.01,1.01);
 	}
 	uv = aUV / uImgSize;
 	vec2 pos = vec2(

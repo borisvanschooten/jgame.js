@@ -42,6 +42,26 @@ function typecheckNumber(value,name) {
 }
 
 
+var KeyUp = 38;
+var KeyRight = 39;
+var KeyDown = 40;
+var KeyLeft = 37;
+var KeyShift = 16;
+var KeyCtrl = 17;
+var KeyAlt = 18;
+var KeyAltGr = 225;
+var KeyBackspace = 8;
+var KeyDelete = 46;
+var KeyEnter = 13;
+var KeyTab = 9;
+var KeyEsc = 27;
+var KeyHome = 36;
+var KeyPageUp = 33;
+var KeyPageDown = 34;
+var KeyPause = 19;
+
+
+
 // canvas - canvas to register events on
 function JGCanvas(canvas,logicalwidth,logicalheight) {
 	this.canvas = canvas;
