@@ -521,10 +521,25 @@ StdGame.prototype.doWebGLFrame = function() {
 		//gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 		if (!gamepadcontrols && !touchcontrols) {
-			var color = hsv_to_rgb(gametime/100,0.7,1, 1);
+			var color;
+			if (GameConfig.mouse.color) {
+				color = GameConfig.mouse.color;
+			} else {
+				color = hsv_to_rgb(gametime/100,0.7,1, 1);
+			}
+			var pointersize = {
+				x: 64,
+				y: 64,
+			}
+			if (GameConfig.mouse.pointerSize) {
+				pointersize = GameConfig.mouse.pointerSize;
+			}
+			var center = false;
+			if (GameConfig.mouse.centerPointer) center=true;
 			//var color = cyclecol[Math.floor(gametime/8) % cyclecol.length];
-			drawSprite(pointerx,pointery, 64, 64, 0.0, mousepointer_tex,
-				null, color, false); // XXX normally true
+			drawSprite(pointerx,pointery, pointersize.x, pointersize.y,
+				0.0, mousepointer_tex,
+				null, color, !center);
 			//particlebatch.addSprite(0,pointerx,pointery,true,
 			//	96, 96, 0.0, color);
 			//gl.enable(gl.BLEND);
@@ -589,12 +604,21 @@ StdGame.prototype.drawScenery=function(speedscale,globalxofs,globalyofs,scene) {
 	}
 }
 
-StdGame.prototype.updateScreenOfs = function() {
+StdGame.prototype.updateScreenOfs = function(x,y) {
 	if (!tilemap) {
 		screenxofs = 0;
 		screenyofs = 0;
 	}
-	var player = JGObject.getObject("player");
+	if (x===undefined || y===undefined) {
+		var objtofollow = GameConfig.scroll.followObject;
+		// object not defined -> default
+		if (objtofollow === undefined) objtofollow = "player";
+		// no coords and object set to null -> disabled
+		if (!objtofollow) return;
+		var player = JGObject.getObject(objtofollow);
+	} else {
+		player = {x:x, y:y};
+	}
 	if (player) {
 		this.targetxofs = player.x - width/2 + 0.5*tilex + thisleveldef.playerofs.x;
 		if (this.targetxofs < 0) this.targetxofs = 0;
@@ -608,6 +632,8 @@ StdGame.prototype.updateScreenOfs = function() {
 		this.targetxofs = -1;
 		this.targetyofs = -1;
 	}
+	var accel = 0.07;
+	if (GameConfig.scroll.speed) accel = GameConfig.scroll.speed;
 	if (this.targetxofs != -1) {
 		// x
 		var diff = screenxofs - this.targetxofs;
@@ -615,7 +641,7 @@ StdGame.prototype.updateScreenOfs = function() {
 		||  (diff<0 && this.scrollspeedx>0)) {
 			this.scrollspeedx = 0;
 		}
-		this.scrollspeedx = 0.92*this.scrollspeedx + 0.07*(-1.0*diff);
+		this.scrollspeedx = (1.0-accel)*this.scrollspeedx + accel*(-1.0*diff);
 		if (this.scrollspeedx > 1.5*tilemap.tilex) this.scrollspeedx = 1.5*tilemap.tilex;
 		if (this.scrollspeedx < -1.5*tilemap.tilex) this.scrollspeedx =-1.5*tilemap.tilex;
 		if (Math.abs(this.scrollspeedx) > 0.002*tilemap.tilex) {
@@ -627,7 +653,7 @@ StdGame.prototype.updateScreenOfs = function() {
 		||  (diff<0 && this.scrollspeedy>0)) {
 			this.scrollspeedy = 0;
 		}
-		this.scrollspeedy = 0.93*this.scrollspeedy + 0.07*(-1.0*diff);
+		this.scrollspeedy = (1.0-accel)*this.scrollspeedy + accel*(-1.0*diff);
 		if (this.scrollspeedy > 0.5*tilemap.tiley) this.scrollspeedy = 0.5*tilemap.tiley;
 		if (this.scrollspeedy < -0.5*tilemap.tiley) this.scrollspeedy =-0.5*tilemap.tiley;
 		if (Math.abs(this.scrollspeedy) > 0.002*tilemap.tiley) {
@@ -734,6 +760,11 @@ function pauseWebGL(paused) {
 	if (!paused && SG.pausedWebGL)
 		requestGLFrame(SG.webGLFrame); // restart frame requests
 	SG.pausedWebGL = paused;
+	if (paused) {
+		JGAudio.mute();
+	} else {
+		JGAudio.unmute();
+	}
 }
 
 
@@ -782,6 +813,9 @@ function startNewLevel(timer) {
 	}
 	//initCeilingObjects();
 	// 1 screen = 16x9
+
+	if (thisleveldef.newlevelModifyTilemap)
+		thisleveldef.newlevelModifyTilemap();
 
 	var tmdef = SG.getLevelInfo("tilemap");
 	console.log(JSON.stringify(tmdef));
@@ -845,7 +879,8 @@ function doFrameGame(timer) {
 
 	var pointerx = eng.getMouseX();
 	var pointery = eng.getMouseY();
-	if (!GameConfig.noScroll) SG.updateScreenOfs();
+	// XXX noScroll deprecated, should be scroll.disabled
+	if(!GameConfig.noScroll&& !GameConfig.scroll.disabled) SG.updateScreenOfs();
 
 	if (thisleveldef.scenery && thisleveldef.scenery.moving) {
 		SG.bgxofs += thisleveldef.scenery.moving;
@@ -879,7 +914,7 @@ function doFrameGame(timer) {
 	JGObject.checkCollision(1,4); // player hits goodies
 	JGObject.checkCollision(2,1); // enemy hits player
 	JGObject.checkCollision(8,2); // bullet hits enemy
-	if (tilemap) JGObject.checkBGCollision(tilemap,0xff00,0xff); // all tiles hit all
+	if (tilemap && GameConfig.disableBGCollision) JGObject.checkBGCollision(tilemap,0xff00,0xff); // all tiles hit all
 
 	if (thisleveldef.doFramePost) thisleveldef.doFramePost();
 
@@ -932,7 +967,7 @@ function startTitle(timer) {
 	var lev = 0;
 	var nrlevels = GameConfig.levels.length;
 	var nrlevx = 0;
-	var itemsize = 180;
+	var itemsize = 140;
 	if (nrlevels < 3) {
 		nrlevx = nrlevels;
 	} else if (nrlevels > 70) {
@@ -991,7 +1026,7 @@ function startTitle(timer) {
 					this.x,this.y-120, 50,50,0,0.25,null);
 				if (GameState.levels["level"+args.level]) {
 					if (GameConfig.score 
-					&& GameState.levels["level"+args.level].score) {
+					&& GameState.levels["level"+args.level].score!==undefined) {
 						var strs = GameConfig.score.displayhighscore(
 							GameState.levels["level"+args.level].score);
 						for (var i=0; i<strs.length; i++) {
@@ -1015,7 +1050,7 @@ function doFrameTitle(timer) {
 
 function paintFrameTitle(timer) {
 	drawSpriteText(fontbatch,GameConfig.title,
-		width/2,200,80,80,0,0.25,
+		width/2,100,80,80,0,0.25,
 		font_color);
 	if (!frameskip) {
 		gl.disable(gl.BLEND);
@@ -1155,7 +1190,8 @@ function startLevelDone(timer) {
 				var hiscore = GameState.levels["level"+level].score;
 				var newscore = GameConfig.score.get();
 				console.log("New score"+newscore);
-				if (GameConfig.score.betterthan(newscore,hiscore)) {
+				if (hiscore===undefined
+				||  GameConfig.score.betterthan(newscore,hiscore)) {
 					GameState.levels["level"+level].score = newscore;
 				}
 			}

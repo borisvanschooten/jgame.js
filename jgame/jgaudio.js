@@ -3,6 +3,32 @@
 // This file is part of jgame.js - a 2D game engine
 
 
+// mute/unmute when page hidden/visible
+
+var _document_hidden_name, _visibilityChangeName; 
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+  _document_hidden_name = "hidden";
+  _visibilityChangeName = "visibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+  _document_hidden_name = "msHidden";
+  _visibilityChangeName = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+  _document_hidden_name = "webkitHidden";
+  _visibilityChangeName = "webkitvisibilitychange";
+}
+ 
+function handleVisibilityChange() {
+  console.log("Hide/Unhide");
+  if (document[_document_hidden_name]) {
+    JGAudio.mute();
+  } else {
+    JGAudio.unmute();
+  }
+}
+
+document.addEventListener(_visibilityChangeName, handleVisibilityChange, false);
+
+
 /** @class
 * SIngleton class for playing audio. */
 function JGAudio() { }
@@ -15,6 +41,11 @@ JGAudio._context = null;
 
 // sound enable per-channel
 JGAudio._disabled = {};
+
+JGAudio._global_disabled=false;
+
+// indicates temporary mute (as used for documen hidden)
+JGAudio._muted=false;
 
 // source or Audio element per channel
 JGAudio._playing = {};
@@ -114,6 +145,8 @@ JGAudio.play = function(name,channel,loop,amplitude) {
 		JGAudio._playingLoopsVolume[channel] = amplitude;
 		//console.log("PLAYLOOP"+channel+" "+name);
 	}
+	if (JGAudio._global_disabled) return;
+	if (JGAudio._muted) return;
 	if (channel && JGAudio._disabled[channel]) return;
 	if (!channel && JGAudio._disabled["_NO_CHANNEL"]) return;
 	if (typeof JGAudio._sounds[name] == "undefined") return;
@@ -187,39 +220,82 @@ JGAudio.stop = function(channel) {
 	JGAudio._playing[channel] = null;
 }
 
-/** Enable audio on a channel.  If no channel is supplied, enable audio with
- * no given channel. 
- * @param {string} [channel] 
- */
-JGAudio.enable = function(channel) {
-	if (channel) {
+JGAudio.mute = function() {
+	this._muted = true;
+	for (var channel in JGAudio._playingLoops) {
+		var loop = JGAudio._playingLoops[channel];
+		JGAudio.stop(channel);
+		JGAudio._playingLoops[channel] = loop;
+	}
+}
+
+JGAudio.unmute = function() {
+	this._muted = false;
+	for (var channel in JGAudio._playingLoops) {
 		if (JGAudio._playingLoops[channel]) {
-			JGAudio._disabled[channel] = false;
 			JGAudio.play(JGAudio._playingLoops[channel],channel,true,
 				JGAudio._playingLoopsVolume[channel]);
 		}
+	}
+
+}
+
+/** Enable audio on a channel.  If no channel is supplied, enable all audio
+ * globally. 
+ * Use _NO_CHANNEL to enable only audio not associated with channel.
+ * @param {string} [channel] 
+ */
+JGAudio.enable = function(channel) {
+	channels = [];
+	//if (!channel) channel = "_NO_CHANNEL";
+	if (channel) {
+		channels.push(channel);
 	} else {
-		JGAudio._disabled["_NO_CHANNEL"] = false;
+		JGAudio._global_disabled = false;
+		for (var channel in JGAudio._disabled) {
+			channels.push(channel);
+		}
+	}
+	for (var i=0; i<channels.length; i++) {
+		channel = channels[i];
+		JGAudio._disabled[channel] = false;
+		if (JGAudio._playingLoops[channel]) {
+			JGAudio.play(JGAudio._playingLoops[channel],channel,true,
+				JGAudio._playingLoopsVolume[channel]);
+		}
 	}
 }
 
 /** Disable audio on a channel. Any sound playing on the channel is stopped.
-* If no channel is supplied, disable playing all audio with no given channel.
+* If no channel is supplied, globally disable playing all audio.  Enabling
+* a channel while audio is disabled globally will not play audio.
+* Use _NO_CHANNEL to disable only audio not associated with channel.
 * @param {string} [channel] 
 */
 JGAudio.disable = function(channel) {
+	channels = [];
+	//if (!channel) channel = "_NO_CHANNEL";
 	if (channel) {
+		channels.push(channel);
+	} else {
+		JGAudio._global_disabled = true;
+		for (var channel in JGAudio._playingLoops) {
+			channels.push(channel);
+		}
+	}
+	for (var i=0; i<channels.length; i++) {
+		channel = channels[i];
 		var loop = JGAudio._playingLoops[channel];
 		//console.log("DISABLELOOP"+channel+" "+loop);
 		JGAudio.stop(channel);
 		JGAudio._playingLoops[channel] = loop;
+		JGAudio._disabled[channel] = true;
 	}
-	if (!channel) channel = "_NO_CHANNEL";
-	JGAudio._disabled[channel] = true;
 }
 
 JGAudio.isEnabled = function(channel) {
-	if (!channel) channel = "_NO_CHANNEL";
+	//if (!channel) channel = "_NO_CHANNEL";
+	if (!channel) return JGAudio._global_disabled;
 	return !JGAudio._disabled[channel];
 }
 

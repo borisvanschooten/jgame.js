@@ -289,6 +289,9 @@ JGCanvas.prototype.getMouseInside = function() {
 	return this.mouseinside;
 }
 
+JGCanvas.prototype.getTouches = function() {
+	return this.touches;
+}
 
 // screen handling
 
