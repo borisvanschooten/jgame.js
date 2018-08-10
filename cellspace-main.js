@@ -318,7 +318,7 @@ var IOAPI = {
 	playSound: function(sample,channel,loop,volume) {
 		var samplepath = "sounds/"+sample;
 		JGAudio.load(sample,samplepath);
-		JGAudio.play(sample,channel,loop);
+		JGAudio.play(sample,channel,loop,volume);
 	},
 	setConfig: function(config) {
 		MergeRecursive(CSConfig,JSON.parse(config));

@@ -37,6 +37,9 @@ function JGAudio() { }
 // true,null -> use audio element
 // true,nonnull -> use web audio api
 JGAudio._inited = false;
+JGAudio._suspended = false; // confirmed suspended
+JGAudio._unsuspended = false; // confirmed not suspended
+JGAudio._unsuspendInterval = null; // setInterval object
 JGAudio._context = null;
 
 // sound enable per-channel
@@ -71,12 +74,56 @@ JGAudio._sounds_queued_volume = {};
 // prefix used for loading urls
 JGAudio._rootdir = "";
 
+JGAudio._unsuspend = function() {
+	//JGAudio.unmute();
+	if (JGAudio._unsuspendInterval) {
+		clearInterval(JGAudio._unsuspendInterval);
+		JGAudio._unsuspendInterval = null;
+	}
+	JGAudio._suspended = false;
+	JGAudio._unsuspended = true;
+	console.log("Audio resumed.");
+}
+
 JGAudio._init = function() {
-	if (JGAudio._inited) return;
+	if (!window.AudioContext && !window.webkitAudioContext) {
+		// web audio not supported, use audio element
+		JGAudio._inited = true;
+		return;
+	}
+	window.AudioContext=window.AudioContext||window.webkitAudioContext;
+	if (JGAudio._inited) {
+		// check if suspended by audio blocking (chrome 66+)
+		// already un-suspended -> finished
+		if (JGAudio._unsuspended) return;
+		if (JGAudio._context.state=="suspended") {
+			console.log("Trying to resume audio.");
+			JGAudio._suspended = true;
+			// try to resume
+			JGAudio._context.resume();
+			if (JGAudio._context.state!="suspended") {
+				if (JGAudio._suspended) {
+					// suspended -> not suspended
+					JGAudio._unsuspend();
+				}
+			}
+		} else {
+			JGAudio._unsuspended = true;
+			if (JGAudio._suspended) {
+				// suspended -> not suspended
+				JGAudio._unsuspend();
+			}
+		}
+		return;
+	}
 	if (window.AudioContext || window.webkitAudioContext) {
 		try {
-			window.AudioContext=window.AudioContext||window.webkitAudioContext;
 			JGAudio._context = new AudioContext();
+			if (JGAudio._context.state=="suspended") {
+				console.log("Audio suspended, will try to resume.");
+				// Chrome 66+ will suspend audio until user gesture
+				JGAudio._unsuspendInterval = setInterval(JGAudio._init,500);
+			}
 		} catch (e) {
 			// web audio not supported, use audio element
 		}
@@ -135,10 +182,11 @@ JGAudio.load = function (name,basefilename) {
 * @param {string} [channel] channel name
 * @param {boolean} [loop]  loop sample. Channel must be defined for a sample
 *        to loop.
-* @param {float} [amplitude=0.6]  
+* @param {float} [amplitude=0.5]  
 */
 JGAudio.play = function(name,channel,loop,amplitude) {
-	if (!amplitude) amplitude = 0.6;
+	JGAudio._init();
+	if (!amplitude) amplitude = 0.5;
 	if (channel) JGAudio.stop(channel);
 	if (channel && loop) {
 		JGAudio._playingLoops[channel] = name;
