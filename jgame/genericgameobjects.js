@@ -43,7 +43,7 @@ TextObj.prototype.paint = function(gl) {
 // XXX merge text with auxtext. Also add color?
 function MenuObj(type,x,y,xsize,ysize,delay,text,textofs,textscale,
 callback,callbackparam,hover,hoverparam,color,easing,name,
-auxtext) {
+auxtext,shortcutkey) {
 	JGObject.apply(this,[name ? name : "menuitem",true,x,y, 0]);
 	this.type = type;
 	this.easing = easing || easing===0 ? easing : 40;
@@ -61,6 +61,7 @@ auxtext) {
 	this.selected=false;
 	this.sizeeasing=1;
 	this.auxtext = auxtext;
+	this.shortcutkey = shortcutkey;
 }
 
 MenuObj.prototype = new JGObject();
@@ -85,6 +86,11 @@ MenuObj.prototype.move = function() {
 			JGAudio.play("select");
 			this.callback(this.callbackparam);
 		}
+	}
+	if (this.shortcutkey && eng.getKey(this.shortcutkey)) {
+		eng.clearKey(this.shortcutkey);
+		JGAudio.play("select");
+		this.callback(this.callbackparam);
 	}
 }
 

@@ -1120,15 +1120,17 @@ function startGameOver(timer) {
 	// UNUSED
 	//JGAudio.play("failure");
 	SG.gameendtimestamp = new Date().getTime();
-	new MenuObj(9, width/2 - 200,0.6*height, 384,384, 0, "replay",170,0.15,
+	var o=new MenuObj(9, width/2 - 200,0.6*height, 384,384, 0, "(r)eplay",170,0.15,
 	function(args) {
 		SG.startNewGame();
 	}, {});
+	o.shortcutkey="R";
 	if (GameConfig.gamemode != "no-title") {
-		new MenuObj(10,width/2 + 200,0.6*height, 384,384, 0, "to menu",170,0.15,
+		var o=new MenuObj(10,width/2 + 200,0.6*height, 384,384, 0, "to (m)enu",170,0.15,
 		function(args) {
 			JGState.set("Title",-1);
 		}, {});
+		o.shortcutkey="M";
 	}
 	// store highscore for non separate-levels gamemode
 	if (GameConfig.gamemode != "separate-levels"
@@ -1155,41 +1157,46 @@ function startLevelDone(timer) {
 	SG.gameendtimestamp = new Date().getTime();
 	var xofs = width/2 - 400;
 	if (level < GameConfig.levels.length-1) {
-		new MenuObj(8, xofs, 0.6*height,
-			320,320, 0, "next",150,0.15,
+		var o=new MenuObj(8, xofs, 0.6*height,
+			320,320, 0, "(n)ext",150,0.15,
 		function(args) {
 			level++;
 			stage=level;
 			JGState.remove("LevelDone");
 			SG.startNewGame(true);
 		}, {});
+		o.shortcutkey="N";
+
 		xofs += 400;
 	} else {
 		// if not separate-levels, this signals game is complete
 		// => offer restart option
 		if (GameConfig.gamemode && GameConfig.gamemode != "separate-levels") {
-			new MenuObj(9, xofs, 0.6*height, 320,320, 0, "replay game",150,0.15,
+			var o=new MenuObj(9, xofs, 0.6*height, 320,320, 0, "(r)eplay game",150,0.15,
 			function(args) {
 				SG.startlevel = 0;
 				level = SG.startlevel;
 				stage = level;
 				SG.startNewGame();
 			}, {});
+			o.shortcutkey = "R";
 			xofs += 400;
 		}
 	}
 	if (!GameConfig.gamemode || GameConfig.gamemode == "separate-levels") {
-		new MenuObj(9, xofs, 0.6*height, 320,320, 0, "replay",150,0.15,
+		var o=new MenuObj(9, xofs, 0.6*height, 320,320, 0, "(r)eplay",150,0.15,
 		function(args) {
 			SG.startNewGame();
 		}, {});
+		o.shortcutkey = "R";
 		xofs += 400;
 	}
 	if (GameConfig.gamemode != "no-title") {
-		new MenuObj(10, xofs, 0.6*height, 320,320, 0, "to menu",150,0.15,
+		var o=new MenuObj(10, xofs, 0.6*height, 320,320, 0, "to (m)enu",150,0.15,
 		function(args) {
 			JGState.set("Title",-1);
 		}, {});
+		o.shortcutkey="M";
 		xofs += 400;
 	}
 	// store level complete and level score if applicable

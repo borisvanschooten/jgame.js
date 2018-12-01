@@ -2,6 +2,17 @@
 // Released under BSD license. See LICENSE for details.
 // This file is part of jgame.js - a 2D game engine
 
+
+/* Polyfills (maybe move to different file later) */
+
+// IE polyfill
+if (!String.prototype.startsWith) {
+  String.prototype.startsWith = function(searchString, position) {
+    position = position || 0;
+    return this.indexOf(searchString, position) === position;
+  };
+}
+
 /**
 * @param {float} min - lower bound
 * @param {float} max - upper bound exclusive

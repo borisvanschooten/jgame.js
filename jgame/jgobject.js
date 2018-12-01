@@ -165,6 +165,15 @@ JGObject.checkCollision = function(srccid,dstcid) {
 
 // Return first object that collides with rect, null if none
 JGObject.checkCollisionRect = function(rect,dstcid) {
+	var ret = JGObject.checkCollisionRectAll(rect,dstcid,1);
+	if (ret.length==1) return ret[0];
+	return null;
+}
+
+// Return array of objects that collides with rect, [] if none
+// limit indicates maximum # of objects returned, 0/null = all
+JGObject.checkCollisionRectAll = function(rect,dstcid,limit) {
+	var ret = [];
 	var srcx1 = rect.x;
 	var srcy1 = rect.y;
 	var srcx2 = srcx1 + rect.width;
@@ -180,9 +189,10 @@ JGObject.checkCollisionRect = function(rect,dstcid) {
 		var dsty1 = dsto.y + dsto.bbox.y;
 		if (srcy1 > dsty1+dsto.bbox.height
 		||  dsty1 > srcy2) continue;
-		return dsto;
+		ret.push(dsto);
+		if (limit && ret.length>=limit) return ret;
 	}
-	return null;
+	return ret;
 }
 
 // call hit in dstcid when hit by tilecid

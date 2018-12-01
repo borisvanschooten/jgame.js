@@ -72,6 +72,7 @@ PersistentState.prototype._callRemote = function(method,data,callback) {
 
 
 PersistentState.prototype._ajax = function(method,url,body,success,failure) {
+	if (!url) return; // prevent open with no url, causes syntax error on ie11
 	// code for IE7+, Firefox, Chrome, Opera, Safari
 	var xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function() {
