@@ -51,6 +51,7 @@ var lives=3;
 
 
 var spritesheet_tex;
+var spritesheet2_tex=null;
 var particlesheet_tex;
 var font_tex;
 var tiles_tex;
@@ -58,7 +59,7 @@ var tiles_tex;
 
 var mousepointer_tex;
 
-var spritebatch, particlebatch, fontbatch;
+var spritebatch, spritebatch2, particlebatch, fontbatch;
 
 // scroll offsets, subtract from coordinates when drawing sprites
 var screenxofs = 0,screenyofs = 0;
@@ -307,6 +308,12 @@ StdGame.prototype.webGLStart = function() {
 		GameConfig.spritesheet.texture.url,
 		GameConfig.spritesheet.texture.smooth,
 		GameConfig.spritesheet.texture.wrap);
+	if (GameConfig.spritesheet2) {
+		spritesheet2_tex=initTexture(gl,
+			GameConfig.spritesheet2.texture.url,
+			GameConfig.spritesheet2.texture.smooth,
+			GameConfig.spritesheet2.texture.wrap);
+	}
 	for (var texid in GameConfig.textures) {
 		var texinfo = GameConfig.textures[texid];
 		if (TexLoader.texByURL[texinfo.url]) continue;
@@ -327,6 +334,16 @@ StdGame.prototype.webGLStart = function() {
 			height:GameConfig.spritesheet.unity
 		}
 	] );
+	if (spritesheet2_tex) {
+		spritebatch2 = new JGSpriteBatch(gl,spritesheet2_tex,
+			GameConfig.spritesheet2.countx*GameConfig.spritesheet2.unitx,
+			GameConfig.spritesheet2.county*GameConfig.spritesheet2.unity, [
+			{x: 0,y: 0, 
+				width:GameConfig.spritesheet2.unitx,
+				height:GameConfig.spritesheet2.unity
+			}
+		] );
+	}
 
 	particlebatch = new JGSpriteBatch(gl,particlesheet_tex,1024,1024, [
 		{x: 0,y: 0, width:256,height:256}
@@ -455,6 +472,7 @@ StdGame.prototype.doWebGLFrame = function() {
 
 
 	spritebatch.clear();
+	if (spritebatch2) spritebatch2.clear();
 	particlebatch.clear();
 	fontbatch.clear();
 
@@ -513,6 +531,7 @@ StdGame.prototype.doWebGLFrame = function() {
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		//gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 		spritebatch.draw(gl);
+		if (spritebatch2) spritebatch2.draw(gl);
 		if (GameConfig.paintOverSprites) GameConfig.paintOverSprites();
 
 		if (GameConfig.tilemapOnTop && JGState.isIn("Game")) {
@@ -816,7 +835,7 @@ function startNewLevel(timer) {
 	}
 	leveldonetimer=0;
 	JGObject.removeObjects(null,0);
-	if (GameConfig.gamemode != "no-title") {
+	if (GameConfig.gamemode != "no-title" && !GameConfig.nomenubutton) {
 		new MenuObj(10, width-128,height*0.9, 128,128, 0, "to menu",60,0.3,
 		function(args) {
 			JGState.set("Title",-1);
