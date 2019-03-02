@@ -195,6 +195,10 @@ JGCanvas.prototype._jgkeydown = function (event) {
 	}
 	this.keymap[event.keyCode] = true;
 	//event.preventDefault();
+	if (event.keyCode == KeyEnter
+	&&  this.keymap[KeyAlt]) {
+		this.toggleFullscreen();
+	}
 }
 
 JGCanvas.prototype._jgkeyup = function (event) {
@@ -330,4 +334,38 @@ JGCanvas.prototype.setFrameskip = function(value) {
 }
 
 
+// returns: true = fullscreen is now enabled, false = disabled
+JGCanvas.prototype.toggleFullscreen = function() {
+	var el = this.canvas;
+	if (document.fullscreenElement
+	|| document.mozFullScreenElement  /*sic*/
+	|| document.webkitFullscreenElement
+	|| document.msFullscreenElement) {
+		if (document.exitFullScreen) {
+			document.exitFullScreen();
+		} else if (document.mozCancelFullScreen) { /* Firefox */
+			document.mozCancelFullScreen();
+		} else if (document.webkitExitFullscreen) {/* Chrome, Safari and Opera */
+			document.webkitExitFullscreen();
+		} else if (document.msExitFullscreen) { /* IE/Edge */
+			document.msExitFullscreen();
+		}
+		return false;
+	} else {
+		if (el.requestFullScreen) {
+			el.requestFullScreen();
+			return true;
+		} else if (el.mozRequestFullScreen) { /* Firefox */
+			el.mozRequestFullScreen();
+			return true;
+		} else if (el.webkitRequestFullscreen) {/* Chrome, Safari and Opera */
+			el.webkitRequestFullscreen();
+			return true;
+		} else if (el.msRequestFullscreen) { /* IE/Edge */
+			el.msRequestFullscreen();
+			return true;
+		}
+	}
+	return false;
+}
 

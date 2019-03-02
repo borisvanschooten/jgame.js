@@ -285,28 +285,47 @@ JGSpriteBatch.prototype.draw = function(gl) {
 }
 
 
-
-function drawSpriteText(spritebatch,text,x,y,xsize,ysize,align,shrink,color,rot)
+// linespacing - a float indicating relative spacing, default=1.5
+function drawSpriteText(spritebatch,text,x,y,xsize,ysize,align,shrink,color,rot,
+linespacing)
 {
+	if (typeof drawSpriteTextConfig != "undefined"
+	&& drawSpriteTextConfig.fontScale) {
+		var scale = drawSpriteTextConfig.fontScale;
+		xsize *= scale;
+		ysize *= scale;
+	}
 	if (!rot) rot=0;
+	if (!linespacing) linespacing=1.5;
+	var lines = text.split("\n");
 	var xpos = x;
 	var ypos = y;
 	var xadvance = xsize*(1 - shrink);
 	var yadvance = -xadvance*Math.sin(rot);
 	xadvance *= Math.cos(rot);
-	if (align==1) xpos -= xadvance*text.length;
-	if (align==0) xpos -= 0.5*xadvance*text.length - xadvance/2;
-	for (var i=0; i<text.length; i++) {
-		var ch = text.charCodeAt(i);
-		if (ch<32 || ch>127) {
-			// treat as space
+	var sxpos = xpos;
+	var sypos = ypos;
+	for (var n=0; n<lines.length; n++) {
+		var line = lines[n];
+		if (align==1) xpos -= xadvance*line.length;
+		if (align==0) xpos -= 0.5*xadvance*line.length - xadvance/2;
+		for (var i=0; i<line.length; i++) {
+			var ch = line.charCodeAt(i);
+			if (ch<32) {
+				// treat as space
+				xpos += xadvance;
+				ypos += yadvance;
+				continue;
+			}
+			spritebatch.addSprite(ch-32,xpos,ypos,false,xsize,ysize,rot,color);
 			xpos += xadvance;
 			ypos += yadvance;
-			continue;
 		}
-		spritebatch.addSprite(ch-32,xpos,ypos,false,xsize,ysize,rot,color);
-		xpos += xadvance;
-		ypos += yadvance;
+		// advance vertically, which is 90 degrees 
+		sxpos += linespacing*yadvance;
+		sypos += linespacing*xadvance;
+		xpos = sxpos;
+		ypos = sypos;
 	}
 }
 

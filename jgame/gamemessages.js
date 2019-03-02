@@ -12,6 +12,8 @@
 // chunks - array of elements to pass to drawChunk. Each element is an
 //          associative array with at least the follwing fields:
 //          - height - height of message as used for drawbg and vertical spacing
+//          - textsize - size of font (not implemented!)
+//          - id - used for multilayer drawing
 //          - draw() - function(xcen,ytop,easing,chunk)
 // easing.in - duration of start phase >= 1
 // easing.out - duration of end phase >= 1
@@ -67,6 +69,32 @@ GameMessages.prototype.clear = function() {
 }
 
 GameMessages.prototype.addMessage = function(msg,chunktemplate) {
+	// split chunks with '\n' in them.
+	// height is copied into last chunk
+	// textsize, id, draw() are copied into every chunk
+	for (var i=0; i<msg.chunks.length; i++) {
+		var par = msg.chunks[i];
+		if (par.text) {
+			var parchunks = par.text.split("\n");
+			if (parchunks.length > 1) {
+				var height = par.height;
+				delete msg.chunks[i].height;
+				msg.chunks[i].text = parchunks.shift();
+				for (var j=0; j<parchunks.length; j++) {
+					var chunk = {
+						id: par.id
+					};
+					if (par.textsize) chunk.textsize = par.textsize;
+					if (par.draw) chunk.draw = par.draw;
+					chunk.text = parchunks[j];
+					if (j == parchunks.length-1) {
+						chunk.height = height;
+					}
+					msg.chunks.splice(i+j+1,0,chunk);
+				}
+			}
+		}
+	}
 	// fill in chunk template fields not defined in each chunk
 	if (chunktemplate) {
 		for (var i=0; i<msg.chunks.length; i++) {
@@ -293,9 +321,15 @@ togglefunc) {
 GameMessages.prototype.displaySwitch = function(eng,GameState,
 variable,defaultvalue,callback, fontbatch,coords,title1,title2) {
 	if (!this.switchtex) {
+		var locale = "";
+		if (typeof _i18n != "undefined") {
+			locale = "-"+_i18n.getLocale();
+		}
 		this.switchtex = {
-			on:  initTexture(gl,"images/switch-3-256-aan.png",true,false),
-			off: initTexture(gl,"images/switch-3-256-uit.png",true,false),
+			on:  initTexture(gl,"images/switch-3-256-aan"+locale
+				+".png",true,false),
+			off: initTexture(gl,"images/switch-3-256-uit"+locale
+				+".png",true,false),
 		};
 	}
 	var state = variable ? GameState[variable] : null;

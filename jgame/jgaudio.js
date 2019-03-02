@@ -116,7 +116,7 @@ JGAudio._init = function() {
 		}
 		return;
 	}
-	if (window.AudioContext || window.webkitAudioContext) {
+	if (window.AudioContext) {
 		try {
 			JGAudio._context = new AudioContext();
 			if (JGAudio._context.state=="suspended") {

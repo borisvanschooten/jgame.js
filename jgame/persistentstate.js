@@ -15,7 +15,8 @@
 
 // XXX add prefix for localStorage
 
-function PersistentState(url,token,useridtoken) {
+// gameids - array of strings indicating game ids (for deletion)
+function PersistentState(url,token,useridtoken,gameids) {
 	this.url = url;
 	if (token=="false" || token=="") token = null;
 	this.token = token;
@@ -25,11 +26,14 @@ function PersistentState(url,token,useridtoken) {
 		this.anontoken = null;
 		if (useridtoken) { // we got a user id -> use that
 			var prevtoken = localStorage.getItem("perssilaa_anonToken");
-			if (prevtoken && prevtoken != useridtoken) {
-				// token changed -> delete local state
-				// XXX we need to set a flag that makes local reads return
-				// null the first time.
-				//if (localStorage) localStorage.removeItem(gameid);
+			if (!prevtoken || prevtoken != "useridtoken_"+useridtoken) {
+				// token changed -> delete local state for all known games
+				if (gameids) {
+					for (var i=0; i<gameids.length; i++) {
+						if (localStorage) localStorage.removeItem(gameids[i]);
+						console.log("Removed "+gameids[i]);
+					}
+				}
 			}
 			this.anonToken = "useridtoken_"+useridtoken;
 		}
@@ -70,9 +74,12 @@ PersistentState.prototype._callRemote = function(method,data,callback) {
 		});
 }
 
-
+// legacy method
 PersistentState.prototype._ajax = function(method,url,body,success,failure) {
-	if (!url) return; // prevent open with no url, causes syntax error on ie11
+	PersistentState._ajax(method,url,body,success,failure);
+}
+
+PersistentState._ajax = function(method,url,body,success,failure) {
 	// code for IE7+, Firefox, Chrome, Opera, Safari
 	var xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function() {
@@ -213,8 +220,8 @@ PersistentState.prototype.write = function(gameid,data) {
 }
 
 // callback has the signature callback(res,error). res!=null indicates success
-PersistentState.prototype.getStats = function(callback) {
-	this._callRemote("getstats", null, callback);
+PersistentState.prototype.readStats = function(gameid,callback) {
+	this._callRemote("readstats", {_gameid: gameid}, callback);
 }
 
 
