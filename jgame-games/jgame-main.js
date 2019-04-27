@@ -530,6 +530,8 @@ StdGame.prototype.doWebGLFrame = function() {
 		gl.enable(gl.BLEND);
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 		//gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+		if (GameConfig.setupSpriteDraw) GameConfig.setupSpriteDraw();
 		spritebatch.draw(gl);
 		if (spritebatch2) spritebatch2.draw(gl);
 		if (GameConfig.paintOverSprites) GameConfig.paintOverSprites();
