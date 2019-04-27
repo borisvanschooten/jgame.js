@@ -322,7 +322,7 @@ GameMessages.prototype.displaySwitch = function(eng,GameState,
 variable,defaultvalue,callback, fontbatch,coords,title1,title2) {
 	if (!this.switchtex) {
 		var locale = "";
-		if (typeof _i18n != "undefined") {
+		if (typeof _i18n != "undefined" && _i18n.getLocale()!="nl") {
 			locale = "-"+_i18n.getLocale();
 		}
 		this.switchtex = {

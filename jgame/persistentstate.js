@@ -45,6 +45,19 @@ function PersistentState(url,token,useridtoken,gameids) {
 		}
 		if (localStorage) 
 			localStorage.setItem("perssilaa_anonToken",this.anonToken);
+	} else {
+		// token -> check if same as previously passed token
+		var prevToken = localStorage.getItem("perssilaa_prevToken");
+		if (prevToken != this.token) {
+			// token changed -> delete local state for all known games
+			if (gameids) {
+				for (var i=0; i<gameids.length; i++) {
+					if (localStorage) localStorage.removeItem(gameids[i]);
+					console.log("Removed "+gameids[i]);
+				}
+			}
+		}
+		localStorage.setItem("perssilaa_prevToken",this.token);
 	}
 }
 
@@ -222,6 +235,21 @@ PersistentState.prototype.write = function(gameid,data) {
 // callback has the signature callback(res,error). res!=null indicates success
 PersistentState.prototype.readStats = function(gameid,callback) {
 	this._callRemote("readstats", {_gameid: gameid}, callback);
+}
+
+// log something for this user and game
+PersistentState.prototype.log = function(gameid,text) {
+	var url=this.url.substring(0,this.url.length-"perssilaa-gameapi.php".length);
+	url += "logpagehit.php?loggameid="+encodeURIComponent(gameid)
+		+ "&loggameinfo="+encodeURIComponent(text);
+
+	PersistentState._ajax("GET",url,"",
+		function(data) {
+			console.log("Logged "+gameid+": "+text);
+		}, function(data) {
+			console.log("Logging failed! url="+url+" error="+data);
+		}
+	);
 }
 
 

@@ -129,6 +129,9 @@ function JGCanvas(canvas,logicalwidth,logicalheight) {
 	//canvas.addEventListener('touchmove',  jgtouchmove,  false);
 	canvas.addEventListener('touchstart',
 		function(event) {
+			if (typeof JGAudio == "function") {
+				JGAudio._init(); // unsuspend audio
+			}
 			object.sawtouchevents = true;
 			object.mousebutton[1] = true;
 			object._jgtouchmove(event);
@@ -147,6 +150,9 @@ function JGCanvas(canvas,logicalwidth,logicalheight) {
 		}, false);
 	canvas.addEventListener('touchend',
 		function(event) {
+			if (typeof JGAudio == "function") {
+				JGAudio._init(); // unsuspend audio
+			}
 			object.sawtouchevents = true;
 			object.mousebutton[1] = false;
 			object._jgtouchmove(event);
