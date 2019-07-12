@@ -1670,6 +1670,15 @@ StdParticle.prototype.paint = function(gl) {
 }
 
 
+// helper functions
+
+function dbgPrint(obj,text) {
+	if (!obj) {
+		obj = { x: width/2, y: height/2 };
+	}
+	drawSpriteText(fontbatch,text,obj.x,obj.y,25,25,0, 0,null);
+}
+
 
 var SG = new StdGame();
 

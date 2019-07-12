@@ -222,6 +222,7 @@ JGObject.countObjects = function(nameprefix,colid) {
 
 // INSTANCE
 
+// snap to grid based on x,y coordinates
 JGObject.prototype.snapToGrid = function(gridx,gridy,threshx,threshy) {
 	// round center point down
 	if (gridx) {
@@ -236,6 +237,45 @@ JGObject.prototype.snapToGrid = function(gridx,gridy,threshx,threshy) {
 	}
 }
 
+// align left side to touch closest grid line
+JGObject.prototype.snapLeft = function(gridx) {
+	var bbox = this.tilebbox;
+	if (!bbox) bbox = this.bbox;
+	if (!bbox) return;
+	var lside = this.x + bbox.x;
+	var newlside = Math.floor((lside+gridx/2)/gridx) * gridx;
+	this.x = newlside - bbox.x;
+}
+
+// align right side to touch closest grid line
+JGObject.prototype.snapRight = function(gridx) {
+	var bbox = this.tilebbox;
+	if (!bbox) bbox = this.bbox;
+	if (!bbox) return;
+	var rside = this.x + bbox.x + bbox.width;
+	var newrside = Math.floor((rside+gridx/2)/gridx) * gridx;
+	this.x = newrside - bbox.x - bbox.width;
+}
+
+// align top to touch closest grid line
+JGObject.prototype.snapUp = function(gridy) {
+	var bbox = this.tilebbox;
+	if (!bbox) bbox = this.bbox;
+	if (!bbox) return;
+	var uside = this.y + bbox.y;
+	var newuside = Math.floor((uside+gridy/2)/gridy) * gridy;
+	this.y = newuside - bbox.y;
+}
+
+// align bottom to touch closest grid line
+JGObject.prototype.snapDown = function(gridy) {
+	var bbox = this.tilebbox;
+	if (!bbox) bbox = this.bbox;
+	if (!bbox) return;
+	var dside = this.y + bbox.y + bbox.height;
+	var newdside = Math.floor((dside+gridy/2)/gridy) * gridy;
+	this.y = newdside - bbox.y - bbox.height;
+}
 
 JGObject.prototype.setBBox = function(x,y,width,height) {
 	this.bbox.x = x;

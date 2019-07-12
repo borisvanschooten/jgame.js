@@ -32,6 +32,10 @@ function randomstep(min, max, interval) {
 	return min + ( Math.floor(Math.random()*(steps+0.99)) )*interval;
 }
 
+function distance(x,y) {
+ return Math.sqrt(x*x + y*y);
+}
+
 function typecheckInt(value,name) {
 	if (isNaN(value) || !isFinite(value) || value%1 != 0) {
 		console.log("Type error: "+name+" is not an integer (value='"+value+"')");
