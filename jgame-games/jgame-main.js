@@ -99,17 +99,23 @@ var mousebutflank=false;
 
 // gamepad state, move to jginput.
 
-/** Gamepad state, move (analog left stick) */
-var gamepadmx = 0, gamepadmy = 0;
-/** Gamepad state fire (analog right stick) */
-var gamepadfx = 0, gamepadfy = 0;
-/** Gamepad state, digital pad */
-var gamepaddx = 0,gamepaddy = 0;
-
-/** true = one of the main buttons is pressed */
-var gamepadbut = false;
-/** previous state of gamepadbut */
-var prevgamepadbut = false;
+var gamepad = {
+	/** move (analog left stick) */
+	mx: 0, 
+	my: 0,
+	/** fire (analog right stick) */
+	fx: 0,
+	fy: 0,
+	/** digital pad */
+	dx: 0,
+	dy: 0,
+	/** true = one of the main buttons is pressed */
+	but: false,
+	buta: false,
+	butb: false,
+	butx: false,
+	buty: false,
+}
 
 // some useful defs
 
@@ -398,13 +404,18 @@ StdGame.prototype.doWebGLFrame = function() {
 	touchcontrols = eng.sawTouchEvents();
 
 	// read gamepads
-	prevgamepadbut = gamepadbut;
 	gamepadcontrols = false;
-	gamepadmx = 0;
-	gamepadmy = 0;
-	gamepadfx = 0;
-	gamepadfy = 0;
-	gamepadbut = false;
+	gamepad.mx = 0;
+	gamepad.my = 0;
+	gamepad.fx = 0;
+	gamepad.fy = 0;
+	gamepad.dx = 0;
+	gamepad.dy = 0;
+	gamepad.but = false;
+	gamepad.buta = false;
+	gamepad.butb = false;
+	gamepad.butx = false;
+	gamepad.buty = false;
 	if (navigator.getGamepads) {
 		var pads = navigator.getGamepads();
 		// circumvent error in Chrome, which returns an array-like
@@ -413,25 +424,44 @@ StdGame.prototype.doWebGLFrame = function() {
 			gamepadcontrols = true;
 			// add up all values from all axes
 			for (var i=0; i<pads.length; i++) {
+				// detect shield controller, has different axes
+				var nvidiaShield =
+					pads[i].id.substr(0,16) == "0955-7214-NVIDIA";
 				// circumvent possible errors
 				if (!pads[i] || !pads[i].axes || !pads[i].buttons) continue;
 				if (pads[i].axes[0] > 0.25 || pads[i].axes[0] < -0.25)
-					gamepadmx += pads[i].axes[0];
+					gamepad.mx += pads[i].axes[0];
 				if (pads[i].axes[1] > 0.25 || pads[i].axes[1] < -0.25)
-					gamepadmy += pads[i].axes[1];
+					gamepad.my += pads[i].axes[1];
 				if (pads[i].axes[2] > 0.25 || pads[i].axes[2] < -0.25)
-					gamepadfx += pads[i].axes[2];
-				if (pads[i].axes[3] > 0.25 || pads[i].axes[3] < -0.25)
-					gamepadfy += pads[i].axes[3];
-				for (var b=0; b<4; b++) {
-					if (pads[i].buttons[b].pressed) gamepadbut=true;
+					gamepad.fx += pads[i].axes[2];
+				if (nvidiaShield) {
+					if (pads[i].axes[5] > 0.25 || pads[i].axes[5] < -0.25)
+						gamepad.fy += pads[i].axes[5];
+				} else {
+					if (pads[i].axes[3] > 0.25 || pads[i].axes[3] < -0.25)
+						gamepad.fy += pads[i].axes[3];
 				}
-				gamepaddx = 0;
-				gamepaddy = 0;
-				if (pads[i].buttons[12].pressed) gamepaddy = -1;
-				if (pads[i].buttons[13].pressed) gamepaddy =  1;
-				if (pads[i].buttons[14].pressed) gamepaddx = -1;
-				if (pads[i].buttons[15].pressed) gamepaddx =  1;
+				for (var b=0; b<4; b++) {
+					if (pads[i].buttons[b].pressed) gamepad.but=true;
+				}
+				if (pads[i].buttons[0].pressed) gamepad.buta=true;
+				if (pads[i].buttons[1].pressed) gamepad.butb=true;
+				if (pads[i].buttons[2].pressed) gamepad.butx=true;
+				if (pads[i].buttons[3].pressed) gamepad.buty=true;
+				if (nvidiaShield) {
+					gamepad.dx = pads[i].axes[8];
+					gamepad.dy = pads[i].axes[9];
+				} else {
+					if (pads[i].buttons[12] && pads[i].buttons[12].pressed)
+						gamepad.dy = -1;
+					if (pads[i].buttons[13] && pads[i].buttons[13].pressed)
+						gamepad.dy =  1;
+					if (pads[i].buttons[14] && pads[i].buttons[14].pressed)
+						gamepad.dx = -1;
+					if (pads[i].buttons[15] && pads[i].buttons[15].pressed)
+						gamepad.dx =  1;
+				}
 			}
 		}
 	}
