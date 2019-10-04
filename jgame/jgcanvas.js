@@ -3,7 +3,8 @@
 // This file is part of jgame.js - a 2D game engine
 
 
-/* Polyfills (maybe move to different file later) */
+/* ---------------------------------------------------------------------
+* Polyfills and helper functions (maybe move to different file later) */
 
 // IE polyfill
 if (!String.prototype.startsWith) {
@@ -56,6 +57,40 @@ function typecheckNumber(value,name) {
 	return true;
 }
 
+//From:http://stackoverflow.com/questions/171251/how-can-i-merge-properties-of-two-javascript-objects-dynamically
+/* Recursively merge properties of two objects.
+* if elem exists in obj2, use that, otherwise use obj1
+* Overwrites obj1 */
+function MergeRecursive(obj1, obj2) {
+	if (!obj1 && !obj2) return {};
+	if (!obj1) return obj2;
+	if (!obj2) return obj1;
+	var ret = {};
+	for (var p in obj2) {
+		try {
+			if ( obj2[p].constructor==Object ) {
+				ret[p] = MergeRecursive(obj1[p], obj2[p]);
+			} else {
+				obj1[p] = obj2[p];
+			}
+		} catch(e) {
+			obj1[p] = obj2[p];
+		}
+	}
+	return obj1;
+}
+
+// version where a copy is returned, obj1 remains unmodified
+function MergeRecursiveCopy(obj1,obj2) {
+	var ret = {};
+	ret = MergeRecursive(ret,obj1);
+	ret = MergeRecursive(ret,obj2);
+	return ret;
+}
+
+
+/* ------------------------------------------------------------------
+* Constants */
 
 var KeyUp = 38;
 var KeyRight = 39;
@@ -76,9 +111,13 @@ var KeyPageDown = 34;
 var KeyPause = 19;
 
 
+/* ------------------------------------------------------------------
+* Class */
+
 
 // canvas - canvas to register events on
 function JGCanvas(canvas,logicalwidth,logicalheight) {
+	if (!canvas) return; // no-parameters call for subclass
 	this.canvas = canvas;
 	this.width = logicalwidth;
 	this.height = logicalheight;
@@ -100,10 +139,29 @@ function JGCanvas(canvas,logicalwidth,logicalheight) {
 
 	this.touches = []; // {id,x,y}
 
+
+	this.gamepad = {
+		/** analog left stick -1 ... 1 */
+		lx: 0, 
+		ly: 0,
+		/** analog right stick -1 ... 1 */
+		rx: 0,
+		ry: 0,
+		/** digital pad -1 ... 1 */
+		dx: 0,
+		dy: 0,
+		/** true = one of the main buttons A,B,X,Y is pressed */
+		anybut: false,
+		but: { a:false, b:false, x:false, y:false },
+		/* todo backside buttons */
+	}
+
+
 	this.frameskip = false;
 
 	this.sawtouchevents = false;
 	this.sawmouseevents = false;
+	this.hasgamepads = false;
 
 	var object = this;
 	// add tabindex="1" to enable keyboard focus on canvas.
@@ -137,9 +195,9 @@ function JGCanvas(canvas,logicalwidth,logicalheight) {
 				JGAudio._init(); // unsuspend audio
 			}
 			object.sawtouchevents = true;
-			object.mousebutton[1] = true;
+			//object.mousebutton[1] = true;
 			object._jgtouchmove(event);
-			object.mouseinside = true;
+			//object.mouseinside = true;
 			// prevent touch behaviour that interferes with game
 			event.preventDefault();
 		}, false);
@@ -148,7 +206,7 @@ function JGCanvas(canvas,logicalwidth,logicalheight) {
 			object.sawtouchevents = true;
 			//object.mousebutton[1] = true;
 			object._jgtouchmove(event);
-			object.mouseinside = true;
+			//object.mouseinside = true;
 			// prevent touch behaviour that interferes with game
 			event.preventDefault();
 		}, false);
@@ -158,12 +216,77 @@ function JGCanvas(canvas,logicalwidth,logicalheight) {
 				JGAudio._init(); // unsuspend audio
 			}
 			object.sawtouchevents = true;
-			object.mousebutton[1] = false;
+			//object.mousebutton[1] = false;
 			object._jgtouchmove(event);
-			object.mouseinside = false;
+			//object.mouseinside = false;
 			// prevent touch behaviour that interferes with game
 			event.preventDefault();
 		}, false);
+}
+
+/** Update parts of the input state that can only be updated through polling
+* (in particular gamepad state) **/
+JGCanvas.prototype.updateInputs = function(timer) {
+	this.hasgamepads=false;
+	this.gamepad.lx = 0;
+	this.gamepad.ly = 0;
+	this.gamepad.rx = 0;
+	this.gamepad.ry = 0;
+	this.gamepad.dx = 0;
+	this.gamepad.dy = 0;
+	this.gamepad.anybut = false;
+	this.gamepad.but = {a:false,b:false,x:false,y:false}
+	if (navigator.getGamepads) {
+		var pads = navigator.getGamepads();
+		// circumvent error in Chrome, which returns an array-like
+		// thing on desktop that doesn't actually contain elements
+		if (pads.length > 0 && pads[0]) {
+			this.hasgamepads = true;
+			// add up all values from all axes
+			for (var i=0; i<pads.length; i++) {
+				// detect shield controller, has different axes
+				var nvidiaShield =
+					pads[i].id.substr(0,16) == "0955-7214-NVIDIA";
+				// circumvent possible errors
+				if (!pads[i] || !pads[i].axes || !pads[i].buttons) continue;
+				if (pads[i].axes[0] > 0.25 || pads[i].axes[0] < -0.25)
+					this.gamepad.lx += pads[i].axes[0];
+				if (pads[i].axes[1] > 0.25 || pads[i].axes[1] < -0.25)
+					this.gamepad.ly += pads[i].axes[1];
+				if (pads[i].axes[2] > 0.25 || pads[i].axes[2] < -0.25)
+					this.gamepad.rx += pads[i].axes[2];
+				if (nvidiaShield) {
+					if (pads[i].axes[5] > 0.25 || pads[i].axes[5] < -0.25)
+						this.gamepad.ry += pads[i].axes[5];
+				} else {
+					if (pads[i].axes[3] > 0.25 || pads[i].axes[3] < -0.25)
+						this.gamepad.ry += pads[i].axes[3];
+				}
+				for (var b=0; b<4; b++) {
+					if (pads[i].buttons[b].pressed) this.gamepad.anybut=true;
+				}
+				if (pads[i].buttons[0].pressed) this.gamepad.but.a=true;
+				if (pads[i].buttons[1].pressed) this.gamepad.but.b=true;
+				if (pads[i].buttons[2].pressed) this.gamepad.but.x=true;
+				if (pads[i].buttons[3].pressed) this.gamepad.but.y=true;
+				if (nvidiaShield) {
+					this.gamepad.dx = pads[i].axes[8];
+					this.gamepad.dy = pads[i].axes[9];
+				} else {
+					if (pads[i].buttons[12] && pads[i].buttons[12].pressed)
+						this.gamepad.dy = -1;
+					if (pads[i].buttons[13] && pads[i].buttons[13].pressed)
+						this.gamepad.dy =  1;
+					if (pads[i].buttons[14] && pads[i].buttons[14].pressed)
+						this.gamepad.dx = -1;
+					if (pads[i].buttons[15] && pads[i].buttons[15].pressed)
+						this.gamepad.dx =  1;
+				}
+			}
+		}
+	}
+	if (this.update) this.update();
+
 }
 
 /** Call when frame is done to update flank information. Game timer is used to
@@ -194,6 +317,13 @@ JGCanvas.prototype.sawTouchEvents = function() {
  * controls */
 JGCanvas.prototype.sawMouseEvents = function() {
 	return this.sawmouseevents;
+}
+
+
+/** Check if touch events were reported. Check every frame to enable touch
+ * controls */
+JGCanvas.prototype.hasGamepads = function() {
+	return this.hasgamepads;
 }
 
 
@@ -238,14 +368,6 @@ JGCanvas.prototype._jgmousemove = function (event) {
 
 JGCanvas.prototype._jgtouchmove = function (event) {
 	var rect = this.canvas.getBoundingClientRect();
-	if (event.touches.length >= 1) {
-		var touch = event.touches[0];
-		//console.log("##############TOUCH "+touch.pageX + " "+touch.pageY);
-		this.mousex = (touch.pageX - rect.left - this.viewportxofs) 
-			/ (this.viewportwidth / this.width);
-		this.mousey = (touch.pageY - rect.top - this.viewportyofs) 
-			/ (this.viewportheight / this.height);
-	}
 	this.touches = [];
 	for (var i=0; i<event.touches.length; i++) {
 		var touch = event.touches[i];
@@ -317,6 +439,12 @@ JGCanvas.prototype.getMouseInside = function() {
 JGCanvas.prototype.getTouches = function() {
 	return this.touches;
 }
+
+/** nr = gamepad/player # */
+JGCanvas.prototype.getGamepad = function(nr) {
+	return this.gamepad;
+}
+
 
 // screen handling
 

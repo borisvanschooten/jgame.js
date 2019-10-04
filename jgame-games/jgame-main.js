@@ -22,11 +22,10 @@
 var width=1920, height=1080;
 
 /** handle to canvas input */
-var eng;
+var eng,io;
 
 /** GL context */
 var gl;
-
 
 /** Time since start of level */
 var gametime=0;
@@ -96,26 +95,6 @@ var touchcontrols = false;
 // XXX MenuObj depends on this. Move to JGInput.
 var mousebutflank=false;
 
-
-// gamepad state, move to jginput.
-
-var gamepad = {
-	/** move (analog left stick) */
-	mx: 0, 
-	my: 0,
-	/** fire (analog right stick) */
-	fx: 0,
-	fy: 0,
-	/** digital pad */
-	dx: 0,
-	dy: 0,
-	/** true = one of the main buttons is pressed */
-	but: false,
-	buta: false,
-	butb: false,
-	butx: false,
-	buty: false,
-}
 
 // some useful defs
 
@@ -271,7 +250,11 @@ StdGame.prototype.webGLStart = function() {
 	// use this to show verbose debug info in console
 	//gl = WebGLDebugUtils.makeDebugContext(gl);
 
-	eng = new JGCanvas(canvas,width,height);
+	// new name
+	io = new JGCanvasAbstractControls(canvas,width,height,GameConfig.controls);
+	// old name
+	eng = io;
+
 	JGState.set("Loading",-1);
 
 	gldrawInit();
@@ -400,72 +383,13 @@ StdGame.prototype.webGLFrame = function() {
 
 StdGame.prototype.doWebGLFrame = function() {
 
+	io.updateInputs();
+
 	// update touch controls
-	touchcontrols = eng.sawTouchEvents();
+	touchcontrols = io.sawTouchEvents();
 
 	// read gamepads
-	gamepadcontrols = false;
-	gamepad.mx = 0;
-	gamepad.my = 0;
-	gamepad.fx = 0;
-	gamepad.fy = 0;
-	gamepad.dx = 0;
-	gamepad.dy = 0;
-	gamepad.but = false;
-	gamepad.buta = false;
-	gamepad.butb = false;
-	gamepad.butx = false;
-	gamepad.buty = false;
-	if (navigator.getGamepads) {
-		var pads = navigator.getGamepads();
-		// circumvent error in Chrome, which returns an array-like
-		// thing on desktop that doesn't actually contain elements
-		if (pads.length > 0 && pads[0]) {
-			gamepadcontrols = true;
-			// add up all values from all axes
-			for (var i=0; i<pads.length; i++) {
-				// detect shield controller, has different axes
-				var nvidiaShield =
-					pads[i].id.substr(0,16) == "0955-7214-NVIDIA";
-				// circumvent possible errors
-				if (!pads[i] || !pads[i].axes || !pads[i].buttons) continue;
-				if (pads[i].axes[0] > 0.25 || pads[i].axes[0] < -0.25)
-					gamepad.mx += pads[i].axes[0];
-				if (pads[i].axes[1] > 0.25 || pads[i].axes[1] < -0.25)
-					gamepad.my += pads[i].axes[1];
-				if (pads[i].axes[2] > 0.25 || pads[i].axes[2] < -0.25)
-					gamepad.fx += pads[i].axes[2];
-				if (nvidiaShield) {
-					if (pads[i].axes[5] > 0.25 || pads[i].axes[5] < -0.25)
-						gamepad.fy += pads[i].axes[5];
-				} else {
-					if (pads[i].axes[3] > 0.25 || pads[i].axes[3] < -0.25)
-						gamepad.fy += pads[i].axes[3];
-				}
-				for (var b=0; b<4; b++) {
-					if (pads[i].buttons[b].pressed) gamepad.but=true;
-				}
-				if (pads[i].buttons[0].pressed) gamepad.buta=true;
-				if (pads[i].buttons[1].pressed) gamepad.butb=true;
-				if (pads[i].buttons[2].pressed) gamepad.butx=true;
-				if (pads[i].buttons[3].pressed) gamepad.buty=true;
-				if (nvidiaShield) {
-					gamepad.dx = pads[i].axes[8];
-					gamepad.dy = pads[i].axes[9];
-				} else {
-					if (pads[i].buttons[12] && pads[i].buttons[12].pressed)
-						gamepad.dy = -1;
-					if (pads[i].buttons[13] && pads[i].buttons[13].pressed)
-						gamepad.dy =  1;
-					if (pads[i].buttons[14] && pads[i].buttons[14].pressed)
-						gamepad.dx = -1;
-					if (pads[i].buttons[15] && pads[i].buttons[15].pressed)
-						gamepad.dx =  1;
-				}
-			}
-		}
-	}
-
+	gamepadcontrols = io.hasGamepads();
 
 
 	// init gl
@@ -484,8 +408,8 @@ StdGame.prototype.doWebGLFrame = function() {
 	gl.clear(gl.COLOR_BUFFER_BIT);
 	//gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	// then set viewport to preserve aspect ratio
-	eng.updateViewport();
-	gl.viewport(eng.viewportxofs,eng.viewportyofs,eng.viewportwidth,eng.viewportheight);
+	io.updateViewport();
+	gl.viewport(io.viewportxofs,io.viewportyofs,io.viewportwidth,io.viewportheight);
 
 
 	drawLineInitFrame(width,height);
@@ -507,7 +431,7 @@ StdGame.prototype.doWebGLFrame = function() {
 	fontbatch.clear();
 
 	if (!JGState.isIn("Game")) {
-		this.gamemsgs.displayAudioEnable(eng,GameState,this.drawAudioIcon,this.toggleAudio);
+		this.gamemsgs.displayAudioEnable(io,GameState,this.drawAudioIcon,this.toggleAudio);
 	}
 
 
@@ -522,11 +446,11 @@ StdGame.prototype.doWebGLFrame = function() {
 	//   GameOver - game over sequence
 	JGState.handleGameStates(1,frameskip);
 
-	this.gamemsgs.update(eng);
+	this.gamemsgs.update(io);
 
 	if (!frameskip) {
-		var pointerx = eng.getMouseX();
-		var pointery = eng.getMouseY();
+		var pointerx = io.getMouseX();
+		var pointery = io.getMouseY();
 		font_color = 
 			[0.5+0.5*Math.sin(gametime*0.2),
 			 0.5+0.5*Math.sin(gametime*0.164),
@@ -580,7 +504,7 @@ StdGame.prototype.doWebGLFrame = function() {
 		//gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 		//gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-		if (!gamepadcontrols && !touchcontrols) {
+		if (!touchcontrols) {
 			var color;
 			if (GameConfig.mouse && GameConfig.mouse.color) {
 				color = GameConfig.mouse.color;
@@ -609,7 +533,7 @@ StdGame.prototype.doWebGLFrame = function() {
 		}
 	}
 	this.prevmousebut = this.curmousebut;
-	this.curmousebut = !this.gamemsgs.inModal() && eng.getMouseButton(1);
+	this.curmousebut = !this.gamemsgs.inModal() && io.getMouseButton(1);
 	mousebutflank = this.curmousebut && !this.prevmousebut;
 }
 
@@ -786,7 +710,7 @@ StdGame.prototype.drawManualChunk = function(xcen,ytop,easing,chunk) {
 
 // currently unused
 StdGame.prototype.displayManual = function(section,cascade) {
-	this.gamemsgs.displayManual(section,cascade,eng,GameState,this.gamestate_loaded,
+	this.gamemsgs.displayManual(section,cascade,io,GameState,this.gamestate_loaded,
 	function(easing) {
 		particlebatch.addSprite(6,96,96,false,
 			128+32*easing, 128+32*easing, 0.0, null);
@@ -939,8 +863,8 @@ function startGame(timer) {
 function doFrameGame(timer) {
 	//displayManual(gametype+"Game");
 
-	var pointerx = eng.getMouseX();
-	var pointery = eng.getMouseY();
+	var pointerx = io.getMouseX();
+	var pointery = io.getMouseY();
 	// XXX noScroll deprecated, should be scroll.disabled
 	if (!GameConfig.noScroll
 	&& (!GameConfig.scroll || !GameConfig.scroll.disabled) )
@@ -1584,37 +1508,6 @@ var DefaultParticleConfig = {
 			{"r":0, "g":0, "b":0, "a":0},
 		]
 	},
-}
-
-
-// if elem exists in obj2, use that, otherwise use obj1
-// Overwrites obj1
-//From:http://stackoverflow.com/questions/171251/how-can-i-merge-properties-of-two-javascript-objects-dynamically
-/* Recursively merge properties of two objects  */
-function MergeRecursive(obj1, obj2) {
-	if (!obj1 && !obj2) return {};
-	if (!obj1) return obj2;
-	if (!obj2) return obj1;
-	var ret = {};
-	for (var p in obj2) {
-		try {
-			if ( obj2[p].constructor==Object ) {
-				ret[p] = MergeRecursive(obj1[p], obj2[p]);
-			} else {
-				obj1[p] = obj2[p];
-			}
-		} catch(e) {
-			obj1[p] = obj2[p];
-		}
-	}
-	return obj1;
-}
-
-function MergeRecursiveCopy(obj1,obj2) {
-	var ret = {};
-	ret = MergeRecursive(ret,obj1);
-	ret = MergeRecursive(ret,obj2);
-	return ret;
 }
 
 
