@@ -305,7 +305,6 @@ StdGame.prototype.webGLStart = function() {
 	}
 	for (var texid in GameConfig.textures) {
 		var texinfo = GameConfig.textures[texid];
-		if (TexLoader.texByURL[texinfo.url]) continue;
 		console.log("Loading image "+texid+" from "+texinfo.url);
 		TexLoader.load(gl,texid,texinfo.url,texinfo.smooth,texinfo.wrap,true);
 	}
@@ -365,6 +364,7 @@ StdGame.prototype.webGLFrame = function() {
 	if (this.lastTime != 0) {
 		this.timeElapsed = timeNow - this.lastTime;
 		this.gamespeed = this.timeElapsed / this.gamebasespeed;
+		// we don't do anything with gamespeed yet, always 1
 		this.gamespeed = 1.0;
 		gametime += this.gamespeed;
 		totalgametime += this.gamespeed;
@@ -1591,6 +1591,57 @@ StdParticle.prototype.paint = function(gl) {
 			+ this.config.spriteangledir*Math.atan2(this.xspeed,this.yspeed),
 		col);
 }
+
+
+// --------------------------------------------------------------------
+// In-game text display
+// --------------------------------------------------------------------
+
+
+function TextParticle(x,y,text,xspeed,yspeed,
+size,zoomspeed,fadespeed,hsv,cyclespeed) {
+	JGObject.apply(this,["TextParticle",true,x,y, 0]);
+	if (!hsv) hsv = { h:0, s:1, v:1 };
+	if (!cyclespeed) cyclespeed = 0.01;
+	if (!size) size = tilex;
+	if (!zoomspeed) zoomspeed = 1.005;
+	if (!fadespeed) fadespeed = 0.005;
+	if (xspeed) this.xspeed = xspeed;
+	if (yspeed) this.yspeed = yspeed;
+	this.hsv = hsv;
+	this.cyclespeed = cyclespeed;
+	this.zoom = size;
+	this.y -= size;
+	this.x -= size;
+	this.zoomspeed = zoomspeed;
+	this.fadespeed = fadespeed;
+	this.fade=1;
+	this.text = ""+text;
+}
+
+TextParticle.prototype = new JGObject();
+
+TextParticle.prototype.move = function() {
+	this.zoom *= this.zoomspeed;
+	this.fade -= this.fadespeed;
+	if (this.fade <= 0) this.remove();
+}
+
+TextParticle.prototype.hit = function(obj) {
+}
+
+TextParticle.prototype.hit_bg = function(tilecid) {
+}
+
+
+TextParticle.prototype.paint = function(gl) {	
+	col = hsv_to_rgb(this.hsv.h + this.cyclespeed*gametime, this.hsv.s, this.hsv.v,
+		this.fade);
+	drawSpriteText(fontbatch,this.text,
+			this.x,this.y, this.zoom,this.zoom, 0, 0.25, col);
+}
+
+
 
 
 // helper functions

@@ -131,6 +131,10 @@ var TexLoader = {
 
 	load: function(gl,id,imageurl,smooth,wrap,lazyloading) {
 		var tex;
+		if (TexLoader.texByURL[imageurl]) {
+			if (id) TexLoader.texById[id] = TexLoader.texByURL[imageurl];
+			return;
+		}
 		if (!lazyloading && id) {
 			TexLoader.texNotLoaded[id] = true;
 			tex = initTexture(gl,imageurl,smooth,wrap,function() {

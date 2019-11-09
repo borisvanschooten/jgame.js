@@ -31,7 +31,7 @@ createJsonForm("gameconfig", {
 		titlebg: {
 			title: 'titlebg:',
 			type: 'string',
-			description: "Name of background texture to use on title screen",
+			description:"Filename of background texture to use on title screen",
 			placeholder: "Optional",
 		},
 	},
@@ -67,13 +67,14 @@ createJsonForm("gameconfig", {
 			+"	name: \""+val["name"]+"\",\n"
 			+"	gamemode: \""+val["gamemode"]+"\",\n"
 			+"	title: \""+val["title"]+"\",\n"
-			+(val["titlebg"] ?  "	titlebg: \""+val["titlebg"]+"\",\n" : "")
+			+(val["titlebg"] ?  "	titlebg: \"titletex\",\n" : "")
 			+"	sounds: {\n"
 			+"		// Insert your sounds here\n"
 			+"		\"mysound\": \"sounds/MySound\",\n"
 			+"	},\n"
 			+"	textures: {\n"
 			+"		// Insert your textures here\n"
+			+(val["titlebg"] ? "		\"titletex\": {url:\""+val["titlebg"]+"\",smooth:true,wrap:false},\n" : "" )
 			+"		\"tex1\": {url:\"images/tex1.png\",smooth:true,wrap:false},\n"
 			+"	},\n"
 			+"	// Insert a spritesheet definition here (use the code wizard)\n"
@@ -108,6 +109,12 @@ createJsonForm("gameconfig", {
 			+"				vertical: false,\n"
 			+"			},\n"
 			+"			playerofs: {x: 500, y: 0},\n"
+			+"			doFramePre: function() {},\n"
+			+"			doFramePost: function() {myDoFrame();},\n"
+			+"			paintBackground: function() {},\n"
+			+"			paintForeground: function() {},\n"
+			+"			paintOverlay: function() {},\n"
+
 			+"		},\n"
 			+"	},\n"
 			+"	levels: [\n"
@@ -120,10 +127,34 @@ createJsonForm("gameconfig", {
 			+"				{ text: \"Fill in the text you want to show\" },\n"
 			+"				{ text: \"at the start of the level here.\" },\n"
 			+"			],\n"
+			+"			par: { levelduration: 1000, },\n"
 			+"		},\n"
 			+"	],\n"
 			+"};\n"
-
+			+"\n"
+			+"\n"
+			+"function myStartNewLevel() {\n"
+			+"	tilemap.setOffscreenTile(-1,0);\n"
+			+"	// draw floor\n"
+			+"	for (var x=0; x<nrtilesx; x++) {\n"
+			+"			tilemap.setTile(0,1,x,nrtilesy-1);\n"
+			+"	}\n"
+			+"	tilemap.update(gl);\n"
+			+"}\n"
+			+"\n"
+			+"\n"
+			+"function myDoFrame() {\n"
+			+"	if (checkTime(0,thislevel.par.levelduration,50)) {\n"
+			+"		// create enemy\n"
+			+"	}\n"
+			+"	if (gametime > thislevel.par.levelduration\n"
+			+"	&& JGObject.countObjects('Object',0) == 0) {\n"
+			+"		//JGState.add(\"LevelDone\",-1);\n"
+			+"	}\n"
+			+"}\n"
+			+"\n"
+			+"\n"
+			;
 			insertCodeFromContextMenu(code);
 			//$('#res').html(code);
 			$('#globalsdialog').css("display","none");
@@ -232,6 +263,12 @@ createJsonForm("tilemap", {
 			type: 'number',
 			description: "Number of tiles in vertical direction in texture",
 		},
+		nrtiles: {
+			title: "nrtiles:",
+			type: 'string',
+			description: "Number of tiles on screen",
+			enum: ["22x12", "32x18", "40x23"]
+		},
 	},
 	form: [
 		{
@@ -255,6 +292,9 @@ createJsonForm("tilemap", {
 			htmlClass: "number",
 		},
 		{
+			key: "nrtiles", 
+		},
+		{
 			"type": "submit",
 			"title": "Insert code",
 		}
@@ -263,6 +303,13 @@ createJsonForm("tilemap", {
 		if (errors) {
 			alert(errors);
 		} else {
+			var tilespecs = {
+				"22x12": [ "22","12","90","90" ],
+				"32x18": [ "32","18","60","60" ],
+				"40x23": [ "40","23","48","48" ],
+			};
+			var tilespec = tilespecs[val.nrtiles];
+
 			var code = ""
 			+"	tilemap: {\n"
 			+"		texture: {url:\""+val.texture_url+"\", smooth: false, wrap:false},\n"
@@ -270,10 +317,10 @@ createJsonForm("tilemap", {
 			+"		unity: "+val.unity+",\n"
 			+"		countx: "+val.countx+",\n"
 			+"		county: "+val.county+",\n"
-			+"		tilex: 90,\n"
-			+"		tiley: 90,\n"
-			+"		nrtilesx: 22,\n"
-			+"		nrtilesy: 12,\n"
+			+"		tilex: "+tilespec[2]+",\n"
+			+"		tiley: "+tilespec[3]+",\n"
+			+"		nrtilesx: "+tilespec[0]+",\n"
+			+"		nrtilesy: "+tilespec[1]+",\n"
 			+"		filltile: -1,\n"
 			+"		filltilecid: 0,\n"
 			+"	},\n";
@@ -295,7 +342,7 @@ createJsonForm("jgobject", {
 		unique: {
 			title: 'unique:',
 			type: 'string',
-			description: "Is there only one object of this type in the game?",
+			description: "Are there multiple objects of this type in the game?",
 			enum: ["false","true"],
 		},
 		cid: {

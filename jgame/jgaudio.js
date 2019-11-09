@@ -186,7 +186,7 @@ JGAudio.load = function (name,basefilename) {
 */
 JGAudio.play = function(name,channel,loop,amplitude) {
 	JGAudio._init();
-	if (!amplitude) amplitude = 0.5;
+	if (!amplitude) amplitude = 0.25;
 	if (channel) JGAudio.stop(channel);
 	if (channel && loop) {
 		JGAudio._playingLoops[channel] = name;

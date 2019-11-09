@@ -14,49 +14,6 @@ if (!String.prototype.startsWith) {
   };
 }
 
-/**
-* @param {float} min - lower bound
-* @param {float} max - upper bound exclusive
-* @return {float}
-*/
-function random(min, max) {
-	return min + Math.random()*(max-min);
-}
-/**
-* @param {float} min - lower bound
-* @param {float} max - upper bound exclusive
-* @param {float} interval - step size
-* @return {float}
-*/
-function randomstep(min, max, interval) {
-	var steps = Math.floor(0.00001 + (max-min)/interval);
-	return min + ( Math.floor(Math.random()*(steps+0.99)) )*interval;
-}
-
-function distance(x,y) {
- return Math.sqrt(x*x + y*y);
-}
-
-function typecheckInt(value,name) {
-	if (isNaN(value) || !isFinite(value) || value%1 != 0) {
-		console.log("Type error: "+name+" is not an integer (value='"+value+"')");
-		if (console.trace) console.trace();
-		return false;
-	}
-	return true;
-}
-
-function typecheckNumber(value,name) {
-	if (isNaN(value) || !isFinite(value)) {
-		console.log("Type error: "+name+" is not a number (value='"+value+"')");
-		if (console.trace) {
-			console.trace();
-		}
-		return false;
-	}
-	return true;
-}
-
 //From:http://stackoverflow.com/questions/171251/how-can-i-merge-properties-of-two-javascript-objects-dynamically
 /* Recursively merge properties of two objects.
 * if elem exists in obj2, use that, otherwise use obj1
@@ -65,11 +22,14 @@ function MergeRecursive(obj1, obj2) {
 	if (!obj1 && !obj2) return {};
 	if (!obj1) return obj2;
 	if (!obj2) return obj1;
-	var ret = {};
 	for (var p in obj2) {
 		try {
 			if ( obj2[p].constructor==Object ) {
-				ret[p] = MergeRecursive(obj1[p], obj2[p]);
+				obj1[p] = MergeRecursive(obj1[p], obj2[p]);
+			} else if ( obj2[p].constructor==Array ) {
+				for (var i=0; i<obj2[p].length; i++) {
+					obj1[p][i] = MergeRecursive(obj1[p][i],obj2[p][i]);
+				}
 			} else {
 				obj1[p] = obj2[p];
 			}

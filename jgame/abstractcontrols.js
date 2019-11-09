@@ -144,7 +144,8 @@ function JGCanvasAbstractControls(canvas,logicalwidth,logicalheight,config) {
 			},
 		]
 	}
-	if (config) MergeRecursive(this.config,config);
+	if (config) this.config = MergeRecursive(this.config,config);
+	console.log(this.config);
 	this.initState();
 }
 
@@ -319,15 +320,15 @@ JGCanvasAbstractControls.prototype.update = function() {
 			var touch = this.getTouchInRegion(axis.touch.region);
 			if (touch) {
 				if (this.axis_prevtouch[i]) {
-					this.axis_touch[i].x += this.axis_touchcen[i].x;
-					this.axis_touch[i].y += this.axis_touchcen[i].y;
+					this.axis_touch[i].x += touch.x - this.axis_touchcen[i].x;
+					this.axis_touch[i].y += touch.y - this.axis_touchcen[i].y;
 				}
 				this.axis_touchcen[i].x = touch.x;
 				this.axis_touchcen[i].y = touch.y;
 				this.axis_prevtouch[i] = true;
-				this.axes[i].x = 0.001*axis.touch.sensitivity
+				this.axes[i].x = 0.01*axis.touch.sensitivity
 					* this.axis_touch[i].x;
-				this.axes[i].y = 0.001*axis.touch.sensitivity
+				this.axes[i].y = 0.01*axis.touch.sensitivity
 					* this.axis_touch[i].y;
 			} else {
 				this.axis_prevtouch[i] = false;
