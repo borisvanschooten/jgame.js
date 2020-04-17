@@ -41,7 +41,7 @@ for (var i=0; i<JGameBaseFiles.length; i++) {
 
 // load game defs
 gamedir = PersistentState.getUrlParameter("game");
-if (!gamedir) gamedir="";
+if (!gamedir) gamedir=defaultgamedir;
 
 loadScript(gamedir+"game.js",function() {
 

@@ -115,7 +115,13 @@ function initTexture(gl,imageurl,smooth,wrap,callback,mipmap) {
 		gl.bindTexture(gl.TEXTURE_2D, null);
 		if (callback) callback();
 	};
-	image.src = _textureRootDir+imageurl;
+	if (imageurl.indexOf(":") >= 0 && imageurl.indexOf(":") <= 5) {
+		// absolute url with http:// or image: protocol
+		image.src = imageurl;
+	} else {
+		// relative url
+		image.src = _textureRootDir+imageurl;
+	}
 	return texture;
 }
 

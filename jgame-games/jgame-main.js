@@ -1273,6 +1273,7 @@ function TileSprite(name,unique,tx,ty,colid) {
 	this.flipx = false;
 	this.flipy = false;
 	this.angle = 0;
+	this.color = null;
 	this.anim = null; // start, end, speed, vertical, always
 	this.tx = tx;
 	this.ty = ty;
@@ -1336,7 +1337,7 @@ TileSprite.prototype.moveFunc = function() {
 TileSprite.prototype.paintFunc = function(gl) {
 	spritebatch.addSprite(this.sprite,this.x-screenxofs,this.y-screenyofs,true,
 		this.flipx ? -tilex : tilex, this.flipy ? -tiley: tiley,
-		this.angle,null);
+		this.angle,this.color);
 }
 
 

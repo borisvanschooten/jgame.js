@@ -11,6 +11,7 @@ createJsonForm("gameconfig", {
 			title: 'gamedir:',
 			type: 'string',
 			description: "Base URL for textures and sounds",
+			placeholder: "jgame-games/mygame/",
 		},
 		name: {
 			title: 'name:',
@@ -165,6 +166,12 @@ createJsonForm("gameconfig", {
 
 createJsonForm("spritesheet", {
 	schema: {
+		spritesheetname: {
+			title: 'name:',
+			type: 'string',
+			description: "Spritesheet name",
+			enum: ["spritesheet", "spritesheet2" ],
+		},
 		texture_url: {
 			title: 'texture URL:',
 			type: 'string',
@@ -192,6 +199,9 @@ createJsonForm("spritesheet", {
 		},
 	},
 	form: [
+		{
+			key: "spritesheetname", 
+		},
 		{
 			key: "texture_url", 
 			htmlClass: "string",
@@ -222,7 +232,7 @@ createJsonForm("spritesheet", {
 			alert(errors);
 		} else {
 			var code = ""
-			+"	spritesheet: {\n"
+			+"	"+val.spritesheetname+": {\n"
 			+"		texture: {url:\""+val.texture_url+"\", smooth: false, wrap:false},\n"
 			+"		unitx: "+val.unitx+",\n"
 			+"		unity: "+val.unity+",\n"
