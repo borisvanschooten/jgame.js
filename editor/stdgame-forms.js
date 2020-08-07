@@ -10,7 +10,8 @@ createJsonForm("gameconfig", {
 		gamedir: {
 			title: 'gamedir:',
 			type: 'string',
-			description: "Base URL for textures and sounds",
+			description: "Base URL for textures and sounds, ex. jgame-games/mygame/",
+			// placeholder not working???
 			placeholder: "jgame-games/mygame/",
 		},
 		name: {
@@ -175,7 +176,7 @@ createJsonForm("spritesheet", {
 		texture_url: {
 			title: 'texture URL:',
 			type: 'string',
-			description: "URL of tile map texture",
+			description: "URL of tile map texture, ex. images/image.png",
 		},
 		unitx: {
 			title: 'unit.x:',
@@ -251,7 +252,7 @@ createJsonForm("tilemap", {
 		texture_url: {
 			title: 'texture URL:',
 			type: 'string',
-			description: "URL of tile map texture",
+			description: "URL of tile map texture, ex. images/image.png",
 		},
 		unitx: {
 			title: 'unit.x:',

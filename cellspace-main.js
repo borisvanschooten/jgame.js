@@ -600,6 +600,7 @@ function webGLFrame() {
 		frameskip=0;
 		doWebGLFrame();
 	} catch (err) {
+		console.log(err);
 		IOAPI.reportConsole("Exception",err.message);
 		pauseWebGL(true);
 	}

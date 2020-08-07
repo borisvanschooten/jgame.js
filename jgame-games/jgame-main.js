@@ -366,16 +366,12 @@ StdGame.prototype.webGLFrame = function() {
 		this.gamespeed = this.timeElapsed / this.gamebasespeed;
 		// we don't do anything with gamespeed yet, always 1
 		this.gamespeed = 1.0;
-		gametime += this.gamespeed;
-		totalgametime += this.gamespeed;
 	}
 	this.lastTime = timeNow;
 	if (this.timeElapsed >= 1000/32) {
 		frameskip=1;
 		SG.doWebGLFrame();
 		this.lastTime = new Date().getTime();
-		gametime += this.gamespeed;
-		totalgametime += this.gamespeed;
 	}
 	frameskip=0;
 	SG.doWebGLFrame();
@@ -891,6 +887,8 @@ function doFrameGame(timer) {
 	// do not update anything until modal dialogs disappear
 	if (SG.gamemsgs.inModal()) return;
 
+	gametime += this.gamespeed;
+	totalgametime += this.gamespeed;
 
 	if (thisleveldef.doFramePre) thisleveldef.doFramePre();
 
@@ -1035,6 +1033,8 @@ function startTitle(timer) {
 
 function doFrameTitle(timer) {
 	JGObject.updateObjects(gl,frameskip,screenxofs,screenyofs,width,height);
+	gametime += this.gamespeed;
+	totalgametime += this.gamespeed;
 }
 
 function paintFrameTitle(timer) {
@@ -1268,6 +1268,7 @@ function TileSprite(name,unique,tx,ty,colid) {
 	JGObject.apply(this,[name,unique,tilex*tx,tiley*ty, colid]);
 	this.transition=0;
 	this.dest = null;
+	this.spritebatch = spritebatch;
 	this.sprite = 1;
 	this.animpos = 0;
 	this.flipx = false;
@@ -1335,7 +1336,7 @@ TileSprite.prototype.moveFunc = function() {
 
 /** Call this in paint() function to draw a standard animated sprite. */
 TileSprite.prototype.paintFunc = function(gl) {
-	spritebatch.addSprite(this.sprite,this.x-screenxofs,this.y-screenyofs,true,
+	this.spritebatch.addSprite(Math.floor(this.sprite),this.x-screenxofs,this.y-screenyofs,true,
 		this.flipx ? -tilex : tilex, this.flipy ? -tiley: tiley,
 		this.angle,this.color);
 }
@@ -1361,10 +1362,12 @@ TileSprite.prototype.setTile = function(tileid,xofs,yofs) {
 }
 
 TileSprite.prototype.dispose = function() {
+	if (this.disposePre) this.disposePre();
 	if (this.colid) {
 		tilemap.setTileCid(0, TILEAND, this.tx,this.ty);
 		setTileSpriteIndex(this,true);
 	}
+	if (this.disposePost) this.disposePost();
 }
 
 /** Move this sprite to a new tile coordinate.
@@ -1405,9 +1408,13 @@ TileSprite.prototype.goTo = function(tx,ty,steps) {
 /** Get TileSprite object at given coordinate. 
 * @param tx tile x coordinate
 * @param ty tile x coordinate */
-TileSprite.prototype.getSprite = function(tx,ty) {
+TileSprite.getSprite = function(tx,ty) {
 	//console.log(JSON.stringify(tilespriteidxes));
 	return tilespriteidxes[tx+","+ty];
+}
+
+TileSprite.removeSprites = function() {
+	tilespriteidxes = {};
 }
 
 /** Get tile ID at position relative to this object.

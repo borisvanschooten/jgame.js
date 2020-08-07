@@ -292,6 +292,9 @@ CS.reportError = function(type,linenr,message) {
 CS.Main.getTileIdFromMask = function(tilemask, d) {
 	if (tilemask) {
 		var cell = CS.Main.game.cellsyms_mask[tilemask];
+		if (typeof cell == 'undefined') {
+			console.log("Mask "+tilemask+" has no defined cell");
+		}
 		return CS.Main.getTileIdFromBaseId(cell, cell.tilenr, d);
 	} else {
 		return -1; // -1 represents empty tile

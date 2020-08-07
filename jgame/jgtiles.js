@@ -161,8 +161,8 @@ JGTileMap.prototype.setOffscreenTile = function(tileidx,tilecid) {
 JGTileMap.prototype.setTile = function(tileidx,tilecid,x,y) {
 	if (!typecheckInt(tileidx,"tileidx")) return;
 	if (!typecheckInt(tilecid,"tilecid")) return;
-	if (!typecheckNumber(x,"x")) return;
-	if (!typecheckNumber(y,"y")) return;
+	if (!typecheckInt(x,"x")) return;
+	if (!typecheckInt(y,"y")) return;
 	if (x < 0 || x >= this.nrtilesx
 	||  y < 0 || y >= this.nrtilesy) return;
 	this.map[y][x] = tileidx;
@@ -173,8 +173,8 @@ JGTileMap.prototype.setTile = function(tileidx,tilecid,x,y) {
 JGTileMap.prototype.setTileCid = function(tilecid,tilecidand,x,y) {
 	if (!typecheckInt(tilecid,"tilecid")) return;
 	if (!typecheckInt(tilecidand,"tilecidand")) return;
-	if (!typecheckNumber(x,"x")) return;
-	if (!typecheckNumber(y,"y")) return;
+	if (!typecheckInt(x,"x")) return;
+	if (!typecheckInt(y,"y")) return;
 	if (x < 0 || x >= this.nrtilesx
 	||  y < 0 || y >= this.nrtilesy) return;
 	this.cidmap[y][x] = (this.cidmap[y][x] & tilecidand) | tilecid;
@@ -272,6 +272,8 @@ JGTileMap.prototype.getTileCidRect = function(rect) {
 
 
 JGTileMap.prototype.getTileCidPos = function(tx,ty) {
+	if (!typecheckInt(tx,"tx")) return;
+	if (!typecheckInt(ty,"ty")) return;
 	if (ty<0 || ty>=this.nrtilesy
 	||  tx<0 || tx>=this.nrtilesx)
 		return this.offscreencid;
@@ -284,6 +286,8 @@ JGTileMap.prototype.getTileCidPos = function(tx,ty) {
 
 
 JGTileMap.prototype.getTilePos = function(tx,ty) {
+	if (!typecheckInt(tx,"tx")) return;
+	if (!typecheckInt(ty,"ty")) return;
 	if (ty<0 || ty>=this.nrtilesy
 	||  tx<0 || tx>=this.nrtilesx)
 		return this.offscreentile;
@@ -292,6 +296,10 @@ JGTileMap.prototype.getTilePos = function(tx,ty) {
 
 /** Note, x2,y2 exclusive */
 JGTileMap.prototype.countTileCids = function(tilecidmask,x1,y1,x2,y2) {
+	if (!typecheckInt(x1,"x1")) return;
+	if (!typecheckInt(y1,"y1")) return;
+	if (!typecheckInt(x2,"x2")) return;
+	if (!typecheckInt(y2,"y2")) return;
 	if (!x1 || x1<0) x1=0;
 	if (!y1 || y1<0) y1=0;
 	if (!x2 || x2>this.nrtilesx) x2 = this.nrtilesx;
