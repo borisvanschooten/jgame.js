@@ -2,7 +2,7 @@
 # Copy resources to publish/ to obtain a clean package for uploading.
 # Copies basic jgame, no cellspace, no editor, no i18n
 # Parameter: dir of game under jgame-games/ (no trailing slash)
-# Ex: publish-game.sh ld45 -> copy base libs + jgame-games/ld45/ to staging
+# Ex: publish-game.sh ld45 -> copy base libs + jgame-games/ld45/ to publish/
 
 gamedir="${1:?Missing game directory}"
 

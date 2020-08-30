@@ -166,6 +166,8 @@ JGCanvasAbstractControls.prototype.initState = function() {
 		this.axis_touch.push({x:0,y:0});
 	}
 	this.buttons = [];
+	this.prevmousebutton = false; // used for mouse button 1 emulation
+	this.mousebuttonoverlay = false; // used for mouse button 1 emulation
 	for (i=0; i<this.config.button.length; i++) {
 		this.buttons.push(false);
 	}
@@ -400,10 +402,37 @@ JGCanvasAbstractControls.prototype.getMouseY = function(index) {
 
 JGCanvasAbstractControls.prototype.getMouseButton = function(button,index) {
 	if (!index) index=0;
-	if (button==1) return this.buttons[index];
+	// mouse button 1 emulation
+	if (button==1) {
+		// change mouse button only on flank since last call
+		if (!this.prevmousebutton && this.buttons[index]) {
+			this.mousebuttonoverlay = true;
+		}
+		if (this.prevmousebutton && !this.buttons[index]) {
+			this.mousebuttonoverlay = false;
+		}
+		this.prevmousebutton = this.buttons[index];
+		return this.mousebuttonoverlay;
+	}
 	// normal behaviour for other buttons
 	return this.mousebutton[button];
 }
+JGCanvasAbstractControls.prototype.setMouseButton = function(button) {
+	if (button == 1) {
+		this.mousebuttonoverlay = true;
+	} else {
+		this.mousebutton[button] = true;
+	}
+}
+
+JGCanvasAbstractControls.prototype.clearMouseButton = function(button) {
+	if (button == 1) {
+		this.mousebuttonoverlay = false;
+	} else {
+		this.mousebutton[button] = false;
+	}
+}
+
 
 JGCanvas.prototype.getMouseInside = function() {
 	if (this.getTouches().length > 0) return true;

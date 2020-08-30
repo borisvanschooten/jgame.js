@@ -456,7 +456,7 @@ function drawLineInitFrame(width,height) {
 // name in polycache.  This assumes the coords, nr_points, and is_closed
 // will stay the same in future calls.
 function drawLine(offset, angle, scale, thickness, color,
-coords, nr_points, is_closed, cache_id){
+coords, nr_points, is_closed, cache_id, rebuild_cache){
 	gl.useProgram(drawLine.program.program);
 
 	gl.uniform1f(drawLine.uObjScale, scale);
@@ -471,6 +471,9 @@ coords, nr_points, is_closed, cache_id){
 
 	var buf_obj;
 	var is_gl_buffered=false;
+	if (cache_id && rebuild_cache) {
+		delete drawLine.polycache[cache_id]
+	}
 	if (cache_id) {
 		if (drawLine.polycache[cache_id]) {
 			buf_obj = drawLine.polycache[cache_id];

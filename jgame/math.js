@@ -20,6 +20,37 @@ function randomstep(min, max, interval) {
 	return min + ( Math.floor(Math.random()*(steps+0.99)) )*interval;
 }
 
+
+
+var _mulberry32seed = 1234567;
+
+function _mulberry32(input) {
+	var t = input += 0x6D2B79F5;
+	t = Math.imul(t ^ t >>> 15, t | 1);
+	t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+	return (t ^ t >>> 14) >>> 0;
+}
+
+function mulberry32rand() {
+	_mulberry32seed =  _mulberry32(_mulberry32seed);
+	return (_mulberry32seed & 0x7fffffff) / 0x7fffffff;
+}
+
+function random2(min, max) {
+	return min + mulberry32rand() * (max-min);
+}
+
+function randomstep2(min, max, interval) {
+	var steps = Math.floor(0.00001 + (max-min)/interval);
+	return min + ( Math.floor(mulberry32rand()*(steps+0.99)) )*interval;
+}
+
+
+function srand2(seed) {
+	_mulberry32seed = seed;
+}
+
+
 // deprecated, use Vec2.dist
 function distance(x,y) {
 	return Math.sqrt(x*x + y*y);

@@ -213,6 +213,7 @@ JGObject.countObjects = function(nameprefix,colid) {
 	var nr_objects=0;
 	for (var name in JGObject._objects) {
 		var obj = JGObject._objects[name];
+		if (!obj.alive) continue;
 		if (colid!=0 && (obj.colid & colid) == 0) continue;
 		if (nameprefix!=null && obj.name.indexOf(nameprefix)!=0) continue;
 		nr_objects++;

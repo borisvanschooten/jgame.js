@@ -23,6 +23,11 @@ JGState.isIn = function(state) {
 	return typeof JGState.gamestates[state] != "undefined";
 }
 
+JGState.willBeIn = function(state) {
+	return typeof JGState.gamestates[state] != "undefined"
+	||     typeof JGState.newgamestates[state] != "undefined";
+}
+
 // timer=-1 means indefinitely.
 // if game state is already set or already in new game states,
 // start will not be triggered again, but other game states will be cleared.

@@ -946,6 +946,7 @@ function doFrameLoading(timer) {
 
 
 function startTitle(timer) {
+	if (GameConfig.startTitle) GameConfig.startTitle();
 	SG.gamemsgs.clear();
 	JGObject.removeObjects(null,0);
 	mousebutflank=false;
