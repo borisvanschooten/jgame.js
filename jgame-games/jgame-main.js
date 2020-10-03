@@ -484,7 +484,10 @@ StdGame.prototype.doWebGLFrame = function() {
 		if (GameConfig.setupSpriteDraw) GameConfig.setupSpriteDraw();
 		spritebatch.draw(gl);
 		if (spritebatch2) spritebatch2.draw(gl);
-		if (GameConfig.paintOverSprites) GameConfig.paintOverSprites();
+		if (!frameskip && JGState.isIn("Game")
+		&& thisleveldef && thisleveldef.paintOverlay) {
+			thisleveldef.paintOverlay();
+		}
 
 		if (GameConfig.tilemapOnTop && JGState.isIn("Game")) {
 			if (tilemap) tilemap.draw(gl,screenxofs,screenyofs);
@@ -916,7 +919,8 @@ function paintFrameGame(timer) {
 		var str = GameConfig.score.display(GameConfig.score.get());
 		drawSpriteText(fontbatch,str,width-30,50,60,60,1, 0.25,[1,1,1,1]);
 	}
-	if (thisleveldef.paintOverlay) thisleveldef.paintOverlay();
+	// Is below sprite sheets, so no use here.
+	//if (thisleveldef.paintOverlay) thisleveldef.paintOverlay();
 	//drawSpriteText(fontbatch,timestampToString(getGameTimeTaken()),
 	//	190,380,60,60,0, 0.25,[1,1,1,1]);
 	//drawSpriteText(fontbatch,"Score:",200,500,60,60,0, 0.25,[1,1,1,1]);
