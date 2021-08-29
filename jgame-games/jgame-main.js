@@ -971,6 +971,9 @@ function startTitle(timer) {
 	} else if (nrlevels > 40) {
 		nrlevx = 10;
 	}
+	if (GameConfig.levelsPerRow) {
+		nrlevx = GameConfig.levelsPerRow;
+	}
 	if (!nrlevx) {
 		levelsloop1:
 		for (var hght=2; hght<=5; hght++) {
@@ -1625,7 +1628,6 @@ size,zoomspeed,fadespeed,hsv,cyclespeed) {
 	this.cyclespeed = cyclespeed;
 	this.zoom = size;
 	this.y -= size;
-	this.x -= size;
 	this.zoomspeed = zoomspeed;
 	this.fadespeed = fadespeed;
 	this.fade=1;

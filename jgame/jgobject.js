@@ -125,6 +125,19 @@ JGObject.getObject = function(name) {
 	return ret;
 };
 
+// Returns array of objects conforming to spec
+JGObject.getObjects = function(nameprefix,colid) {
+	var ret = [];
+	for (var name in JGObject._objects) {
+		var obj = JGObject._objects[name];
+		if (colid!=0 && (obj.colid & colid) == 0) continue;
+		if (nameprefix!=null && obj.name.indexOf(nameprefix)!=0) continue;
+		ret.push(obj);
+	}
+	return ret;
+};
+
+
 JGObject._colsrcset = [];
 JGObject._coldstset = [];
 
