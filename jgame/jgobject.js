@@ -332,6 +332,15 @@ JGObject.prototype.setExpireOffscreen = function(xmargin,ymargin) {
 	}
 }
 
+// check if one object hits (is within certain distance of) another
+// returns true = hit
+JGObject.prototype.isHitBy = function(obj,maxdist) {
+	var distx = obj.x-this.x;
+	var disty = obj.y-this.y;
+	var dist = Math.sqrt(distx*distx + disty*disty);
+	return dist <= maxdist;
+}
+
 
 JGObject.prototype.remove = function() {
 	// should not be removed immediately

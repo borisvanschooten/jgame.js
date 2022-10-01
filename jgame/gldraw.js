@@ -276,6 +276,8 @@ void main(void) {
 
 
 
+
+
 // variables
 
 glBuffers = [];
@@ -303,7 +305,8 @@ function gldrawInit() {
 	drawSprite.colProgram = new ShaderProgram(gl, sprite_vs, sprite_col_fs, true);
 	drawSprite.simpleProgram = new ShaderProgram(gl, sprite_vs, sprite_simple_fs, true);
 	drawSprite.fadeProgram = new ShaderProgram(gl, sprite_vs, sprite_fade_fs, true);
-	// get uniforms
+	drawTriangleStrip.program = new ShaderProgram(gl, trianglestrip_vs, trianglestrip_fs, true);
+	// get uniforms for drawSprite variants
 	drawSprite.fade = new drawSpriteInit(drawSprite.fadeProgram,true,true);
 	drawSprite.col = new drawSpriteInit(drawSprite.colProgram,false,true);
 	drawSprite.simple = new drawSpriteInit(drawSprite.simpleProgram,false,false);
@@ -311,6 +314,7 @@ function gldrawInit() {
 	drawLineInit();
 	drawLineSegmentsInit();
 	drawSimpleLineInit();
+	drawTriangleStripInit();
 
 	// create buffers at init
 	//http://stackoverflow.com/questions/23120851/webgl-deletebuffer-leaking-memory
@@ -324,6 +328,9 @@ function gldrawInit() {
 	glBuffers.nrBuffer = gl.createBuffer();
 	glBuffers.sizeBuffer = gl.createBuffer(); // unused?
 	glBuffers.spriteidxBuffer = gl.createBuffer();
+	// triangle strip program
+	glBuffers.uvVecBuffer = gl.createBuffer();
+	glBuffers.posVecBuffer = gl.createBuffer();
 
 	_gldraw_inited=true;
 }
@@ -735,9 +742,6 @@ coords, nr_points, is_closed){
 //----------------------------------------------------------------------
 
 
-
-
-
 var spriteidxBufferDefined = false;
 
 var white = [1,1,1,1];
@@ -862,6 +866,88 @@ function flushDrawSpriteQueue() {
 	}
 	_drawSpriteQueue=[];
 }
+
+
+
+
+
+//----------------------------------------------------------------------
+// DRAWTRIANGLESTRIP
+//----------------------------------------------------------------------
+
+
+var trianglestrip_fs=(function () { /*
+
+precision mediump float;
+uniform sampler2D uTex;
+
+varying vec2 uv;
+
+void main(void) {
+	gl_FragColor = texture2D(uTex, uv);
+	if (gl_FragColor.a < 0.01) discard;
+}
+
+*/ }).toString().split('\n').slice(2,-2).join('\n').trim();
+
+
+var trianglestrip_vs=(function () { /*
+
+precision mediump float;
+uniform vec2 uScale;
+
+attribute vec2 uvVec;
+attribute vec2 posVec;
+
+varying vec2 uv;
+
+void main(void) {
+	uv = uvVec;
+
+	gl_Position = vec4(
+		-1.0 + 2.0*posVec.x/uScale.x,
+		 1.0 - 2.0*posVec.y/uScale.y,
+		0.0, 1.0);
+}
+
+*/ }).toString().split('\n').slice(2,-2).join('\n').trim();
+
+
+
+function drawTriangleStripInit(program) {
+	var program = drawTriangleStrip.program;
+	drawTriangleStrip.uTex = gl.getUniformLocation(program.program, "uTex");
+	drawTriangleStrip.posVec = gl.getAttribLocation(program.program, "posVec");
+	drawTriangleStrip.uvVec = gl.getAttribLocation(program.program, "uvVec");
+	drawTriangleStrip.uv = gl.getAttribLocation(program.program, "uv");
+}
+
+
+function drawTriangleStripInitFrame(width,height) {
+	gl.useProgram(drawTriangleStrip.program.program);
+	gl.uniform2f(drawTriangleStrip.uScale, width, height);
+	gl.uniform1i(drawTriangleStrip.uTex, 0);
+}
+
+
+function drawTriangleStrip(posVec,uvVec,tex) {
+	this.program.setAttribute(glBuffers.posVecBuffer,this.posVec, posVec.length, 1, posVec);
+	this.program.setAttribute(glBuffers.uvVecBuffer,this.uvVec, uvVec.length, 1, uvVec);
+
+	// MUST be set again for every draw on some devices
+	// such as Samsung Galaxy Tab Pro
+	gl.uniform1i(uniforms.uTex, 0);
+	gl.activeTexture(gl.TEXTURE0);
+	gl.bindTexture(gl.TEXTURE_2D, tex);
+
+	gl.drawArrays(gl.TRIANGLE_STRIP, 0, posVec.length);
+}
+
+
+
+// -------------------------------------------------------------
+// Helpers
+
 
 function hsv_to_rgb(h,s,v,a) {
 	var c = v * s;

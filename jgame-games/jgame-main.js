@@ -520,9 +520,11 @@ StdGame.prototype.doWebGLFrame = function() {
 			var center = false;
 			if (GameConfig.mouse && GameConfig.mouse.centerPointer) center=true;
 			//var color = cyclecol[Math.floor(gametime/8) % cyclecol.length];
-			drawSprite(pointerx,pointery, pointersize.x, pointersize.y,
-				0.0, mousepointer_tex,
-				null, color, !center);
+			if (!GameConfig.mouse || !GameConfig.mouse.disabled) {
+				drawSprite(pointerx,pointery, pointersize.x, pointersize.y,
+					0.0, mousepointer_tex,
+					null, color, !center);
+			}
 			//particlebatch.addSprite(0,pointerx,pointery,true,
 			//	96, 96, 0.0, color);
 			//gl.enable(gl.BLEND);
@@ -1432,6 +1434,82 @@ TileSprite.removeSprites = function() {
 TileSprite.prototype.getEnv = function(xofs,yofs,andmask) {
 	if (!andmask) andmask = 0xffff;
 	return tilemap.getTileCidPos(this.tx+xofs,this.ty+yofs) & andmask;
+}
+
+
+// --------------------------------------------------------------------
+// Flocking
+// --------------------------------------------------------------------
+
+// superclass for flocking sprites
+function FlockingSprite(name,unique,x,y,colid) {
+	JGObject.apply(this,[name,unique, x,y, colid]);
+	// angle / dist of last turn. Can be used for animations.
+	this.angletraveled = 0;
+	this.disttraveled = 0;
+	this.basename = name;
+}
+FlockingSprite.prototype = new JGObject();
+
+// Flock centers: can be used for flock self-attraction.
+// Call initFlockCenters at start of frame.
+// Flocks are distinguished by name.
+
+FlockingSprite.centers = {};
+FlockingSprite.newcenters = {};
+
+FlockingSprite.initCenters = function() {
+	FlockingSprite.centers = FlockingSprite.newcenters;
+	FlockingSprite.newcenters = {};
+}
+FlockingSprite.getCenter = function(name) {
+	if (!FlockingSprite.centers[name]) {
+		return{x:0, y:0, nr:0};
+	}
+	if (FlockingSprite.centers[name].nr == 0) {
+		return{x:0, y:0, nr:0};
+	}
+	return {
+		x: FlockingSprite.centers[name].x / FlockingSprite.centers[name].nr,
+		y: FlockingSprite.centers[name].y / FlockingSprite.centers[name].nr,
+		nr: FlockingSprite.centers[name].nr,
+	};
+}
+
+
+
+// call once within your move function, after calling follow()
+FlockingSprite.prototype.update = function() {
+	if (!FlockingSprite.newcenters[this.basename]) {
+		FlockingSprite.newcenters[this.basename] = {x:0,y:0,nr:0};
+	}
+	FlockingSprite.newcenters[this.basename].x += this.x;
+	FlockingSprite.newcenters[this.basename].y += this.y;
+	FlockingSprite.newcenters[this.basename].nr++;
+
+	this.angletraveled = Math.atan2(this.x-this.lastx, this.y-this.lasty);
+	this.disttraveled = distance(this.x-this.lastx, this.y-this.lasty);
+}
+
+// Call within your move or hit function for every object you want to
+// attract/repel.
+// obj - obj {x,y} to attract to or repel from
+// speed - strength of attraction, positive number = attract
+// maxdist - dist at wbich attraction tapers to 0
+// taper - true = taper off with distance
+FlockingSprite.prototype.follow = function(obj,speed,maxdist,taper) {
+	var distx = obj.x-this.x;
+	var disty = obj.y-this.y;
+	var dist = Math.sqrt(distx*distx + disty*disty);
+	var taperfac = (maxdist - dist) / maxdist;
+	if (taperfac < 0) {
+		taperfac = 0;
+	} else {
+		if (!taper) taperfac = 1;
+	}
+	var ang = Math.atan2(distx,disty);
+	this.x += taperfac*speed*Math.sin(ang);
+	this.y += taperfac*speed*Math.cos(ang);
 }
 
 
