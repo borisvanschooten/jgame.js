@@ -377,8 +377,10 @@ StdGame.prototype.webGLFrame = function() {
 	SG.doWebGLFrame();
 }
 
-StdGame.prototype.doWebGLFrame = function() {
+// paint list from updateObjects, filled in by cal within doFrame...
+var objToPaint = null; 
 
+StdGame.prototype.doWebGLFrame = function() {
 	io.updateInputs();
 
 	// update touch controls
@@ -408,9 +410,11 @@ StdGame.prototype.doWebGLFrame = function() {
 	gl.viewport(io.viewportxofs,io.viewportyofs,io.viewportwidth,io.viewportheight);
 
 
+	drawSimpleLineInitFrame(width,height);
 	drawLineInitFrame(width,height);
 	drawLineSegmentsInitFrame(width,height);
 	drawSpriteInitFrame(width,height);
+	drawTriangleStripInitFrame(width,height);
 
 	if (JGState.isIn("Game")) {
 		//ld33bg.draw(bg_texs[stage%bg_texs.length],gametime);
@@ -420,6 +424,7 @@ StdGame.prototype.doWebGLFrame = function() {
 		//ld33bg.draw(bg_texs[0],gametime);
 	}
 
+	objToPaint = null;
 
 	spritebatch.clear();
 	if (spritebatch2) spritebatch2.clear();
@@ -491,6 +496,10 @@ StdGame.prototype.doWebGLFrame = function() {
 
 		if (GameConfig.tilemapOnTop && JGState.isIn("Game")) {
 			if (tilemap) tilemap.draw(gl,screenxofs,screenyofs);
+		}
+
+		if (GameConfig.multiphasePaint && objToPaint) {
+			JGObject.paintObjects(gl,"overlay",objToPaint);
 		}
 
 		gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -667,7 +676,7 @@ StdGame.prototype.getLevelInfo = function(key) {
 // Messages / audio
 
 StdGame.prototype.drawAudioIcon = function(enabled,easing) {
-	particlebatch.addSprite(enabled ? 14:13,96+128,96,false,
+	particlebatch.addSprite(enabled ? 14:13,96/*+128*/,96,false,
 		128+32*easing, 128+32*easing, 0.0, null);
 }
 
@@ -897,7 +906,7 @@ function doFrameGame(timer) {
 
 	if (thisleveldef.doFramePre) thisleveldef.doFramePre();
 
-	JGObject.updateObjects(gl,frameskip,screenxofs,screenyofs,width,height);
+	objToPaint = JGObject.updateObjects(gl,frameskip,screenxofs,screenyofs,width,height);
 
 	gl.disable(gl.BLEND);
 
@@ -916,7 +925,7 @@ function doFrameGame(timer) {
 
 function paintFrameGame(timer) {
 	if (!GameConfig.hideLevelNameInGame)
-		drawSpriteText(fontbatch,thislevel.name,width/3,50,60,60,0,0.25,[1,1,1,1]);
+		drawSpriteText(fontbatch,thislevel.name,50,50,60,60,-1,0.25,[1,1,1,1]);
 	if (GameConfig.score && GameConfig.score.display) {
 		var str = GameConfig.score.display(GameConfig.score.get());
 		drawSpriteText(fontbatch,str,width-30,50,60,60,1, 0.25,[1,1,1,1]);
@@ -1042,7 +1051,7 @@ function startTitle(timer) {
 
 
 function doFrameTitle(timer) {
-	JGObject.updateObjects(gl,frameskip,screenxofs,screenyofs,width,height);
+	objToPaint = JGObject.updateObjects(gl,frameskip,screenxofs,screenyofs,width,height);
 	gametime += this.gamespeed;
 	totalgametime += this.gamespeed;
 }
@@ -1338,7 +1347,7 @@ TileSprite.prototype.moveFunc = function() {
 			//console.log("####"+this.x+"##"+this.lastx+"##"+(this.anim.speed*s));
 			this.animpos += this.anim.speed*s;
 		}
-		if (this.animpos >= this.anim.end + 1 - this.anim.start)
+		while (this.animpos >= this.anim.end + 1 - this.anim.start)
 			this.animpos -= this.anim.end + 1 - this.anim.start;
 		this.sprite = this.anim.start + Math.floor(this.animpos);
 	}

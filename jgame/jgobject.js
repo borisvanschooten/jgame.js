@@ -59,7 +59,8 @@ JGObject.addObject = function(o) {
 }
 
 
-JGObject.updateObjects = function(g,frameskip,scrx,scry,scrwidth,scrheight) {
+JGObject.updateObjects = function(g,frameskip,scrx,scry,scrwidth,scrheight,
+nopaint) {
 	var paintObjects = [];
 	for (var key in JGObject._objects) {
 		var obj = JGObject._objects[key];
@@ -94,8 +95,15 @@ JGObject.updateObjects = function(g,frameskip,scrx,scry,scrwidth,scrheight) {
 	paintObjects.sort(function(a,b) {
 		return a.z - b.z;
 	});
+	if (!nopaint) {
+		JGObject.paintObjects(g,"update",paintObjects);
+	}
+	return paintObjects;
+};
+
+JGObject.paintObjects = function(g,phase,paintObjects) {
 	for (var i=0; i<paintObjects.length; i++) {
-		paintObjects[i].paint(g);
+		paintObjects[i].paint(g,phase);
 	}
 };
 

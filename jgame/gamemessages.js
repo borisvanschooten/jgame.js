@@ -54,8 +54,8 @@ function GameMessages(x,y,margin,drawbg,icons) {
 		this.icons = icons;
 	} else {
 		this.icons = {
-			manual: { x:0,y:0, width:144,height:144 },
-			audio: { x:144,y:0, width:144,height:144 },
+			manual: { x:144,y:0, width:144,height:144 },
+			audio: { x:0,y:0, width:144,height:144 },
 		};
 	}
 }

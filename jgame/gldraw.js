@@ -292,6 +292,8 @@ var linepos = new Float32Array(MAXBUFLEN);
 var linenorm1 = new Float32Array(MAXBUFLEN);
 var linenorm2 = new Float32Array(MAXBUFLEN);
 var linedir = new Float32Array(MAXBUFLEN);
+var triangleuv = new Float32Array(MAXBUFLEN);
+var trianglepos = new Float32Array(MAXBUFLEN);
 
 
 var _gldraw_inited=false;
@@ -917,6 +919,7 @@ void main(void) {
 function drawTriangleStripInit(program) {
 	var program = drawTriangleStrip.program;
 	drawTriangleStrip.uTex = gl.getUniformLocation(program.program, "uTex");
+	drawTriangleStrip.uScale = gl.getUniformLocation(program.program, "uScale");
 	drawTriangleStrip.posVec = gl.getAttribLocation(program.program, "posVec");
 	drawTriangleStrip.uvVec = gl.getAttribLocation(program.program, "uvVec");
 	drawTriangleStrip.uv = gl.getAttribLocation(program.program, "uv");
@@ -931,12 +934,17 @@ function drawTriangleStripInitFrame(width,height) {
 
 
 function drawTriangleStrip(posVec,uvVec,tex) {
-	this.program.setAttribute(glBuffers.posVecBuffer,this.posVec, posVec.length, 1, posVec);
-	this.program.setAttribute(glBuffers.uvVecBuffer,this.uvVec, uvVec.length, 1, uvVec);
+	for (var i=0; i<posVec.length; i++) {
+		trianglepos[i] = posVec[i];
+		triangleuv[i] = uvVec[i];
+	}
+	drawTriangleStrip.program.setAttribute(glBuffers.posVecBuffer,drawTriangleStrip.posVec, posVec.length, 2, trianglepos);
+	drawTriangleStrip.program.setAttribute(glBuffers.uvVecBuffer,drawTriangleStrip.uvVec, uvVec.length, 2, triangleuv);
 
+	gl.useProgram(drawTriangleStrip.program.program);
 	// MUST be set again for every draw on some devices
 	// such as Samsung Galaxy Tab Pro
-	gl.uniform1i(uniforms.uTex, 0);
+	gl.uniform1i(drawTriangleStrip.uTex, 0);
 	gl.activeTexture(gl.TEXTURE0);
 	gl.bindTexture(gl.TEXTURE_2D, tex);
 
