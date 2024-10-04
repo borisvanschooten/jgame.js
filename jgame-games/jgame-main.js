@@ -961,6 +961,11 @@ function doFrameLoading(timer) {
 
 
 function startTitle(timer) {
+	// should be renamed startTitle and startTitleInit?
+	if (GameConfig.startTitleFull) {
+		GameConfig.startTitleFull();
+		return;
+	}
 	if (GameConfig.startTitle) GameConfig.startTitle();
 	SG.gamemsgs.clear();
 	JGObject.removeObjects(null,0);
@@ -1054,9 +1059,11 @@ function doFrameTitle(timer) {
 	objToPaint = JGObject.updateObjects(gl,frameskip,screenxofs,screenyofs,width,height);
 	gametime += this.gamespeed;
 	totalgametime += this.gamespeed;
+	if (GameConfig.doFrameTitle) GameConfig.doFrameTitle();
 }
 
 function paintFrameTitle(timer) {
+	if (GameConfig.doFrameTitle) return; // painting done in doFrame
 	drawSpriteText(fontbatch,GameConfig.title,
 		width/2,100,80,80,0,0.25,
 		font_color);
