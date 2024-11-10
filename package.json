@@ -11,7 +11,7 @@
 	},
 	"dependencies": {
 		"codemirror": "5.14.2",
-		"jshint": "2.9.5",
+		"jshint": "2.13.6",
 		"@tensorflow/tfjs": "4.17.0"
 	}
 }
