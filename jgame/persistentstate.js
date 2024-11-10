@@ -256,19 +256,25 @@ PersistentState.prototype.log = function(gameid,text) {
 // helper function
 // from: http://stackoverflow.com/questions/19491336/get-url-parameter-jquery
 PersistentState.getUrlParameter = function (sParam) {
-    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+	var params = new URLSearchParams(window.location.search);
+	var param = params.get(sParam);
+	if (param === "") return true;
+	if (param === null) return false;
+	return param;
+    /*var sPageURL = decodeURIComponent(window.location.search.substring(1)),
         sURLVariables = sPageURL.split('&'),
         sParameterName,
         i;
-
+	console.log(sURLVariables)
     for (i = 0; i < sURLVariables.length; i++) {
         sParameterName = sURLVariables[i].split('=');
-
         if (sParameterName[0] === sParam) {
-            return sParameterName[1] === undefined ? true : sParameterName[1];
+            if (sParameterName[1] === undefined) return true;
+			console.log(sParameterName)
+			sParameterName.shift();
+			return sParameterName.join("=");
         }
-    }
-	return false;
+    }*/
 };
 
 // helper function

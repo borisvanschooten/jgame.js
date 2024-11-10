@@ -241,7 +241,7 @@ var IOAPI = {
 	},
 	loadImage: function(id,url,smooth,wrap,is_tileset) {
 		url = processImageURL(url,is_tileset);
-		if (TexLoader.texByURL[url]) return;
+		//if (TexLoader.texByURL[url]) return; //handled better by loader
 		console.log("Loading image "+id+","+url+","+smooth);
 		TexLoader.load(gl,id,url,smooth,wrap,true);
 
@@ -339,6 +339,7 @@ function resizeCanvas() {
 		canvas.height = window.innerHeight;
 	} else {
 		//alert("!fullscreen");
+		//console.log("Canvas height:"+canvas.parentNode.offsetHeight);
 		canvas.style.width = canvas.parentNode.offsetWidth;
 		canvas.style.height = canvas.parentNode.offsetHeight;
 		canvas.width = canvas.parentNode.offsetWidth;
@@ -350,9 +351,16 @@ function resizeCanvas() {
 function initCSGame(gamesrc) {
 	JGState.set("Loading");
 	CellGameSource = gamesrc;
+	if (kissc) {
+		var unzipped = kissc.decompress(CellGameSource);
+		if (unzipped !== false) CellGameSource = unzipped;
+	}
 	CS.init(CellGameSource,IOAPI);
 	var game = CS.getGame();
-	if (!game) return;
+	if (!game) {
+		console.log("Error parsing game");
+		return false;
+	}
 	//tiles_tex = initTexture(gl,"images/"+game.tilemapurl,
 	//	game.tiletex_smooth,false);
 	spritebatch = new JGSpriteBatch(gl,TexLoader.texById["tiles"],
@@ -366,19 +374,24 @@ function initCSGame(gamesrc) {
 
 	//console.log(JSON.stringify(CS.Main.game));
 	loading_finished=true;
+	return true;
 }
 
-function webGLStart() {
-	//gametype = PersistentState.getUrlParameter("game");
+function webGLStart(gametype1) {
+	gametype2 = PersistentState.getUrlParameter("gametype");
 	if (!gametype) gametype = "building";
+	if (gametype1) gametype = gametype1
+	if (gametype2) gametype = gametype2
 	GameConfig = GameConfigs[gametype];
 
 	//if (window.navigator.paymentSystem) 
 	//	window.navigator.paymentSystem.init("f2ab665e-217f-41fc-98d6-bbdaa6ced57c");
-	window.addEventListener('resize', resizeCanvas, false);
-	document.addEventListener('fullscreenchange', resizeCanvas, false);
-	document.addEventListener('mozfullscreenchange', resizeCanvas, false);
-	document.addEventListener('webkitfullscreenchange', resizeCanvas, false);
+	if (!GameConfig.disableResizeCanvas) {
+		window.addEventListener('resize', resizeCanvas, false);
+		document.addEventListener('fullscreenchange', resizeCanvas, false);
+		document.addEventListener('mozfullscreenchange', resizeCanvas, false);
+		document.addEventListener('webkitfullscreenchange', resizeCanvas, false);
+	}
 	// init gl
 	var canvas = document.getElementById("game-canvas");
 	resizeCanvas();
@@ -405,18 +418,24 @@ function webGLStart() {
 		JGAudio.load(id,file);
 	}
 
-	var gamesrc = PersistentState.getUrlParameter("game");
-	//if (!gamesrc) gamesrc = "simpleboulder";
+	var gamesrc = PersistentState.getUrlParameter("gamesrc");
 	if (gamesrc) {
-		httpGet("cellspace-games/"+gamesrc,function(err,res) {
-			if (err) {
-				alert("Error loading game source");
-			} else {
-				initCSGame(res);
-			}
-		});
+		console.log(gamesrc);
+		initCSGame(gamesrc);
+	} else {
+		var gamesrc = PersistentState.getUrlParameter("game");
+		//if (!gamesrc) gamesrc = "simpleboulder";
+		if (gamesrc) {
+			httpGet("cellspace-games/"+gamesrc,function(err,res) {
+				if (err) {
+					alert("Error loading game source");
+				} else {
+					console.log(res)
+					initCSGame(res);
+				}
+			});
+		}
 	}
-
 
 	//spritesheet_tex=initTexture(gl,GameConfig.textures.spritesheet,false,false);
 	particlesheet_tex = initTexture(gl,"images/hudsprites.png",true,false);
@@ -731,7 +750,9 @@ function doWebGLFrame() {
 	fontbatch.clear();
 
 
-	gamemsgs.displayAudioEnable(eng,GameState,drawAudioIcon,toggleAudio);
+	if (!GameConfig.disableAudio) {
+		gamemsgs.displayAudioEnable(eng,GameState,drawAudioIcon,toggleAudio);
+	}
 
 	// game states:
 	// Title - title screen
@@ -856,18 +877,23 @@ function startNewLevel(timer) {
 	tilemap.setOffscreenTile(0,1);
 	CS.defineLevel(level);
 	// in-game menu
-	new MenuObj(10, width-64,64, 128,128, 0,
-		CSConfig.text.buttons.menu,80,0.35,
-	function(args) {
-		JGState.set("Title",-1);
-	}, {},  null,null,  [1,1,1,0.5], 0);
-	new MenuObj(9, width-300,64, 128,128, 0,
-		CSConfig.text.buttons.restart,80,0.35,
-	function(args) {
-		JGState.remove("LevelDone");
-		JGState.remove("GameOver");
-		JGState.add("NewLevel",1);
-	}, {},  null,null,  [1,1,1,0.5], 0);
+	if (GameConfig.gamemode != "no-title") {
+		new MenuObj(10, width-64,64, 128,128, 0,
+			CSConfig.text.buttons.menu,80,0.35,
+		function(args) {
+			JGState.set("Title",-1);
+		}, {},  null,null,  [1,1,1,0.5], 0);
+	}
+	if (!GameConfig.disableRestart) {
+		new MenuObj(9, width-300,64, 128,128, 0,
+			CSConfig.text.buttons.restart,80,0.35,
+		function(args) {
+			JGState.remove("LevelDone");
+			JGState.remove("GameOver");
+			JGState.add("NewLevel",1);
+		}, {},  null,null,  [1,1,1,0.5], 0);
+	}
+
 //	for (var y=tilemap.nrtilesy-1; y>1; y -= 3) {
 //		for (var x=1; x<tilemap.nrtilesx-1; x++) {
 //			if (y>2) {
@@ -1089,11 +1115,18 @@ function paintFrameGame(timer) {
 // game state Loading
 
 function paintFrameLoading(timer) {
-	drawSpriteText(fontbatch,"Wachten a.u.b. ...",width/2,450,90,90,0, 0.25,[1,1,1,1]);
+	drawSpriteText(fontbatch,"Please wait ...",width/2,450,90,90,0, 0.25,[1,1,1,1]);
 }
 
 function doFrameLoading(timer) {
-	if (loading_finished) JGState.set("Title",-1);
+	if (loading_finished) {
+		if (GameConfig.gamemode != "no-title") {
+			JGState.set("Title",-1);
+		} else {
+			JGState.set("Game",-1);
+			JGState.add("NewLevel",1);
+		}
+	}
 }
 
 
@@ -1239,16 +1272,21 @@ function endLifeLost(timer) {
 
 function startGameOver(timer) {
 	//JGAudio.play("failure");
-	new MenuObj(9, width/2 - 200,height/2, 384,384, 0,
+	var xofs = -200
+	if (GameConfig.gamemode != "no-title") {
+		new MenuObj(10, width/2 + 200,height/2, 384,384, 0,
+			CSConfig.text.buttons.menu,170,0.15,
+		function(args) {
+			JGState.set("Title",-1);
+		}, {});
+	} else {
+		xofs = 0
+	}
+	new MenuObj(9, width/2 - xofs,height/2, 384,384, 0,
 		CSConfig.text.buttons.restart,170,0.15,
 	function(args) {
 		JGState.remove("GameOver");
 		JGState.add("NewLevel",1);
-	}, {});
-	new MenuObj(10, width/2 + 200,height/2, 384,384, 0,
-		CSConfig.text.buttons.menu,170,0.15,
-	function(args) {
-		JGState.set("Title",-1);
 	}, {});
 }
 
@@ -1280,16 +1318,20 @@ function startLevelDone(timer) {
 	} else {
 		xofs = -200;
 	}
+	if (GameConfig.gamemode != "no-title") {
+		new MenuObj(10, xofs + width/2 + 400,height/2, 384,384, 0,
+			CSConfig.text.buttons.menu,170,0.15,
+		function(args) {
+			JGState.set("Title",-1);
+		}, {});
+	} else {
+		xofs += 200;
+	}
 	new MenuObj(9, xofs + width/2,height/2, 384,384, 0,
 		CSConfig.text.buttons.restart,170,0.15,
 	function(args) {
 		JGState.remove("LevelDone");
 		JGState.add("NewLevel",1);
-	}, {});
-	new MenuObj(10, xofs + width/2 + 400,height/2, 384,384, 0,
-		CSConfig.text.buttons.menu,170,0.15,
-	function(args) {
-		JGState.set("Title",-1);
 	}, {});
 	score += 100*moves_left;
 	if (!GameState.levels["level"+level]) {
@@ -1335,6 +1377,7 @@ function toggleAudio(enable) {
 
 
 function displayManual(section,cascade) {
+	if (!CS.getCurrentLevel() || !CS.getCurrentLevel().desc) return;
 	gamemsgs.displayManual(section,cascade,eng,GameState,true,
 	function(easing) {
 		particlebatch.addSprite(15,64,64,false,
@@ -1647,29 +1690,85 @@ Particle.prototype.paint = function(gl) {
 // swap game
 
 var GameConfigs = {
-"building": {
-	name: "minigame_unlock_rotate",
-	strings: {
-		//bonusobject: { single: "anker", plural: "ankers" }
+	"building": {
+		name: "minigame_unlock_rotate",
+		strings: {
+			//bonusobject: { single: "anker", plural: "ankers" }
+		},
+		sounds: {
+			//"chimeii-1":"sounds/242501-powerup-success+1t",
+		},
+		textures: {
+			bg:"images/MLP-Cave.jpg",
+			spritesheet:"images/violinist7.png",
+			manual: [
+				//"images/swap-match-example1-nomarks-pp.jpg",
+			]
+		},
+		spritesheet: {
+			totalx: 120,
+			totaly: 120,
+			unitx: 14,
+			unity: 14
+		},
+		levels: [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
+		fn: {}
 	},
-	sounds: {
-		//"chimeii-1":"sounds/242501-powerup-success+1t",
+	"minimal": {
+		name: "Minimal",
+		gamemode: "no-title",
+		disableAudio: true,
+		disableRestart: true,
+		strings: {
+			//bonusobject: { single: "anker", plural: "ankers" }
+		},
+		sounds: {
+			//"chimeii-1":"sounds/242501-powerup-success+1t",
+		},
+		textures: {
+			bg:"images/MLP-Cave.jpg",
+			spritesheet:"images/violinist7.png",
+			manual: [
+				//"images/swap-match-example1-nomarks-pp.jpg",
+			]
+		},
+		spritesheet: {
+			totalx: 120,
+			totaly: 120,
+			unitx: 14,
+			unity: 14
+		},
+		levels: [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
+		fn: {}
 	},
-	textures: {
-		bg:"images/MLP-Cave.jpg",
-		spritesheet:"images/violinist7.png",
-		manual: [
-			//"images/swap-match-example1-nomarks-pp.jpg",
-		]
+	"minimal-noresize": {
+		name: "Minimal",
+		gamemode: "no-title",
+		disableAudio: true,
+		disableRestart: true,
+		disableResizeCanvas: true,
+		strings: {
+			//bonusobject: { single: "anker", plural: "ankers" }
+		},
+		sounds: {
+			//"chimeii-1":"sounds/242501-powerup-success+1t",
+		},
+		textures: {
+			bg:"images/MLP-Cave.jpg",
+			spritesheet:"images/violinist7.png",
+			manual: [
+				//"images/swap-match-example1-nomarks-pp.jpg",
+			]
+		},
+		spritesheet: {
+			totalx: 120,
+			totaly: 120,
+			unitx: 14,
+			unity: 14
+		},
+		levels: [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
+		fn: {}
 	},
-	spritesheet: {
-		totalx: 120,
-		totaly: 120,
-		unitx: 14,
-		unity: 14
-	},
-	levels: [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
-	fn: {}
-} };
+};
 
 

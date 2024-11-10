@@ -1,6 +1,6 @@
 {
 	"name": "jgame",
-	"version": "2.0.0",
+	"version": "2.1.0",
 	"license": "BSD-2-Clause",
 	"repository": {
 		"type": "git",
@@ -11,6 +11,7 @@
 	},
 	"dependencies": {
 		"codemirror": "5.14.2",
-		"jshint": "2.9.5"
+		"jshint": "2.9.5",
+		"@tensorflow/tfjs": "4.17.0"
 	}
 }

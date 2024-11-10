@@ -63,7 +63,7 @@ CS.Rule = function() {
 
 	this.animinfo="yes"; /* String */
 
-	this.mouseenabled=false;
+	this.mouseenabled=false; // not implemented yet
 	this.mouseflags = 0;
 
 	// subrule defs (derived constants)
@@ -89,6 +89,92 @@ CS.Rule = function() {
 	// indicates which subrules were triggered. A list of indexes.
 	triggers = null; /* int[] */
 	this.nrtriggers=0;
+}
+
+// TODO animinfo, mouseenabled, mouseflags, animdir, andmask
+CS.Rule.prototype.toString = function() {
+	var src = "rule: "+this.id+"\n";
+	for (var y=0; y<3; y++) {
+		for (var x=0; x<6; x++) {
+			if (x==3) src += "  "
+			if (x<3) {
+				src += CS.Main.getTileSymFromMask(this.context[x+3*y])+" "
+			} else {
+				src += CS.Main.getTileSymFromMask(this.output[x-3 + 3*y])+" "
+			}
+		}
+		src += "\n"
+	}
+	src += "priority: "+this.priority+"\n";
+	var trans_str = this.transformToString();
+	if (trans_str != "") src += "transform: "+trans_str+"\n"
+	src += "probability: "+this.probability+"\n";
+	src += "delay: "+this.delayToString()+"\n";
+	if (this.condfuncstr) {
+		src += "condfunc: "+this.condfuncstr+"\n";
+	}
+	if (this.outfuncstr) {
+		src += "outfunc: "+this.outfuncstr+"\n";
+	}
+	if (this.srcdir > -1) {
+		src += "conddir: "+this.dirToString(this.srcdir)+"\n";
+	}
+	var emptyrows = [true,true,true];
+	var rowspecs = ["","",""]
+	for (var y=0; y<3; y++) {
+		for (var x=0; x<3; x++) {
+			if (this.outdir[x+3*y] > -1) emptyrows[y]=false;
+			rowspecs[y] += this.dirToString(this.outdir[x+3*y])+" "
+		}
+	}
+	if (emptyrows[0] && !emptyrows[1] && emptyrows[2]) {
+		// one-row spec
+		src += "outdir: "+rowspecs[1];
+	} else if (!emptyrows[0] || !emptyrows[1] || !emptyrows[2]) {
+		// full spec
+		src += "outdir:\n"+rowspecs[0]+"\n"+rowspecs[1]+"\n"+rowspecs[2]+"\n";
+	} // else empty
+	return src
+}
+
+CS.Rule.prototype.delayToString = function() {
+	ret = ""+this.delay;
+	if (this.delaytype == "trigger") {
+		ret += " trigger "+this.delaytimer;
+	}
+	return ret;
+}
+
+CS.Rule.prototype.transformToString = function() {
+	str = "";
+	if (this.transformspec&CS.ROT2) str += "rot2 ";
+	if (this.transformspec&CS.ROT4) str += "rot4 ";
+	if (this.transformspec&CS.MIRX) str += "mirx ";
+	if (this.transformspec&CS.MIRY) str += "miry ";
+	return str.trim();
+}
+
+CS.Rule.prototype.mouseToString = function() {
+	if (this.mouseenabled) return "";
+	ret = [];
+	if (this.mouseoptions&CS.MOUSEHOVER) ret.push("hover");
+	if (this.mouseoptions&CS.MOUSEDRAG)  ret.push("drag");
+	if (this.mouseoptions&CS.MOUSECLICK) ret.push("click");
+	return ret.join(" ");
+}
+
+CS.Rule.prototype.dirToString = function(dirmask) {
+	switch(dirmask) {
+		case CS.DIRU: return "U";
+		case CS.DIRD: return "D";
+		case CS.DIRL: return "L";
+		case CS.DIRUL: return "UL";
+		case CS.DIRDL: return "DL";
+		case CS.DIRR: return "R";
+		case CS.DIRUR: return "UR";
+		case  CS.DIRDR: return "DR";
+		default: /*CS.NODIR*/ return "-";
+	}
 }
 
 CS.Rule.prototype._dumpContext = function(c) {

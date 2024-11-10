@@ -329,7 +329,7 @@ CS.GameParser.prototype.parseTransform = function(transstr) {
 // combination.
 CS.GameParser.prototype.parseMouse = function(mousestr) {
 	var ret=0;
-	var tokens = gamesrc.split(/[ \t\r\n]/);
+	var tokens = mousestr.split(/[ \t\r\n]/);
 	for (var i=0; i<tokens.length; i++) {
 		var t = tokens[i].toLowerCase();
 		if (t == "hover") ret |= CS.MOUSEHOVER;
@@ -456,6 +456,7 @@ CS.GameParser.prototype.keyword_display = function(par) {
 // smooth = use smoothing to draw tiles
 // URL [tilex] [tiley] [nrtilesx] [nrtilesy] [smooth]
 // or: tilex tiley nrtilesx nrtilesy smooth URL
+// TODO: in the current implementation the tilemap must be square!
 CS.GameParser.prototype.keyword_tilemap = function(par) {
 	if (isNaN(par[0])) { // url first
 		if (par.length < 1) CS.reportError("ParamError",this.linenr,

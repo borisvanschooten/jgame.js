@@ -282,6 +282,7 @@ CS.reportConsole = function(type,message) {
 }
 
 CS.reportError = function(type,linenr,message) {
+	console.log("CS error: line "+linenr+": ["+type+"] "+message);
 	CS.Main.errorlog.push({type:type,linenr:linenr,message:message});
 }
 
@@ -289,12 +290,26 @@ CS.reportError = function(type,linenr,message) {
 // -------------------------------------------------------------
 // helpers
 
-CS.Main.getTileIdFromMask = function(tilemask, d) {
+CS.Main.getTileSymFromMask = function(tilemask) {
 	if (tilemask) {
 		var cell = CS.Main.game.cellsyms_mask[tilemask];
 		if (typeof cell == 'undefined') {
 			console.log("Mask "+tilemask+" has no defined cell");
 		}
+		return cell.str;
+	} else {
+		return "."; // XXX is currently hard coded, see keyword_empty
+	}
+}
+
+// if raw_tilenr is true, d is ignored
+CS.Main.getTileIdFromMask = function(tilemask, d, raw_tilenr) {
+	if (tilemask) {
+		var cell = CS.Main.game.cellsyms_mask[tilemask];
+		if (typeof cell == 'undefined') {
+			console.log("Mask "+tilemask+" has no defined cell");
+		}
+		if (raw_tilenr) return cell.tilenr
 		return CS.Main.getTileIdFromBaseId(cell, cell.tilenr, d);
 	} else {
 		return -1; // -1 represents empty tile
@@ -459,11 +474,24 @@ function mousey() {
 }
 
 function mousebutton(butnr) {
+	if (butnr === undefined) butnr = 1;
 	return CS.IO.getMouseButton(butnr);
 }
 
 function clearmousebutton(butnr) {
+	if (butnr === undefined) butnr = 1;
 	CS.IO.clearMouseButton(butnr);
+}
+
+function mouseclick(butnr) {
+	if (butnr === undefined) butnr = 1;
+	// XXX do not know why xpos has offset
+	return (x==mousex()-1) && y==mousey() && mousebutton(butnr)
+}
+
+function mousehover() {
+	// XXX do not know why xpos has offset
+	return (x==mousex()-1) && y==mousey()
 }
 
 // MOVE TO jgengine.js

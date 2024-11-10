@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<!-- Copyright (c) 2014 by Boris van Schooten tmtg.net boris@13thmonkey.org -->
+<!-- Released under BSD license. See LICENSE for details. -->
+<head>
+<title>CellSpace</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<!--
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+ integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+ crossorigin="anonymous"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> 
+-->
+
+<script type="text/javascript" src="lib/kissc.js"></script>
+
+<script type="text/javascript" src="jgame/math.js"></script>
+<script type="text/javascript" src="jgame/jgstate.js"></script>
+<script type="text/javascript" src="jgame/jgcanvas.js"></script>
+<script type="text/javascript" src="jgame/jgobject.js"></script>
+<script type="text/javascript" src="jgame/jgaudio.js"></script>
+<script type="text/javascript" src="jgame/jgtiles.js"></script>
+<script type="text/javascript" src="jgame/jgmenu.js"></script>
+<script type="text/javascript" src="jgame/gl.js"></script>
+<script type="text/javascript" src="jgame/gldraw.js"></script>
+<script type="text/javascript" src="jgame/jgspritebatch.js"></script>
+
+<script type="text/javascript" src="jgame/gamemessages.js"></script>
+<script type="text/javascript" src="jgame/genericgameobjects.js"></script>
+<script type="text/javascript" src="jgame/persistentstate.js"></script>
+
+<script type="text/javascript" src="cellspace/Main.js"></script>
+<script type="text/javascript" src="cellspace/Cell.js"></script>
+<script type="text/javascript" src="cellspace/CellMap.js"></script>
+<script type="text/javascript" src="cellspace/Game.js"></script>
+<script type="text/javascript" src="cellspace/GameParser.js"></script>
+<script type="text/javascript" src="cellspace/Level.js"></script>
+<script type="text/javascript" src="cellspace/Rule.js"></script>
+
+<script type="text/javascript" src="cellspace-main.js"></script>
+
+<script type="text/javascript" src="cellspace-ide-main.js"></script>
+
+<style>
+
+/*http://stackoverflow.com/questions/17506469/how-to-make-html5-canvas-full-page-size-with-cocos2d*/
+
+html,body {
+	/*border: 1px solid black;*/
+	width: 100%;
+	background-color: #444;
+	color: #fff;
+	height: 100%;
+}
+
+* { margin:0; padding:0; } /* to remove the top and left whitespace */
+/*html, body { width:100%; height:100%; }*/
+canvas { display:block; /*cursor:none;*/ } /* To remove the scrollbars */
+
+
+select.rule {
+  /* for Firefox */
+  -moz-appearance: none;
+  /* for Safari, Chrome, Opera */
+  -webkit-appearance: none;
+}
+
+/* for IE10 */
+select.rule::-ms-expand {
+  display: none;
+}
+
+.celldef select {
+  width: 18px;
+  text-align: center;
+}
+
+.optdef select {
+  width: 45px;
+  text-align: center;
+}
+
+.optdef td.label {
+	font-size: 14px;
+}
+
+
+
+#cellrules {
+}
+
+#cellrules, #cellrules * {
+	background-color: #444;
+	color: #fff;
+	font-size: 14px;
+}
+
+#cellrules button {
+	margin-left:3px;
+	padding-left: 1px;
+	padding-right: 1px;
+	font-size:10px;
+}
+
+#controlpanel {
+	border: 2px solid black;
+	font-size: 18px;
+}
+#controlpanel input {
+	font-size:16px;
+}
+
+#controlpanel, #controlpanel * {
+	background-color: #444;
+	color: #fff;
+}
+
+#controlpanel button, #controlpanel span, #controlpanel .loadfilebutton {
+	font-size: 18px;
+	margin-left:4px;
+	margin-right:4px;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+#controlpanel .loadfilebutton {
+	font-family: sans-serif;
+	padding: 2px 10px 2px 10px;
+	text-decoration: none;
+	border: 2px outset #fff;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+
+#controlpanel span {
+	color: #fcc;
+	font-weight: bold;
+}
+
+#palette, #palette * {
+	background-color: #444;
+	color: #fff;
+	overflow: hidden;
+}
+#palette .sprite {
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+	border-top: 3px solid black;
+	border-bottom: 3px solid black;
+}
+
+#palette .sprite.selected {
+	border: 1px solid white;
+}
+
+.ruleblock {
+	border: 3px solid #777;
+	margin: 2px;
+}
+
+
+.legenditem {
+	line-height:20px;
+	display: inline-block;
+	vertical-align: top;
+	font-size: 20px;
+	margin-right: 10px;
+}
+.sprite {
+	background-image: url(images/genericimages-5x5-2.png);
+	background-repeat: no-repeat;
+	width: 32px;
+	height: 32px;
+	display: inline-block;
+	background-size: 128px 128px;
+	image-rendering: pixelated;
+}
+
+.tile {
+	background-image: url(images/genericimages-5x5-2.png);
+	background-repeat: no-repeat;
+	width: 24px;
+	height: 24px;
+	border: 1px solid black;
+	background-size: 96px 96px;
+	image-rendering: pixelated;
+	/*display: inline-block;*/
+}
+
+#cellrules {
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+.rulecell, #cellrules .rulecell {
+	display: inline-block;
+	background-image: url(images/genericimages-5x5-2.png);
+	background-repeat: no-repeat;
+	width: 16px;
+	height: 16px;
+}
+#cellrules .rulecell {
+	border: 1px solid white;
+}
+#palette .rulecell {
+	margin-top: 8px;
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+	border-top: 3px solid black;
+	border-bottom: 3px solid black;
+	float: right;
+}
+
+
+.sprite-1, #palette .sprite-1 {
+	background-color: #080;
+}
+
+.rulecell-1, #palette .rulecell-1, #cellrules .rulecell-1 {
+	background-color: #080;
+}
+
+#leveleditor {
+	overflow-y: auto;
+}
+
+#leveleditor table {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#leveleditor, #leveleditor * {
+	background-color: #444;
+	color: #fff;
+}
+
+#leveleditor table {
+	border: 2px solid white;
+}
+
+</style>
+
+<style id="tilestyle">
+.sprite {
+	background-image: url(images/genericimages-5x5-2.png);
+}
+
+.tile {
+	background-image: url(images/genericimages-5x5-2.png);
+}
+
+.rulecell {
+	background-image: url(images/genericimages-5x5-2.png);
+}
+</style>
+
+<style id="spritesheets">
+</style>
+
+</head>
+
+
+<body onload="initIDE();">
+<table id='mainblock' style='width:100%; height:100%;table-layout:fixed;'>
+<colgroup>
+<col />
+<col style='width:390px;' />
+</colgroup>
+<tr><td colspan=2>
+<div id='palette' style="height: 38px;"></div>
+</td></tr>
+<tr>
+<td>
+<canvas id="game-canvas" tabindex="1" style="border: none; "></canvas>
+<div id="leveleditor" tabindex="2" style="display: none;"></div>
+</td>
+<td id='cellrules_td' style='overflow-x:hidden;vertical-align:top;' rowspan=1>
+<!-- height is set in js -->
+<!--<div id='cellrules' style='height:600px;overflow:scroll;'></div>-->
+</td>
+</tr>
+<tr><td colspan=2 id='controlpanel' style="height: 50px;">
+	<button onclick='editLevel()'>Edit</button>
+	<button onclick='runLevel()'>Run</button>
+	<!--<button onclick='incLevel(-1)'>&lt;&lt; Level</button>
+	<span id="currentlevel">Level 1</span>
+	<button onclick='incLevel(1)'>Level &gt;&gt;</button>-->
+	<a download="game.txt" href="#" onclick="return saveSource(this)"><button>Save</button></a>
+	<label for="sourcefile" class="loadfilebutton">Load</label>
+	<input type="file" id="sourcefile" onchange="loadSource(this.files)" accept="text/plain">
+	<button onclick='clearLevel()'>Clear level</button>
+	<button onclick='getURL()'>Game URL</button>
+	<button onclick='readTileset()'>Load Tileset</button>
+	Title: <input id='leveltitle' type="text" value='User defined level' size=25></input>
+	<table style='display: inline-block;vertical-align:middle;'><tr><td>
+	<input id='winenabled' type="checkbox" ></input>Win when <div id='wintile' style='vertical-align: middle;' class="rulecell rulecell1" onclick='setCondTile("win",pencil);'></div> reaches zero
+	</td></tr><tr><td>
+	<input id='loseenabled' type="checkbox" ></input>Lose when <div id='losetile' style='vertical-align: middle;' class="rulecell rulecell1" onclick='setCondTile("lose",pencil);'></div> reaches zero
+</td></tr>
+	</td></tr></table>
+</table>
+
+<script>
+//document.getElementById("game-canvas").focus();
+/*$(document).ready(function() {
+	function formatOption(option) {
+		return $("<div class='sprite0'>"+option.text+"</div>\n");
+		if (!option.id) {
+			return option.text;
+		}
+		var imageUrl = 'path/' + option.id + '.png';
+		var optionWithImage = $(
+			'<span><img src="' + imageUrl + '" class="img-flag" /> ' + option.text + '</span>'
+		);
+		return optionWithImage;
+	}
+
+	//$('.rule.celldef').select2({
+	//	templateResult: formatOption,
+	//	templateSelection: formatOption,
+	//	minimumResultsForSearch: -1,
+	//});
+	//$('b[role="presentation"]').hide();
+});*/
+</script>
+</body>
+
+</html>

@@ -519,12 +519,12 @@ CS.CellMap.prototype._triggerRule = function(r, x,y, callback) {
 					this.map[this.srci][x+1][y+1]);
 			}
 		} else { // dest is off the map
-			//callback.tileChanged(x,y,
-			//	this.map[this.dsti][x+1][y+1],
-			//	this.dir[this.dsti][x][y] );
-			callback.tileChanged(x2,y2,
-				this.map[this.dsti][x2+1][y2+1],
-				this.dir[this.dsti][x2][y2] );
+			callback.tileChanged(x,y,
+				this.map[this.dsti][x+1][y+1],
+				this.dir[this.dsti][x][y] );
+			//callback.tileChanged(x2,y2,
+			//	this.map[this.dsti][x2+1][y2+1],
+			//	this.dir[this.dsti][x2][y2] );
 		}
 	}
 	if (anim_idx_dst >= 0) {
@@ -552,12 +552,12 @@ CS.CellMap.prototype._triggerRule = function(r, x,y, callback) {
 					this.map[this.srci][x2+1][y2+1]);
 			}
 		} else { // dest is off the map
-			//callback.tileChanged(x,y,
-			//	this.map[this.dsti][x+1][y+1],
-			//	this.dir[this.dsti][x][y] );
-			callback.tileChanged(x2,y2,
-				this.map[this.dsti][x2+1][y2+1],
-				this.dir[this.dsti][x2][y2] );
+			callback.tileChanged(x,y,
+				this.map[this.dsti][x+1][y+1],
+				this.dir[this.dsti][x][y] );
+			//callback.tileChanged(x2,y2,
+			//	this.map[this.dsti][x2+1][y2+1],
+			//	this.dir[this.dsti][x2][y2] );
 		}
 	}
 	if (r.outfunc) r.outfunc();
