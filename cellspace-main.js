@@ -399,7 +399,7 @@ function webGLStart(gametype1) {
 	// use this to show verbose debug info in console
 	//gl = WebGLDebugUtils.makeDebugContext(gl);
 
-	eng = new JGCanvas(canvas,width,height);
+	eng = new JGCanvasAbstractControls(canvas,width,height);
 	JGState.set("Loading",-1);
 	//JGState.set("Game",-1);
 	//JGState.set("NewLevel",450);
@@ -626,11 +626,15 @@ function webGLFrame() {
 }
 
 function doWebGLFrame() {
+	eng.updateInputs();
 
 	eng.updateFlanks(totalgametime);
 
 	// update touch controls
 	touchcontrols = eng.sawTouchEvents();
+
+	// read gamepads
+	gamepadcontrols = eng.hasGamepads();
 
 	// read gamepads
 	prevgamepadbut = gamepadbut;
@@ -878,20 +882,22 @@ function startNewLevel(timer) {
 	CS.defineLevel(level);
 	// in-game menu
 	if (GameConfig.gamemode != "no-title") {
-		new MenuObj(10, width-64,64, 128,128, 0,
+		var o =new MenuObj(10, width-64,64, 128,128, 0,
 			CSConfig.text.buttons.menu,80,0.35,
 		function(args) {
 			JGState.set("Title",-1);
 		}, {},  null,null,  [1,1,1,0.5], 0);
+		o.shortcutkey="M"
 	}
 	if (!GameConfig.disableRestart) {
-		new MenuObj(9, width-300,64, 128,128, 0,
+		var o = new MenuObj(9, width-300,64, 128,128, 0,
 			CSConfig.text.buttons.restart,80,0.35,
 		function(args) {
 			JGState.remove("LevelDone");
 			JGState.remove("GameOver");
 			JGState.add("NewLevel",1);
 		}, {},  null,null,  [1,1,1,0.5], 0);
+		o.shortcutkey="R"
 	}
 
 //	for (var y=tilemap.nrtilesy-1; y>1; y -= 3) {
@@ -1274,20 +1280,22 @@ function startGameOver(timer) {
 	//JGAudio.play("failure");
 	var xofs = -200
 	if (GameConfig.gamemode != "no-title") {
-		new MenuObj(10, width/2 + 200,height/2, 384,384, 0,
+		var o = new MenuObj(10, width/2 + 200,height/2, 384,384, 0,
 			CSConfig.text.buttons.menu,170,0.15,
 		function(args) {
 			JGState.set("Title",-1);
 		}, {});
+		o.shortcutkey="M"
 	} else {
 		xofs = 0
 	}
-	new MenuObj(9, width/2 - xofs,height/2, 384,384, 0,
+	var o = new MenuObj(9, width/2 - xofs,height/2, 384,384, 0,
 		CSConfig.text.buttons.restart,170,0.15,
 	function(args) {
 		JGState.remove("GameOver");
 		JGState.add("NewLevel",1);
 	}, {});
+	o.shortcutkey="R"
 }
 
 function paintFrameGameOver(timer) {
@@ -1307,7 +1315,7 @@ function startLevelDone(timer) {
 	var xofs = 0;
 	//if (level < GameConfig.levels.length-1) {
 	if (level < CS.getGame().levels.length-1) {
-		new MenuObj(8, width/2 - 400,height/2, 384,384, 0,
+		var o = new MenuObj(8, width/2 - 400,height/2, 384,384, 0,
 			CSConfig.text.buttons.next,170,0.15,
 		function(args) {
 			level++;
@@ -1315,24 +1323,27 @@ function startLevelDone(timer) {
 			JGState.remove("LevelDone");
 			JGState.add("NewLevel",1);
 		}, {});
+		o.shortcutkey="N"
 	} else {
 		xofs = -200;
 	}
 	if (GameConfig.gamemode != "no-title") {
-		new MenuObj(10, xofs + width/2 + 400,height/2, 384,384, 0,
+		var o = new MenuObj(10, xofs + width/2 + 400,height/2, 384,384, 0,
 			CSConfig.text.buttons.menu,170,0.15,
 		function(args) {
 			JGState.set("Title",-1);
 		}, {});
+		o.shortcutkey="M"
 	} else {
 		xofs += 200;
 	}
-	new MenuObj(9, xofs + width/2,height/2, 384,384, 0,
+	var o = new MenuObj(9, xofs + width/2,height/2, 384,384, 0,
 		CSConfig.text.buttons.restart,170,0.15,
 	function(args) {
 		JGState.remove("LevelDone");
 		JGState.add("NewLevel",1);
 	}, {});
+	o.shortcutkey="R"
 	score += 100*moves_left;
 	if (!GameState.levels["level"+level]) {
 		GameState.levels["level"+level] = { complete: true, score: score };

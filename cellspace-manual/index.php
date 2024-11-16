@@ -97,10 +97,11 @@ function printRule($inputs,$outputs, $code) {
 </head><body>
 
 
-<div style='position: fixed; top: 30px; left: 70%; width:28%; '>
+<div style='position: fixed; top: 30px; left: 70%; width:28%; overflow:scroll;'>
+<div style='overflow:scroll;'>
 
 <div style='float: right;'>
-<a href="http://tmtg.net/"><img src="http://tmtg.net/emergencyexit-tomato-39.png"></a>
+<a href="http://tmtg.nl/"><img src="http://tmtg.net/emergencyexit-tomato-39.png"></a>
 </div>
 
 <h2>Code</h2>
@@ -128,38 +129,39 @@ need to be run on a web server due to CORS restrictions.
 
 <li> <a href="../games/simpleboulder.txt">Simpleboulder</a>
 <a href="../cellspace-editor.html?edit=simpleboulder.txt">[EDIT]</a>
-<a href="../cellspace-play.html?game=simpleboulder.txt">[PLAY]</a>
+<a href="../cellspace.html?game=simpleboulder.txt">[PLAY]</a>
 - the tutorial example.
 
 <li> <a href="../games/simpleboulder.txt">Simpleboulder Enhanced</a>
 <a href="../cellspace-editor.html?edit=simpleboulder-enhanced.txt">[EDIT]</a>
-<a href="../cellspace-play.html?game=simpleboulder-enhanced.txt">[PLAY]</a>
+<a href="../cellspace.html?game=simpleboulder-enhanced.txt">[PLAY]</a>
 - almost exactly the same, but with a hi-res tileset
 
 <li> <a href="../games/candycanedash.txt">Candy Cane Dash</a>
 <a href="../cellspace-editor.html?edit=candycanedash.txt">[EDIT]</a>
-<a href="../cellspace-play.html?game=candycanedash.txt">[PLAY]</a>
+<a href="../cellspace.html?game=candycanedash.txt">[PLAY]</a>
 demonstrates various mechanics, including growing slime and water physics.
 
 <li><a href="../games/flushthefish.txt">Flush the Fish</a>
 <a href="../cellspace-editor.html?edit=flushthefish.txt">[EDIT]</a>
-<a href="../cellspace-play.html?game=flushthefish.txt">[PLAY]</a> is a water
+<a href="../cellspace.html?game=flushthefish.txt">[PLAY]</a> is a water
 physics based game
 
 <li><a href="../games/onemanfirebrigade.txt">One Man Fire Brigade</a>
 <a href="../cellspace-editor.html?edit=onemanfirebrigade.txt">[EDIT]</a>
-<a href="../cellspace-play.html?game=onemanfirebrigade.txt">[PLAY]</a>
+<a href="../cellspace.html?game=onemanfirebrigade.txt">[PLAY]</a>
 is a game where you have to fight a growing wildfire
 
 <li><a href="../games/crushthecandyking.txt">Crush the Candy King</a>
 <a href="../cellspace-editor.html?edit=crushthecandyking.txt">[EDIT]</a>
-<a href="../cellspace-play.html?game=crushthecandyking.txt">[PLAY]</a>
+<a href="../cellspace.html?game=crushthecandyking.txt">[PLAY]</a>
 is a physics platform game featuring a destructible environment.
 
 </ul>
 
 
 
+</div>
 </div>
 
 

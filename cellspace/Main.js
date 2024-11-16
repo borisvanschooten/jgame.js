@@ -8,6 +8,7 @@ var ruletriggerparam;
 var CS = {
 	// CONSTANTS
 	MAXTRIGRULES: 100,
+	MAXPRIO: 16,
 	// transform flags, OR to get the transform value
 	ROT2: 1,
 	ROT4: 2,

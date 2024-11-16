@@ -94,7 +94,17 @@ CS.Rule = function() {
 // TODO animinfo, mouseenabled, mouseflags, animdir, andmask
 CS.Rule.prototype.toString = function() {
 	var src = "rule: "+this.id+"\n";
-	for (var y=0; y<3; y++) {
+	var skipline0_2=true;
+	for (var y=0; y<3; y+=2) {
+		for (var x=0; x<3; x++) {
+			if (this.context[x + 3*y] || this.output[x + 3*y]) {
+				skipline0_2=false;
+			}
+		}
+	}
+	var y0 = skipline0_2 ? 1 : 0;
+	var y1 = skipline0_2 ? 2 : 3;
+	for (var y=y0; y<y1; y++) {
 		for (var x=0; x<6; x++) {
 			if (x==3) src += "  "
 			if (x<3) {

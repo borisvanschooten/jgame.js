@@ -601,6 +601,11 @@ CS.GameParser.prototype.keyword_animdir = function(par) {
 // prioritylevel(int)
 CS.GameParser.prototype.keyword_priority = function(par) {
 	this.currule.priority = Math.floor(par[0]);
+	if (this.currule.priority<0 || this.currule.priority>CS.MAXPRIORITIES) {
+		CS.reportError("PriorityOutOfRange",this.linenr,
+			"Priority found: "+this.currule.priority);
+		this.currule.priority = 1;
+	}
 }
 // probability(float)
 CS.GameParser.prototype.keyword_probability = function(par) {

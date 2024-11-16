@@ -40,9 +40,11 @@ CS.CellMap = function(game,level,callback) {
 	this.dsti=1;
 
 	// temp variables for applyRules
-	this._triggered = new Array(CS.MAXTRIGRULES); /* Rule[] */
-	this._trigprob = new Array(CS.MAXTRIGRULES); /* double[] */
-	this._nrtriggered=0;
+	// triggered and trigprob hold an array of rules+probs for each priority
+	// level. Counts are stored in nrtriggered.
+	this._triggered = CS.initArray([CS.MAXPRIO,CS.MAXTRIGRULES],null); /* Rule[][] */
+	this._trigprob = CS.initArray([CS.MAXPRIO,CS.MAXTRIGRULES],0); /* double[][] */
+	this._nrtriggered = null; /* double[] */
 	// is set when a rule may trigger in the current cell
 	this._potentialtrigger = false;
 
@@ -223,15 +225,17 @@ CS.CellMap.prototype.applyRules = function(rules,worldtimer,callback) {
 			&&  !this.active[this.srci][x  ][y+2]
 			&&  !this.active[this.srci][x+1][y+2]
 			&&  !this.active[this.srci][x+2][y+2]) continue;
-			var cur_prio = -32768;
-			var cur_prob = 0.0;
-			this._nrtriggered=0;
+			//var cur_prio = -32768;
+			var cur_prob = CS.initArray([CS.MAXPRIO],0.0);
+			// XXX make more efficient with fixed array size
+			this._nrtriggered = CS.initArray([CS.MAXPRIO],0.0);
 			this._potentialtrigger=false;
 			for (var r=0; r<rules.length; r++) {
 				var rule = rules[r];
+				var prio = rule.priority;
 				if (this._checkRuleAtPos(rule,x,y)) {
 					// rule is potentially triggered
-					if (rule.priority < cur_prio) continue;
+					//if (rule.priority < cur_prio) continue;
 					if (rule.delaytype == "time") {
 						if (worldtimer%rule.delay != 0) continue;
 					} else { // "trigger"
@@ -240,10 +244,11 @@ CS.CellMap.prototype.applyRules = function(rules,worldtimer,callback) {
 						if (CS.Main.triggertimers[rule.delaytimer]) continue;
 					}
 					// rule is actually triggered
-					cur_prio = rule.priority;
-					cur_prob += rule.probability;
-					this._triggered[this._nrtriggered] = rule;
-					this._trigprob[this._nrtriggered++] = cur_prob;
+					//cur_prio = rule.priority;
+					cur_prob[prio] += rule.probability;
+					this._triggered[prio][this._nrtriggered[prio]] = rule;
+					this._trigprob[prio][this._nrtriggered[prio]++] =
+						cur_prob[prio];
 				}
 			}
 			// set active state for every cell that can be potentially
@@ -260,18 +265,21 @@ CS.CellMap.prototype.applyRules = function(rules,worldtimer,callback) {
 				this.active[this.dsti][x+2][y+2] = true;
 			}
 			// select a rule from the triggered rules
-			if (this._nrtriggered!=0) {
-				//active[dsti][x+1][y+1] = true;
-				// pick a point on the probability line
-				var prob = random(0.0,Math.max(1.0,cur_prob));
-				// find the rule that matches that point
-				// XXX linear search is slow
-				if (prob <= cur_prob) {
-					for (var i=0; i<this._nrtriggered; i++) {
-						if (this._trigprob[i] >= prob) {
-							this._triggerRule(this._triggered[i],x,y,callback);
-							break;
+			trigger_rules: for (var p=CS.MAXPRIO-1; p>=0; p--) {
+				if (this._nrtriggered[p]!=0) {
+					//active[dsti][x+1][y+1] = true;
+					// pick a point on the probability line
+					var prob = random(0.0,Math.max(1.0,cur_prob[p]));
+					// find the rule that matches that point
+					// XXX linear search is slow
+					if (prob <= cur_prob[p]) {
+						for (var i=0; i<this._nrtriggered[p]; i++) {
+							if (this._trigprob[p][i] >= prob) {
+								this._triggerRule(this._triggered[p][i],x,y,callback);
+								break trigger_rules;
+							}
 						}
+						// fall through to lower priority level
 					}
 				}
 			}

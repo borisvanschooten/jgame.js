@@ -18,6 +18,7 @@
 <script type="text/javascript" src="jgame/gldraw.js"></script>
 <script type="text/javascript" src="jgame/jgspritebatch.js"></script>
 
+<script type="text/javascript" src="jgame/abstractcontrols.js"></script>
 <script type="text/javascript" src="jgame/gamemessages.js"></script>
 <script type="text/javascript" src="jgame/genericgameobjects.js"></script>
 <script type="text/javascript" src="jgame/persistentstate.js"></script>
@@ -45,6 +46,7 @@ canvas { display:block; /*cursor:none;*/ } /* To remove the scrollbars */
 
 
 <body oncontextmenu="return false;" onload="webGLStart();">
+<div style='position:fixed; top:2%; left:2%; border:1px solid white; color:white; line-height:12px;' onclick='goFullscreen("game-canvas")'>&#x2196;&#x2197;<br>&#x2199;&#x2198;</div>
 <canvas id="game-canvas" tabindex="1" style="border: none; width: 100px; height: 100px;"></canvas>
 
 

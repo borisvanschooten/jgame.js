@@ -27,6 +27,7 @@
 <script type="text/javascript" src="jgame/gldraw.js"></script>
 <script type="text/javascript" src="jgame/jgspritebatch.js"></script>
 
+<script type="text/javascript" src="jgame/abstractcontrols.js"></script>
 <script type="text/javascript" src="jgame/gamemessages.js"></script>
 <script type="text/javascript" src="jgame/genericgameobjects.js"></script>
 <script type="text/javascript" src="jgame/persistentstate.js"></script>
@@ -145,6 +146,7 @@ input[type="file"] {
 	background-color: #444;
 	color: #fff;
 	overflow: hidden;
+	font-size: 17px;
 }
 #palette .sprite {
 	border-left: 1px solid black;
@@ -171,7 +173,6 @@ input[type="file"] {
 	margin-right: 10px;
 }
 .sprite {
-	background-image: url(images/genericimages-5x5-2.png);
 	background-repeat: no-repeat;
 	width: 32px;
 	height: 32px;
@@ -181,7 +182,6 @@ input[type="file"] {
 }
 
 .tile {
-	background-image: url(images/genericimages-5x5-2.png);
 	background-repeat: no-repeat;
 	width: 24px;
 	height: 24px;
@@ -198,7 +198,6 @@ input[type="file"] {
 
 .rulecell, #cellrules .rulecell {
 	display: inline-block;
-	background-image: url(images/genericimages-5x5-2.png);
 	background-repeat: no-repeat;
 	width: 16px;
 	height: 16px;
@@ -222,6 +221,7 @@ input[type="file"] {
 
 .rulecell-1, #palette .rulecell-1, #cellrules .rulecell-1 {
 	background-color: #080;
+	background-image: none;
 }
 
 #leveleditor {
@@ -271,7 +271,15 @@ input[type="file"] {
 <col style='width:390px;' />
 </colgroup>
 <tr><td colspan=2>
-<div id='palette' style="height: 38px;"></div>
+<div id='palette' style="height: 38px;">
+	<div id='palette-large' style='float:left;'></div>
+	<div style='float:left; margin-top:8px; margin-left:8px;'>Tileset: tilesize:</div>
+	<div id='tileset-select-container' style='float:left;margin-top:6px; margin-left:4px;'></div>
+	<button onclick='readTileset()' style='margin-left:8px; margin-top:6px;'>Load</button>
+	<button onclick='editTileset()' style='margin-left:8px; margin-top:6px;'>Edit</button>
+	<div id='palette-small' style='float:right;'></div>
+
+</div>
 </td></tr>
 <tr>
 <td>
@@ -294,7 +302,6 @@ input[type="file"] {
 	<input type="file" id="sourcefile" onchange="loadSource(this.files)" accept="text/plain">
 	<button onclick='clearLevel()'>Clear level</button>
 	<button onclick='getURL()'>Game URL</button>
-	<button onclick='readTileset()'>Load Tileset</button>
 	Title: <input id='leveltitle' type="text" value='User defined level' size=25></input>
 	<table style='display: inline-block;vertical-align:middle;'><tr><td>
 	<input id='winenabled' type="checkbox" ></input>Win when <div id='wintile' style='vertical-align: middle;' class="rulecell rulecell1" onclick='setCondTile("win",pencil);'></div> reaches zero
