@@ -220,7 +220,7 @@ JGAudio.play = function(name,channel,loop,amplitude) {
 		} else {
 			var playtime = Date.now();
 			var lastplaytime = JGAudio._lastPlayed[name]
-			console.log("p"+playtime+"   l"+lastplaytime);
+			//console.log("p"+playtime+"   l"+lastplaytime);
 			if (!lastplaytime || playtime - lastplaytime > 8) {
 				var source = JGAudio._context.createBufferSource();
 				var sourceGain = JGAudio._context.createGain();

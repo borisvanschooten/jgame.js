@@ -1,0 +1,167 @@
+
+globals:
+var gems=0;
+
+gametitle: CellSpace: cellular automata sandbox
+gamedesc:
+
+gamebackground: #648
+
+tilemap: 16 16 4 4 no genericimages-4x4-1.png
+
+display: 48 48
+
+background: #444
+empty: .
+
+cell: - 0 - no - no
+cell: # 1 - no - no
+cell: % 2 - no - no
+cell: ~ 3 - no - yes
+cell: H 4 - rot-mir - yes
+cell: P 5 - rot-mir - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - rot4 - yes
+cell: * 8 - no - yes
+cell: o 9 - no - yes
+cell: & 10 - no - yes
+cell: $ 11 - no - yes
+cell: [ 12 - no - yes
+cell: = 13 - no - no
+cell: + 14 - no - yes
+cell: @ 15 - no - no
+
+rule: rule0
+. . . . . . 
+. B . . . . 
+. . . . . . 
+
+priority: 1
+transform: -
+outdir:
+- - - 
+- L - 
+- - - 
+
+probability: 1.0
+delay: 3
+rule: rule1
+. . . . . . 
+. B - . - B 
+. . . . . . 
+
+priority: 2
+transform: rot4
+conddir: R
+outdir:
+- - - 
+- - R 
+- - - 
+
+probability: 1.0
+delay: 3
+rule: rule2
+. # - . . . 
+. B - . - B 
+. . . . . . 
+
+priority: 3
+transform: rot4
+conddir: R
+outdir:
+- - - 
+- - U 
+- - - 
+
+probability: 1.0
+delay: 3
+rule: rule3
+. . . . . . 
+. B # . . . 
+. . . . . . 
+
+priority: 2
+transform: rot4
+conddir: R
+outdir:
+- - - 
+- D - 
+- - - 
+
+probability: 1.0
+delay: 3
+rule: rule4
+. . . . . . 
+. - . . # . 
+. . . . . . 
+
+condfunc: mouseclick()
+priority: 1
+transform: -
+outdir:
+- - - 
+- - - 
+- - - 
+
+probability: 1.0
+delay: 1
+rule: rule5
+. . . . . . 
+. B $ . - B 
+. . . . . . 
+
+priority: 4
+transform: rot4
+conddir: R
+outdir:
+- - - 
+- - R 
+- - - 
+
+probability: 1.0
+delay: 3
+rule: rule6
+. # $ . . . 
+. B - . - B 
+. . . . . . 
+
+priority: 4
+transform: rot4
+conddir: R
+outdir:
+- - - 
+- - U 
+- - - 
+
+probability: 1.0
+delay: 3
+
+
+
+level: #
+
+######################################
+#------------------------------------#
+#B-----------------------------$-----#
+#------------------$-----------------#
+#---$--------------------------------#
+#---------$------------------$-------#
+#-------------$----------$-----------#
+#-------$-------------------------$--#
+#--------------------$---------------#
+#----------$--------B----------------#
+#----------------######----------$---#
+#-------------$--######--$--$--------#
+#----$-----------######--------------#
+#$----------$-----------------------$#
+#--------------------$---------------#
+#-------------------------------$----#
+#------------------------------------#
+#-------$--------$-------$-----------#
+#------------------------------------#
+#--------------$----------------$----#
+#----------------------------------B-#
+######################################
+win: countCells('$')==0
+
+title: Harvey Wallbangers

@@ -1,0 +1,260 @@
+
+gamebackground: #648
+
+tilemap: 16 16 4 4 no genericimages-4x4-1.png
+
+display: 48 48
+
+background: #444
+empty: .
+
+cell: - 0 - no - no
+cell: # 1 - no - no
+cell: % 2 - no - no
+cell: ~ 3 - no - yes
+cell: H 4 - rot-mir - yes
+cell: P 5 - rot-mir - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - rot4 - yes
+cell: * 8 - no - yes
+cell: o 9 - no - yes
+cell: & 10 - no - yes
+cell: $ 11 - no - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - rot4 - no
+cell: + 14 - rot4 - yes
+cell: @ 15 - rot4 - no
+rule: rule0
+. * . . & . 
+. T . & & & 
+. . . . & . 
+
+priority: 4
+conddir: -
+outdir:
+- - - 
+- - - 
+- - - 
+
+probability: 1.0
+delay: 1
+outfunc: lose()
+rule: rule1
+. . . . . . 
+. * . . . . 
+. o . . - . 
+
+priority: 4
+conddir: -
+outdir:
+- - - 
+- - - 
+- - - 
+
+probability: 1.0
+delay: 1
+rule: rule2
+. . . . . . 
+. B . . - . 
+. o . . * . 
+
+priority: 4
+conddir: -
+outdir:
+- - - 
+- - - 
+- D - 
+
+probability: 1.0
+delay: 1
+rule: rule3
+. . . . . . 
+. T - . - T 
+. . . . . . 
+
+condfunc: playerdir("right")
+priority: 3
+transform: mirx
+conddir: -
+outdir:
+- - - 
+- - U 
+- - - 
+
+probability: 1.0
+delay: 3
+rule: rule4
+. . . . . . 
+. - . . o . 
+. T . . . . 
+
+condfunc: keypress(" ")
+priority: 2
+conddir: -
+outdir:
+- - - 
+- - - 
+- - - 
+
+probability: 1.0
+delay: 3
+rule: rule5
+. . . . . . 
+. B - . - B 
+. . . . . . 
+
+priority: 2
+transform: mirx
+conddir: R
+outdir:
+- - - 
+- - R 
+- - - 
+
+probability: 1.0
+delay: 3
+rule: rule6
+. . . . . . 
+. - . . o . 
+. o . . - . 
+
+priority: 2
+conddir: -
+outdir:
+- - - 
+- - - 
+- - - 
+
+probability: 1.0
+delay: 1
+rule: rule7
+. - . . * . 
+. * . . - . 
+. . . . . . 
+
+priority: 2
+transform: rot4
+conddir: U
+outdir:
+- U - 
+- - - 
+- - - 
+
+probability: 1.0
+delay: 2
+rule: rule8
+. . . . . . 
+. B - . - B 
+. . . . . . 
+
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+- - - 
+- - R 
+- - - 
+
+probability: 1.0
+delay: 3
+rule: rule9
+. # . . . . 
+. o . . - . 
+. . . . . . 
+
+priority: 1
+conddir: -
+outdir:
+- - - 
+- - - 
+- - - 
+
+probability: 1.0
+delay: 1
+rule: rule10
+. . . . . . 
+. * . . - . 
+. . . . . . 
+
+priority: 1
+conddir: -
+outdir:
+- - - 
+- - - 
+- - - 
+
+probability: 1.0
+delay: 2
+rule: rule11
+. . . . . . 
+. B . . . . 
+. - . . * . 
+
+priority: 1
+conddir: -
+outdir:
+- - - 
+- - - 
+- D - 
+
+probability: 0.05
+delay: 2
+rule: rule12
+. - . . & . 
+. & . . . . 
+. . . . . . 
+
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- - - 
+- - - 
+- - - 
+
+probability: 1.0
+delay: 1
+rule: rule13
+. . . . . . 
+. * . . . . 
+. o . . - . 
+
+priority: 3
+conddir: -
+outdir:
+- - - 
+- - - 
+- - - 
+
+probability: 1.0
+delay: 1
+
+
+
+level: #
+
+----------------------B---------------
+------------------------------B-------
+-----------B--------------------------
+-------B----------B----------------B--
+-------------------------------B------
+---------------------B----------------
+------------------B-------------------
+--------------------------B-----------
+-----------B--------------------------
+----------------------------------B---
+-----B--------------------------------
+-------------B----------------B-------
+--------------------------------------
+----B-----------------------------B---
+---------------------------B----------
+--------------------B-----------------
+---------B----------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+-------------------------T------------
+win: countCells('B')==0
+
+title: Cell Shooter

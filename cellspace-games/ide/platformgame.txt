@@ -1,0 +1,194 @@
+globals: sfxdef('rule_0','Powerup',630004); sfxdef('rule_1','Pickup',318220); sfxdef('rule_13','Shoot',256457); 
+
+gamebackground: #648
+
+tilemap: 8 8 4 4 no data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACXUlEQVRYR+2Wz0tUURzFzxulP8BVGzeCWITkiIEUmD3cJZXLQBB/pLRKCCSCZsYRWgSGWyUFIWhpqAsXw/gUdGM0oxE0VFK7FuFfoHN75867zzuPGZ/w7jBF3s37ce+c87nn+73DsxAytsfHxVlLehYWrDCNs+ZDf5y61+cD2Jdb8OR4C/d/N0tNPtcc4K9IgDvN/jr0k9STSK1mQlOMVIK6JxAfaRN6zYNJ/N89wNrmlgrRe6AHEJOxWFmvzBWL2AYiiVNw99WQeDa1jEr6j0dbYdF8Lt5RZh6ffY1kn410MTpAJX2avd/P4+qwC5CIQTy4fgpAc8u2IRIJ3E6nI6cQ1Fc7/bF/AKYsE1DxDGQyQFNTac3RkZEUKpVXQeThAfS6u+WY9maS7tUxsHvKEaCavuwBN2qRW1vFZC6PVDYLx3GMmasmvDm1LJMO6r8bbRVyggu3LjUgeXyC6cbS1Skicv31U9DrHjJqcyh9mYCKiQC5a+2If/7kLzJxCtQxpL4+CCFPQdnbaA/B7walLdLZknDCBl62vMXzw0E+ynlTAGI9YN9fUvYh+EDz7g0LO/NdeDHbJudNAEjzu24rfccjfMEbeT+zafk7VqYNK3s4GbgBXpkCgYwBcMffxJgE4D2hvBQw87QgTZU5t66gjAFcwZjMnAAcHzdPa67Mbk18kPHrMMYA9P6leeed6gnofVATAD0BrxGF3oBMgIN9YAKAWtU+3XV9CaGMvcTCTwH/SH4WdvFw8WsZbLX3einOcx+aAI0qCRGKIwh2HlN9zb8BUPcS1B3gogdqWYI/MXx0YlSzO9wAAAAASUVORK5CYII=
+
+display: 48 48
+
+background: #444
+empty: .
+
+cell: - 0 - no - no
+cell: # 1 - no - no
+cell: % 2 - no - no
+cell: ~ 3 - no - yes
+cell: H 4 - mirx - yes
+cell: P 5 - rot-mir - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - rot4 - yes
+cell: * 8 - no - yes
+cell: o 9 - no - yes
+cell: & 10 - no - yes
+cell: $ 11 - no - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - rot4 - no
+cell: + 14 - no - yes
+cell: @ 15 - rot4 - no
+
+rule: rule0
+. & H . - & 
+priority: 4
+transform: mirx
+conddir: R
+delay: 1
+outfunc: lose(); sound('rule_0');
+rule: rule1
+. $ . . - . 
+. H . . . . 
+. . . . . . 
+priority: 3
+transform: miry
+conddir: -
+delay: 1
+outfunc: sound('rule_1')
+rule: rule2
+. . . . . . 
+. H . . - . 
+. - . . H . 
+priority: 2
+transform: mirx
+conddir: R
+outdir:
+- - - 
+- - - 
+- R - 
+delay: 3
+rule: rule3
+. . . . . . 
+. & - . - & 
+. . # . . # 
+priority: 2
+transform: mirx
+conddir: R
+outdir:
+- - R 
+delay: 5
+rule: rule4
+. . . . . . 
+. & - . - & 
+. . = . . . 
+priority: 2
+transform: mirx
+conddir: R
+outdir:
+- - R 
+delay: 5
+rule: rule5
+. . . . . . 
+. H - . - H 
+. # . . . . 
+condfunc: playerdir("right")
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+- - R 
+delay: 3 trigger player
+rule: rule6
+. . . . . . 
+. H . . - . 
+. = . . B . 
+condfunc: playerdir("down")
+priority: 1
+conddir: -
+delay: 3
+rule: rule7
+. . . . . . 
+. H = . - B 
+. # . . . . 
+condfunc: playerdir("right")
+priority: 1
+transform: mirx
+conddir: -
+delay: 3 trigger player
+rule: rule8
+. = . . B . 
+. B . . = . 
+. . . . . . 
+condfunc: playerdir("up")
+priority: 1
+transform: miry
+conddir: -
+delay: 3 trigger player
+rule: rule9
+. . . . . . 
+- B . H = . 
+# . . . . . 
+condfunc: playerdir("left")
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+L - - 
+delay: 3 trigger player
+rule: rule10
+. - . . H . 
+. B . . = . 
+. . . . . . 
+condfunc: playerdir("up")
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+- R - 
+- - - 
+- - - 
+delay: 3 trigger player
+rule: rule11
+. . . . . . 
+. H - . - H 
+. = . . . . 
+condfunc: playerdir("right")
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+- - R 
+delay: 3 trigger player
+rule: rule12
+. & . . . . 
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+- R - 
+delay: 5
+rule: rule13
+. H . . - . 
+. & . . H . 
+. . . . . . 
+priority: 1
+conddir: -
+delay: 1
+outfunc: sound('rule_13')
+
+
+
+level: #
+
+--------------------------------------
+--------------------------------------
+=########---------######=#------------
+=---------------$-------=---$---------
+=--------$-------&------=----&--------
+=------------######-----=-####--------
+=-$------$------$----$--=--------$----
+=------------&----------=-------&-----
+=##------$-######--####-=-----######--
+=--$--------------------=--$--------$-
+=-&------$--------&-----=----&-----&--
+=###-----------#####=####--###--#####-
+=---$---------------=------------$----
+=-&-----------&-----=----&------------
+=####--###=####-----=########=####----
+=----$----=---------=--------=--------
+=-----&---=----H----=--------=--------
+=---#############=####-------=--------
+=----------------=-----------=--------
+=--------------$-=------$----=--$-----
+=---------&------=-----&-----=-----&--
+######################################
+win: countCells('$')==0
+
+title: Platform game
