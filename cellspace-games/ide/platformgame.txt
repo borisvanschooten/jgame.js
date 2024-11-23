@@ -1,4 +1,4 @@
-globals: sfxdef('rule_0','Powerup',630004); sfxdef('rule_1','Pickup',318220); sfxdef('rule_13','Shoot',256457); 
+globals: sfxdef(0,'Powerup',630004); sfxdef(1,'Pickup',318220); sfxdef(13,'Shoot',256457); 
 
 gamebackground: #648
 
@@ -32,7 +32,7 @@ priority: 4
 transform: mirx
 conddir: R
 delay: 1
-outfunc: lose(); sound('rule_0');
+outfunc: lose(); sound('rule_0')
 rule: rule1
 . $ . . - . 
 . H . . . . 

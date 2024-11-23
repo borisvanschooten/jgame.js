@@ -211,75 +211,78 @@ CS.CellMap.prototype.applyRules = function(rules,worldtimer,callback) {
 	this._copySrcDst();
 	//if (worldtimer % 50 == 0) this.dump();
 	// check which rules are triggered
-	for (var xidx=0; xidx<this.width; xidx++) {
-		var x = this._xorder[xidx];
-		for (var yidx=0; yidx<this.height; yidx++) {
-			var y = this._yorder[yidx];
-			// skip if all context cells are inactive
-			if (!this.active[this.srci][x  ][y  ]
-			&&  !this.active[this.srci][x+1][y  ]
-			&&  !this.active[this.srci][x+2][y  ]
-			&&  !this.active[this.srci][x  ][y+1]
-			&&  !this.active[this.srci][x+1][y+1]
-			&&  !this.active[this.srci][x+2][y+1]
-			&&  !this.active[this.srci][x  ][y+2]
-			&&  !this.active[this.srci][x+1][y+2]
-			&&  !this.active[this.srci][x+2][y+2]) continue;
-			//var cur_prio = -32768;
-			var cur_prob = CS.initArray([CS.MAXPRIO],0.0);
-			// XXX make more efficient with fixed array size
-			this._nrtriggered = CS.initArray([CS.MAXPRIO],0.0);
-			this._potentialtrigger=false;
-			for (var r=0; r<rules.length; r++) {
-				var rule = rules[r];
-				var prio = rule.priority;
-				if (this._checkRuleAtPos(rule,x,y)) {
-					// rule is potentially triggered
-					//if (rule.priority < cur_prio) continue;
-					if (rule.delaytype == "time") {
-						if (worldtimer%rule.delay != 0) continue;
-					} else { // "trigger"
-						//console.log("triggertimer "+rule.delaytimer+"="
-						//	+CS.Main.triggertimers[rule.delaytimer]);
-						if (CS.Main.triggertimers[rule.delaytimer]) continue;
-					}
-					// rule is actually triggered
-					//cur_prio = rule.priority;
-					cur_prob[prio] += rule.probability;
-					this._triggered[prio][this._nrtriggered[prio]] = rule;
-					this._trigprob[prio][this._nrtriggered[prio]++] =
-						cur_prob[prio];
-				}
-			}
-			// set active state for every cell that can be potentially
-			// changed by a rule
-			if (this._potentialtrigger) {
-				this.active[this.dsti][x  ][y  ] = true;
-				this.active[this.dsti][x+1][y  ] = true;
-				this.active[this.dsti][x+2][y  ] = true;
-				this.active[this.dsti][x  ][y+1] = true;
-				this.active[this.dsti][x+1][y+1] = true;
-				this.active[this.dsti][x+2][y+1] = true;
-				this.active[this.dsti][x  ][y+2] = true;
-				this.active[this.dsti][x+1][y+2] = true;
-				this.active[this.dsti][x+2][y+2] = true;
-			}
-			// select a rule from the triggered rules
-			trigger_rules: for (var p=CS.MAXPRIO-1; p>=0; p--) {
-				if (this._nrtriggered[p]!=0) {
-					//active[dsti][x+1][y+1] = true;
-					// pick a point on the probability line
-					var prob = random(0.0,Math.max(1.0,cur_prob[p]));
-					// find the rule that matches that point
-					// XXX linear search is slow
-					if (prob <= cur_prob[p]) {
-						for (var i=0; i<this._nrtriggered[p]; i++) {
-							if (this._trigprob[p][i] >= prob) {
-								this._triggerRule(this._triggered[p][i],x,y,callback);
-								break trigger_rules;
-							}
+	for (var prioidx=CS.MAXPRIO-1; prioidx>=0; prioidx--) {
+		for (var xidx=0; xidx<this.width; xidx++) {
+			var x = this._xorder[xidx];
+			for (var yidx=0; yidx<this.height; yidx++) {
+				var y = this._yorder[yidx];
+				// skip if all context cells are inactive
+				if (!this.active[this.srci][x  ][y  ]
+				&&  !this.active[this.srci][x+1][y  ]
+				&&  !this.active[this.srci][x+2][y  ]
+				&&  !this.active[this.srci][x  ][y+1]
+				&&  !this.active[this.srci][x+1][y+1]
+				&&  !this.active[this.srci][x+2][y+1]
+				&&  !this.active[this.srci][x  ][y+2]
+				&&  !this.active[this.srci][x+1][y+2]
+				&&  !this.active[this.srci][x+2][y+2]) continue;
+				//var cur_prio = -32768;
+				var cur_prob = CS.initArray([CS.MAXPRIO],0.0);
+				// XXX make more efficient with fixed array size
+				this._nrtriggered = CS.initArray([CS.MAXPRIO],0.0);
+				this._potentialtrigger=false;
+				for (var r=0; r<rules.length; r++) {
+					var rule = rules[r];
+					var prio = rule.priority;
+					if (prio != prioidx) continue;
+					if (this._checkRuleAtPos(rule,x,y)) {
+						// rule is potentially triggered
+						//if (rule.priority < cur_prio) continue;
+						if (rule.delaytype == "time") {
+							if (worldtimer%rule.delay != 0) continue;
+						} else { // "trigger"
+							//console.log("triggertimer "+rule.delaytimer+"="
+							//	+CS.Main.triggertimers[rule.delaytimer]);
+							if (CS.Main.triggertimers[rule.delaytimer]) continue;
 						}
-						// fall through to lower priority level
+						// rule is actually triggered
+						//cur_prio = rule.priority;
+						cur_prob[prio] += rule.probability;
+						this._triggered[prio][this._nrtriggered[prio]] = rule;
+						this._trigprob[prio][this._nrtriggered[prio]++] =
+							cur_prob[prio];
+					}
+				}
+				// set active state for every cell that can be potentially
+				// changed by a rule
+				if (this._potentialtrigger) {
+					this.active[this.dsti][x  ][y  ] = true;
+					this.active[this.dsti][x+1][y  ] = true;
+					this.active[this.dsti][x+2][y  ] = true;
+					this.active[this.dsti][x  ][y+1] = true;
+					this.active[this.dsti][x+1][y+1] = true;
+					this.active[this.dsti][x+2][y+1] = true;
+					this.active[this.dsti][x  ][y+2] = true;
+					this.active[this.dsti][x+1][y+2] = true;
+					this.active[this.dsti][x+2][y+2] = true;
+				}
+				// select a rule from the triggered rules
+				trigger_rules: for (var p=CS.MAXPRIO-1; p>=0; p--) {
+					if (this._nrtriggered[p]!=0) {
+						//active[dsti][x+1][y+1] = true;
+						// pick a point on the probability line
+						var prob = random(0.0,Math.max(1.0,cur_prob[p]));
+						// find the rule that matches that point
+						// XXX linear search is slow
+						if (prob <= cur_prob[p]) {
+							for (var i=0; i<this._nrtriggered[p]; i++) {
+								if (this._trigprob[p][i] >= prob) {
+									this._triggerRule(this._triggered[p][i],x,y,callback);
+									break trigger_rules;
+								}
+							}
+							// fall through to lower priority level
+						}
 					}
 				}
 			}
@@ -472,7 +475,9 @@ CS.CellMap.prototype._triggerRule = function(r, x,y, callback) {
 			var outdir = r.outdirs[ri][didx];
 			if (out!=0) this.map[this.dsti][xi+1][yi+1] = out;
 			if (outdir!=-1) this.dir[this.dsti][xi][yi] = outdir;
-			if (out!=0 || outdir!=-1) {
+			// note, we include center tile in changed to ensure only one rule
+			// is triggered per tile if we traverse the grid multiple times
+			if (out!=0 || outdir!=-1 || (dx==0&&dy==0)) {
 				this.changed[xi+1][yi+1] = true;
 				if (didx==4 && anim_idx_dst!=-1) continue;
 				if (didx == anim_idx_src) continue;

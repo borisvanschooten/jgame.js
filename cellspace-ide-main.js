@@ -242,6 +242,7 @@ priorities = {
 	"5":"5",
 	"6":"6",
 	"7":"7",
+	"8":"8",
 }
 probabilities = {
 	"1.0":"1.0",
@@ -965,9 +966,15 @@ function createRuleUI() {
 	elem.innerHTML = html
 	for (var i=0; i<CS.Main.game.rules.length; i++) {
 		var rule = CS.Main.game.rules[i]
+		var ruleid = rule.id.match(/([0-9]+)/)
+		if (!ruleid) {
+			console.log("WARNING: cannot parse rule id '"+rule.id+"'")
+			continue
+		}
+		ruleid = ruleid[0]
 		var pattern = getRulePattern(rule)
 		var outdir = getDirPattern(rule)
-		setRuleBlock("rule_"+i,
+		setRuleBlock("rule_"+ruleid,
 			pattern,
 			outdir,
 			rule.dirToString(rule.srcdir),
@@ -979,7 +986,7 @@ function createRuleUI() {
 								? ".0" :  "" ),
 			rule.delayToString(),
 			getOptionFromString(rule.outfuncstr,outfuncs),
-			getSoundDefFromSource("rule_"+i)
+			getSoundDefFromSource("rule_"+ruleid)
 		)
 	}
 }
