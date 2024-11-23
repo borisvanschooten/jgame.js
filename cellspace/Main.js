@@ -495,6 +495,14 @@ function mousehover() {
 	return (x==mousex()-1) && y==mousey()
 }
 
+function loadsound(name,datasource) {
+	JGAudio.load(""+name,datasource);
+}
+
+function sound(name,amplitude) {
+	JGAudio.play(""+name,null,null,amplitude);
+}
+
 // MOVE TO jgengine.js
 // jgengine cannot handle raw keycodes yet
 var KeyUp = 38;
@@ -575,7 +583,7 @@ function keypress(keystr) {
 	return false;
 }
 
-
+// XXX remove/replace?
 function playSound(sample,channel,loop,volume) {
 	CS.IO.playSound(sample,channel,loop,volume);
 }

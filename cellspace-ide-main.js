@@ -303,6 +303,19 @@ outfuncs = {
 	"lose()": "lose",
 }
 
+soundtypes = {
+	"": "-",
+	"Random": "Random",
+	"Pickup": "Pickup",
+	"Powerup": "Powerup",
+	"Jump": "Jump",
+	"Shoot": "Shoot",
+	"Blip": "Blip",
+	"Hit": "Hit",
+	"Explo": "Explo",
+	//"Music": "Tone",
+}
+
 // GLOBALS ------------------------------------------------
 var lev = 0
 var pencil = 0 // -1 is don't care / empty
@@ -432,6 +445,7 @@ title: Maze generator
 // UI events ----------------------------------------------------------------
 
 function runLevel() {
+	pauseWebGL(false)
 	var spec = createCellspaceSpec()
 	console.log(spec)
 	initCSGame(spec)
@@ -446,6 +460,7 @@ function runLevel() {
 }
 
 function editLevel() {
+	pauseWebGL(true)
 	// parse level map
 	var spec = createCellspaceSpec()
 	console.log(spec)
@@ -510,7 +525,7 @@ function clearLevel() {
 
 
 function readTileset() {
-	var url = prompt("Tileset URL (empty = default)")
+	var url = prompt("Tileset URL (empty = default).  You can copy/paste\n a data URL from the tinyspriteeditor export function.")
 	if (url===null) return;
 	if (url.trim() == "") {
 		tileset = tilesetspecs[tileset_tilex+"x"+tileset_tiley].image
@@ -536,7 +551,6 @@ function editTileset() {
 
 function changeTilesetSize() {
 	var newsize = document.getElementById("tileset-select").value
-	console.log(newsize)
 	var spec = tilesetspecs[newsize]
 	if (spec) {
 		tileset_tilex = spec.tilex
@@ -594,7 +608,7 @@ function updateSpritesheets() {
 function clearRule(name) {
 	var yes = confirm("Clear "+name+"?")
 	if (yes) {
-		setRuleBlock(name, emptycell_index, "-", " ", "-", "", "", 1, "1.0",3,"")
+		setRuleBlock(name, emptycell_index, "-", " ", "-", "", "", 1, "1.0",3,"","",857394)
 	}
 }
 
@@ -609,9 +623,9 @@ function pasteRule(name) {
 	var yes = confirm("Paste over "+name+"?")
 	if (yes) {
 		var r = getRuleBlock(rulecopysource,true)
-		console.log(r)
 		setRuleBlock(name,r.pattern,r.outdir,r.conddir,r.transform,
-			r.player,r.mouse,r.priority,r.probability,r.delay,r.outfunc)
+			r.player,r.mouse,r.priority,r.probability,r.delay,r.outfunc,
+			r.sound)
 	}
 }
 
@@ -701,6 +715,20 @@ function copyLevelParam() {
 	setLevelCond("lose",CS.Main.curlev.lose)
 }
 
+function getSoundDefFromSource(rule) {
+	var globals = CS.Main.curlev.globals
+	if (globals) {
+		var regex = /sfxdef\(([0-9]*),'([a-zA-Z]*)',([0-9]*)\)/g
+		var matches = [...globals.matchAll(regex)]
+		for (var i=0; i<matches.length; i++) {
+			if ("rule_"+matches[i][1]==rule) return {
+				type: matches[i][2],
+				seed: matches[i][3],
+			}
+		}
+	}
+}
+
 
 // from: https://stackoverflow.com/questions/18755750/saving-text-in-a-local-file-in-internet-explorer-10
 function saveSource(elem) {
@@ -720,6 +748,46 @@ function saveSource(elem) {
 	}
 }
 
+
+var soundcopysource = null
+
+function updateSoundOptions(elem) {
+	if (elem.value) {
+		elem.parentElement.className="optdef soundenabled"
+	} else {
+		elem.parentElement.className="optdef sounddisabled"
+	}
+}
+
+function playSound(ruleidx) {
+	var name = "rule_"+ruleidx
+	var type = document.getElementById(name+"_soundtype").value
+	var seed = document.getElementById(name+"_soundseed").value
+	var sound = buildPresetSound(seed,type)
+	JGAudio.load(name,sound.samples,true)
+	JGAudio.play(name)
+}
+
+function randomizeSound(ruleidx) {
+	var name = "rule_"+ruleidx
+	document.getElementById(name+"_soundseed").value = randomstep(0,999999,1)
+	playSound(ruleidx)
+}
+
+function copySound(ruleidx) {
+	soundcopysource = ruleidx
+}
+
+function pasteSound(ruleidx) {
+	if (soundcopysource === null) return
+	var dstname = "rule_"+ruleidx
+	var srcname = "rule_"+soundcopysource
+	var type = document.getElementById(srcname+"_soundtype").value
+	var seed = document.getElementById(srcname+"_soundseed").value
+	document.getElementById(dstname+"_soundtype").value = type
+	document.getElementById(dstname+"_soundseed").value = seed
+	updateSoundOptions(document.getElementById(dstname+"_soundtype"))
+}
 
 
 // UI ENTRY POINT --------------------------------------------------------
@@ -867,13 +935,17 @@ function getDirPattern(rule) {
 }
 
 
-// string can be <option> or <option> && <option>
+// Finds instances of options in string, returns "" if not found
+// options: hash with option strings as keys
 function getOptionFromString(string,options) {
+	options = Object.keys(options)
 	if (!string) return ""
-	var opts = string.split("&&")
-	for (var i=0; i<opts.length; i++) {
-		var opt = opts[i].trim()
-		if (options[opt]) return opt
+	for (var i=0; i<options.length; i++) {
+		var opt = options[i]
+		if (opt=="") continue
+		if (string.indexOf(opt) >= 0) {
+			return opt
+		}
 	}
 	return ""
 }
@@ -885,7 +957,7 @@ function createRuleUI() {
 	//html = "<div id='cellrules' style='height:"+elem.parentNode.offsetHeight+"px;overflow:scroll;'>"
 	for (var i=0; i<levels[lev].nr_rules; i++) {
 		html += "<div  class='ruleblock'>"
-			+ createRuleBlock('rule_'+i)
+			+ createRuleBlock(i)
 			+ "<div style='clear:both;'></div>\n"
 			+ "</div>\n"
 	}
@@ -907,11 +979,13 @@ function createRuleUI() {
 								? ".0" :  "" ),
 			rule.delayToString(),
 			getOptionFromString(rule.outfuncstr,outfuncs),
+			getSoundDefFromSource("rule_"+i)
 		)
 	}
 }
 
-function createRuleBlock(name) {
+function createRuleBlock(ruleidx) {
+	var name = "rule_"+ruleidx
 	html = ""
 	// pattern, transform
 	html += "<table class='optdef' style='float:left'>\n"
@@ -924,7 +998,7 @@ function createRuleBlock(name) {
 	html += "<td> &rArr; </td>"
 	html += "<td>"+createRuleGrid(3,0,6,3,objects,name+"_lrhs","celldef") + "</td></tr>\n"
 	html += "<tr><td colspan=3>transform:"+createSelect(transforms,name+"_transform")+"</td></tr>\n";
-	html += "</div>\n"
+	html += "</table>\n"
 	// controls, priority, probability, deplay
 	html += "<table class='optdef' style='float:left;margin-left:10px;'>\n"
 	html += "<tr><td class='label'>keybrd:</td><td>"+createSelect(playercontrols,name+"_player")+"</td></tr>\n";
@@ -937,9 +1011,16 @@ function createRuleBlock(name) {
 	html += "<table style='float:left;margin-left:10px;'>\n"
 	html += "<tr class='optdef' ><td class='label'>conddir:</td><td>"+createSelect(conddirections,name+"_conddir")+"</td></tr>\n";
 	html += "<tr><td class='label'> outdir:</td>"
-	html += "<td><div style='float:left;'>"+createSelectGrid(0,0,3,3,directions,name+"_outdir") + "</div></td></tr>\n"
-	html += "<tr><td class='label'>outfunc:</td><td>"+createSelect(outfuncs,name+"_outfunc")+"</td></tr>\n";
+	html += "<td><div style='float:left;'>"+createSelectGrid(0,0,3,3,directions,name+"_outdir","outdirselect") + "</div></td></tr>\n"
+	html += "<tr><td class='label'>outfunc:</td><td class='optdef'>"+createSelect(outfuncs,name+"_outfunc")+"</td></tr>\n";
 	html += "</table>\n"
+	html +=" <div class='optdef sounddisabled'>sound: "+createSelect(soundtypes,name+"_soundtype",null,"updateSoundOptions(event.target)")
+		+"<input id='"+name+"_soundseed' type='text' style='font-size:12px;' size=6 value='"+randomstep(0,999999,1)+"'></input>"
+		+"<button class='soundhide' onclick='playSound(\""+ruleidx+"\")'>Play</button>"
+		+"<button class='soundhide' onclick='randomizeSound(\""+ruleidx+"\")'>Random</button>"
+		+"<button class='soundhide' onclick='copySound(\""+ruleidx+"\")'>Copy</button>"
+		+"<button onclick='pasteSound(\""+ruleidx+"\")'>Paste</button>"
+		+"</div>\n"
 	return html
 }
 
@@ -1060,7 +1141,7 @@ function getRuleGrid(name,x1,y1,emptycell,use_class,raw_values) {
 	}
 }
 
-function getRuleBlocks() {
+function createRuleBlocks() {
 	var rule = ""
 	for (var i=0; i<levels[lev].nr_rules; i++) {
 		var rule_is_present = document.getElementById("rule_"+i+"_lrhs_0_0")
@@ -1092,13 +1173,56 @@ function getRuleBlocks() {
 			rule += "delay: "+r.delay
 				//+(player != "" ? " trigger player": "")
 				+"\n"
-			if (r.outfunc != "") {
+			if (r.outfunc != "" && r.sounddef) {
+				rule += "outfunc: "+r.outfunc+"; sound("+i+")\n"
+			} else if (r.outfunc != "") {
 				rule += "outfunc: "+r.outfunc+"\n"
+			} else if (r.sounddef) {
+				rule += "outfunc: sound("+i+")\n"
 			}
 		}
 	}
 	return rule
 }
+
+// UNUSED, currently done in createRuleBlocks
+// XXX sound(name) must be sound(number)
+function createOutfunc(name) {
+	var outfunc = document.getElementById(name+"_outfunc").value
+	var soundtype = document.getElementById(name+"_soundtype").value
+	var soundseed = document.getElementById(name+"_soundseed").value
+	if (outfunc && soundtype) {
+		return outfunc+"; "+"sound('"+name+"');"
+	} else if (outfunc) {
+		return outfunc
+	} else if (soundtype) {
+		return "sound('"+name+"')"
+	} else {
+		return ""
+	}
+}
+function getSoundDef(name) {
+	var soundtype = document.getElementById(name+"_soundtype").value
+	var soundseed = document.getElementById(name+"_soundseed").value
+	if (!soundtype) return null
+	//sfxdef is found in cellspace-main
+	return {type:soundtype, seed:soundseed}
+}
+
+function createInitCode() {
+	var init = ""
+	// sound defs
+	for (var i=0; i<levels[lev].nr_rules; i++) {
+		var rule_is_present = document.getElementById("rule_"+i+"_lrhs_0_0")
+		if (!rule_is_present) continue;
+		var r = getRuleBlock("rule_"+i,false)
+		if (r.sounddef != null) {
+			init += "sfxdef("+i+",'"+r.sounddef.type+"',"+r.sounddef.seed+"); "
+		}
+	}
+	return init
+}
+
 
 function getRuleBlock(name,raw_values) {
 	return {
@@ -1112,11 +1236,12 @@ function getRuleBlock(name,raw_values) {
 		"probability": document.getElementById(name+"_probability").value,
 		"delay": document.getElementById(name+"_delay").value,
 		"outfunc": document.getElementById(name+"_outfunc").value,
+		"sounddef": getSoundDef(name),
 	}
 }
 
 function setRuleBlock(name,pattern,outdir,conddir,transform,player,mouse,
-priority,probability,delay,outfunc) {
+priority,probability,delay,outfunc,sounddef) {
 	setRuleGrid(name+"_lrhs",6,3,pattern,true)
 	setRuleGrid(name+"_outdir",3,3,outdir,false)
 	document.getElementById(name+"_conddir").value = conddir
@@ -1127,6 +1252,13 @@ priority,probability,delay,outfunc) {
 	document.getElementById(name+"_probability").value = probability 
 	document.getElementById(name+"_delay").value = delay
 	document.getElementById(name+"_outfunc").value = outfunc
+	if (sounddef) {
+		document.getElementById(name+"_soundtype").value = sounddef.type
+		document.getElementById(name+"_soundseed").value = sounddef.seed
+	} else {
+		document.getElementById(name+"_soundtype").value = ""
+	}
+	updateSoundOptions(document.getElementById(name+"_soundtype"))
 }
 
 function setRuleGrid(name,x1,y1,values,use_class) {
@@ -1170,7 +1302,7 @@ function getLevelMap() {
 
 // -------------------------------------------------------
 
-function getWinLoseCond() {
+function createWinLoseCond() {
 	var ret = ""
 	var conds = ["win","lose"]
 	for (var i=0; i<conds.length; i++) {
@@ -1189,9 +1321,10 @@ function getWinLoseCond() {
 }
 
 function createCellspaceSpec() {
-	var rules = getRuleBlocks()
-	var winlose = getWinLoseCond()
-
+	var rules = createRuleBlocks()
+	var winlose = createWinLoseCond()
+	var initcode = createInitCode()
+	if (initcode) initcode = "globals: "+initcode
 	if (rules == "") rules = levels[lev].fixedrules
 	var cellstatements = ""
 	for (var i=0; i<celldefs.length; i++) {
@@ -1199,7 +1332,8 @@ function createCellspaceSpec() {
 		cellstatements += "cell: " +def[0]+" "+def[1]+" "+def[2]
 			+" "+def[3]+" "+def[4]+" "+def[5]+"\n"
 	}
-	return `
+	return initcode+"\n"
++`
 gamebackground: #648
 
 tilemap: `

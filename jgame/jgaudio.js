@@ -40,7 +40,7 @@ JGAudio._inited = false;
 JGAudio._suspended = false; // confirmed suspended
 JGAudio._unsuspended = false; // confirmed not suspended
 JGAudio._unsuspendInterval = null; // setInterval object
-JGAudio._context = null;
+JGAudio._context = null; // null indicates we have no AudioContext API
 
 // sound enable per-channel
 JGAudio._disabled = {};
@@ -49,6 +49,9 @@ JGAudio._global_disabled=false;
 
 // indicates temporary mute (as used for documen hidden)
 JGAudio._muted=false;
+
+// sound name => timestamp
+JGAudio._lastPlayed = {};
 
 // source or Audio element per channel
 JGAudio._playing = {};
@@ -64,6 +67,7 @@ JGAudio._soundcache = {};
 
 // mapping from sound name to filename
 // or from sound name to audio buffer
+// or from sound name to array of samples
 JGAudio._sounds = {};
 
 // name of channel if a looping sound was played before it was loaded
@@ -85,6 +89,7 @@ JGAudio._unsuspend = function() {
 	console.log("Audio resumed.");
 }
 
+// call from user event to start audio if still suspended due to autoplay policy
 JGAudio._init = function() {
 	if (!window.AudioContext && !window.webkitAudioContext) {
 		// web audio not supported, use audio element
@@ -144,34 +149,42 @@ JGAudio._loadFile = function(basefilename) {
 
 /** Load a sample from a filename.
 * @param name name of sample
-* @param basefilename path to sample without file extension (i.e. ".mp3" is omitted)
+* @param datasource path to sample without file extension (i.e. ".mp3" is omitted)
 */
-JGAudio.load = function (name,basefilename) {
-	if (JGAudio._sounds[name]) return;
+JGAudio.load = function (name,datasource,force_reload) {
+	if (!force_reload && JGAudio._sounds[name]) return;
 	JGAudio._init();
 	if (JGAudio._context) {
-		JGAudio._sounds[name] = "loading";
-		var request = new XMLHttpRequest();
-		request.open('GET', JGAudio._rootdir+basefilename+".mp3", true);
-		request.responseType = 'arraybuffer';
-		// Decode asynchronously
-		request.onload = function() {
-			JGAudio._context.decodeAudioData(request.response,
-				function(buffer) {
-					JGAudio._sounds[name] = buffer;
-					if (JGAudio._sounds_queued[name]) {
-						JGAudio.play(name,JGAudio._sounds_queued[name],true,
-							JGAudio._sounds_queued_volume[name]);
-						JGAudio._sounds_queued[name] = false;
-					}
-				},
-				function(error) { }/*onError*/
-			);
+		if (Array.isArray(datasource)) {
+			// array of samples
+			var buffer = JGAudio._context.createBuffer(1,
+				datasource.length, /* sample rate*/ 44100);
+			buffer.getChannelData(0).set(datasource);
+			JGAudio._sounds[name] = buffer;
+		} else { // filename/url
+			JGAudio._sounds[name] = "loading";
+			var request = new XMLHttpRequest();
+			request.open('GET', JGAudio._rootdir+datasource+".mp3", true);
+			request.responseType = 'arraybuffer';
+			// Decode asynchronously
+			request.onload = function() {
+				JGAudio._context.decodeAudioData(request.response,
+					function(buffer) {
+						JGAudio._sounds[name] = buffer;
+						if (JGAudio._sounds_queued[name]) {
+							JGAudio.play(name,JGAudio._sounds_queued[name],true,
+								JGAudio._sounds_queued_volume[name]);
+							JGAudio._sounds_queued[name] = false;
+						}
+					},
+					function(error) { }/*onError*/
+				);
+			}
+			request.send();
 		}
-		request.send();
 	} else {
-		JGAudio._sounds[name] = basefilename;
-		JGAudio._soundcache[name] = JGAudio._loadFile(basefilename);
+		JGAudio._sounds[name] = datasource;
+		JGAudio._soundcache[name] = JGAudio._loadFile(datasource);
 	}
 }
 
@@ -205,15 +218,21 @@ JGAudio.play = function(name,channel,loop,amplitude) {
 				JGAudio._sounds_queued_volume[name] = amplitude;
 			}		
 		} else {
-			var source = JGAudio._context.createBufferSource();
-			var sourceGain = JGAudio._context.createGain();
-			sourceGain.gain.value = amplitude;
-			source.buffer = JGAudio._sounds[name];
-			source.connect(sourceGain);
-			sourceGain.connect(JGAudio._context.destination);
-			if (loop) source.loop = true;
-			source.start(0);
-			if (channel) JGAudio._playing[channel] = source;
+			var playtime = Date.now();
+			var lastplaytime = JGAudio._lastPlayed[name]
+			console.log("p"+playtime+"   l"+lastplaytime);
+			if (!lastplaytime || playtime - lastplaytime > 8) {
+				var source = JGAudio._context.createBufferSource();
+				var sourceGain = JGAudio._context.createGain();
+				sourceGain.gain.value = amplitude;
+				source.buffer = JGAudio._sounds[name];
+				source.connect(sourceGain);
+				sourceGain.connect(JGAudio._context.destination);
+				if (loop) source.loop = true;
+				source.start(0);
+				if (channel) JGAudio._playing[channel] = source;
+				JGAudio._lastPlayed[name] = playtime;
+			}
 		}
 	} else {
 		var audio = JGAudio._loadFile(JGAudio._sounds[name]);

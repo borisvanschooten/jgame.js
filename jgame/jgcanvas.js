@@ -290,6 +290,9 @@ JGCanvas.prototype.hasGamepads = function() {
 // input
 
 JGCanvas.prototype._jgkeydown = function (event) {
+	if (typeof JGAudio == "function") {
+		JGAudio._init(); // unsuspend audio
+	}
 	if (!this.keymap[event.keyCode]) {
 		this.keyflankmap[event.keyCode] = this.flanktimer;
 	}
@@ -311,6 +314,9 @@ JGCanvas.prototype._jgmouseup = function (event) {
 }
 
 JGCanvas.prototype._jgmousedown = function (event) {
+	if (typeof JGAudio == "function") {
+		JGAudio._init(); // unsuspend audio
+	}
 	this.sawmouseevents = true;
 	this.mousebutton[event.button+1] = true;
 }

@@ -44,7 +44,7 @@ function printRule($inputs,$outputs, $code) {
 <html>
 <head>
 <link rel="shortcut icon" type="image/png" href="http://tmtg.net/cellspace/favicon.png" />
-<title>CellSpace game engine</title>
+<title>Cellspace game engine</title>
 <style type="text/css">
 	* {color:#ddd; background-color:#000;}
 	a img {border-style:none;}
@@ -52,7 +52,7 @@ function printRule($inputs,$outputs, $code) {
 		padding: 8px;
 	}
 	table.rule td.cell {
-		border: 1px solid #444;
+		border: 1px solid #fff;
 	}
 	table.rule td.code {
 		padding-left: 60px;
@@ -70,7 +70,7 @@ function printRule($inputs,$outputs, $code) {
 	}
 	.func {
 		padding-top: 10px;
-		padding-bottom: 10px;
+		padding-bottom: 0px;
 		clear: both;
 		width: 160px;
 		float: left;
@@ -80,7 +80,8 @@ function printRule($inputs,$outputs, $code) {
 	}
 	.funcdesc {
 		width: 750px;
-		padding-top: 10px;
+		padding-left: 30px;
+		padding-top: 0px;
 		padding-bottom: 10px;
 		float: left;
 		font-style: italic;
@@ -88,7 +89,7 @@ function printRule($inputs,$outputs, $code) {
 	}
 	.funcparam {
 		clear: both;
-		padding-left: 160px;
+		padding-left: 120px;
 		padding-bottom: 5px;
 		font-style: italic;
 		color: #fbf;
@@ -97,8 +98,7 @@ function printRule($inputs,$outputs, $code) {
 </head><body>
 
 
-<div style='position: fixed; top: 30px; left: 70%; width:28%; overflow:scroll;'>
-<div style='overflow:scroll;'>
+<div style='position: fixed; top: 30px; left: 70%; width:28%; '>
 
 <div style='float: right;'>
 <a href="http://tmtg.nl/"><img src="http://tmtg.net/emergencyexit-tomato-39.png"></a>
@@ -113,17 +113,120 @@ need to be run on a web server due to CORS restrictions.
 
 
 <ul>
-<li> <a href="#top">Top</a>
-<li> <a href="#rules">Rules</a>
-<li> <a href="#appearance">Appearance and animation</a>
+<li> <a href="#top">Intro and example games</a>
+<li> <a href="#rules">Introduction to Cellspace Rules</a>
+<li> <a href="#ide">Cellspace IDE</a>
+<li> <a href="#cellscript">The Cellscript language</a>
+<li> <a href="#appearance">Cell appearance and animation</a>
 <li> <a href="#examplegame">A complete game</a>
 <li> <a href="#features">More features and function reference</a>
 </ul>
 
-<h2>CellSpace editor</h2>
-<ul><li><a href="../cellspace-editor.html">The CellSpace editor</a></ul>
+<h2>Cellspace tools</h2>
+<ul>
+<li><a href="../cellspace-ide.html">The Cellspace IDE</a> - Create games
+with just point and click.  Exports to Cellscript.
+<li><a href="../cellspace-editor.html">The Cellscript editor</a> - Create
+games in the Cellscript language.  Advanced but more powerful.
+</ul>
 
-<h2><a name="examples"></a>Example games</h2>
+
+
+</div>
+
+
+
+<div style="width: 68%;">
+
+<h1><a name="top"></a>
+<div style='float:left; padding-right: 15px; padding-bottom:15px;'><img src="cellspacelogo2_squareone-inverted.png"></div>
+Cellspace game engine</h1>
+
+Cellspace is a game engine based on cellular automata (aka cellular spaces).
+It was inspired by Boulderdash and similar games, which have tile-based
+entities that behave by just reacting to their neighbouring tiles. 
+
+The basic idea of Cellspace is that a level consists of a tile map, with a set
+of simple rules that describe how tiles are changed when certain patterns of
+tiles occur.  Everything is a tile, including the player and any other
+animated objects.  The engine is optimised so that it handles large tile maps,
+and is suitable for action games with large scrolling playfields.  With the
+help of animation directives, tile changes can be made to animate smoothly.
+
+You can create maze games, platform games and shooters, which can include game
+mechanics like water physics, destructible environment, propagating
+fire, and much more.
+
+<p>
+
+A Cellspace game is specified in a programming language called Cellscript. The
+Cellspace engine is based on HTML5 and WebGL, and will run on most web
+browsers, with good support for smartphones.  There are two tools for creating
+Cellspace games:
+
+<ul>
+
+<li><a href="../cellspace-ide.html">Cellspace IDE</a>: A point-and-click IDE,
+where you can define games without any programming or knowledge of the
+Cellscript syntax.  It is still under development and has some major
+limitations, as it only supports a subset of the Cellscript language. Most
+importantly you can define only one level with fixed size.  Also, the tileset
+is fixed to 16 tiles.  It is well suited for quickly creating minigames which
+you can export using a data URL.
+
+<li><a href="../cellspace-editor.html">Cellspace editor</a>: a text editor
+with code generating forms for editing and running Cellscript.  With the
+editor, you can take full advantage of the Cellscript language.  You can load
+and run games created in the IDE, though code you create in the editor can
+generally not be loaded back into the IDE. Right click on a line number to
+insert code using a code form.
+
+</ul>
+
+
+<h3>Cellspace IDE example games</h3>
+
+<ul>
+
+<li>
+<a href="../cellspace-games/ide/platformgame.txt">Platform game</a>
+<a href="../cellspace-ide.html?game=ide/platformgame.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/platformgame.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/escaperoom.txt">Escape room</a>
+<a href="../cellspace-ide.html?game=ide/escaperoom.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/escaperoom.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/dousethefires.txt">Douse the fires</a>
+<a href="../cellspace-ide.html?game=ide/dousethefires.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/dousethefires.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/cellpacman.txt">Cell pacman</a>
+<a href="../cellspace-ide.html?game=ide/cellpacman.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/cellpacman.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/cellshooter.txt">Cell shooter</a>
+<a href="../cellspace-ide.html?game=ide/cellshooter.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/cellshooter.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/boulderdash.txt">Boulderdash</a>
+<a href="../cellspace-ide.html?game=ide/boulderdash.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/boulderdash.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/harveywallbangers.txt">Harvey Wallbangers</a>
+<a href="../cellspace-ide.html?game=ide/harveywallbangers.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/harveywallbangers.txt&gametype=minimal">[PLAY]</a>
+
+
+</ul>
+
+<h3>Cellscript example games</h3>
 
 <ul> 
 
@@ -150,7 +253,7 @@ physics based game
 <li><a href="../games/onemanfirebrigade.txt">One Man Fire Brigade</a>
 <a href="../cellspace-editor.html?edit=onemanfirebrigade.txt">[EDIT]</a>
 <a href="../cellspace.html?game=onemanfirebrigade.txt">[PLAY]</a>
-is a game where you have to fight a growing wildfire
+is a twin stick game where you have to fight a growing wildfire
 
 <li><a href="../games/crushthecandyking.txt">Crush the Candy King</a>
 <a href="../cellspace-editor.html?edit=crushthecandyking.txt">[EDIT]</a>
@@ -161,49 +264,16 @@ is a physics platform game featuring a destructible environment.
 
 
 
-</div>
-</div>
 
+<h2><a name="rules"></a>Introduction to Cellspace rules</h2>
 
-
-<div style="width: 68%;">
-
-<h1><a name="top"></a>
-<div style='float:left; padding-right: 15px; padding-bottom:15px;'><img src="cellspacelogo2_squareone-inverted.png"></div>
-CellSpace game engine</h1>
-
-CellSpace is a game engine based on cellular automata (aka cellular spaces).
-It was inspired by Boulderdash and similar games, which have entities that are
-little more than tiles that animate by reacting to their immediate
-environment. 
-
-The basic idea of CellSpace is that a level consists of a tile map, with a set
-of simple visually oriented rules that describe how tiles are changed when
-certain patterns of tiles occur.  Everything is a tile, including the player
-and any other animated objects.  The engine is optimised so that it handles
-large tile maps at high frame rates, and is suitable for action games with
-large scrolling playfields.  With the help of animation directives, tile
-changes can be made to animate smoothly.  <p>
-
-You can create maze games, platform games and shooters, which can include game
-mechanics like (simple) water physics, destructible environment, propagating
-fire, and much more.
-
+The basis of Cellspace are cellular automata rules.  You define all behaviour
+by means of these rules.  A rule consists of a tile pattern that is changed
+into another tile pattern.  
 <p>
 
-A CellSpace game is specified in a programming language called CellScript. The
-CellSpace engine is based on HTML5 and WebGL, and will run on most web
-browsers. An <a href="../cellspace-editor.html">online IDE</a> is available for
-developing games easily.  Check out the links on the right to edit/play
-the example games.
-
-<h2><a name="rules"></a>CellScript rules</h2>
-
-
-A rule consists of a tile pattern that is changed into another tile
-pattern.
 For example, if there is a boulder with empty space below it, we want it to
-fall down.  In CellSpace, you specify it like this:
+fall down.  In Cellspace, you specify it like this:
 
 <br>
 <?php
@@ -226,18 +296,19 @@ A rule basically says:
 <p> <i>If you see this => turn it into this.</i>
 <p>
 
-Notice the 3x3 grid, which is the standard grid size for a CellSpace rule.
+Notice the 3x3 grid, which is the standard grid size for a Cellspace rule.
 Usually the object you want to manipulate is in the middle.  
 
-The black squares indicate "ignore this cell", and the grey squares indicate
-empty space (which is just another type of tile in our game, like the
-boulder).  <p>
+The dark green squares indicate "ignore this cell", and the dark grey
+squares indicate empty space (which is just another type of tile in our game,
+like the boulder).  <p>
 
-Right of the graphical representation of the rule, you see the corresponding
-CellScript statement.  The <code>"."</code> indicates ignore, and
+At the left, you see what the rule looks like in the IDE, at the right you see the corresponding
+Cellscript statement.  The <code>"."</code> indicates ignore, and
 <code>"-"</code> and <code>"*"</code> resp. indicate empty space and boulder.
 Linking characters to tile graphics is done using <code>cell:</code>
-statements (see next section).
+statements (these are hard-coded in the IDE, see next sections for more
+info).
 
 <p>
 
@@ -285,13 +356,15 @@ printRule(array(
 
 Note that the boulder will only roll to the right.  We should also specify a
 rule that makes it roll to the left.  Instead of specifying a second rule, in
-CellSpace we can just say that this rule should be mirrored to create a
-second rule.  In CellScript code, you specify this as: <code>transform:
-mirx</code>.  In case a boulder can roll both to the left and right, one rule
-is chosen randomly. 
+Cellspace we can just say that this rule should be mirrored to create a second
+rule.  In Cellscript, you specify this as: <code>transform: mirx</code>. The
+IDE rule settings mostly follow the Cellspace terminology, and there is
+a corresponding IDE <i>transform</i> setting.  In case a boulder can
+roll both to the left and right, one rule is chosen randomly.  
+
 <p>
 
-Now, let's introduce a player that can move around by pressing the WSAD keys.
+Now, let's introduce a player that can move around by pressing the cursor keys.
 
 <?php
 printRule(array(
@@ -317,7 +390,9 @@ condition is just a Javascript expression that must be true in order for the
 rule to trigger.  There is a built-in function <code>playerdir</code> that we
 can use.  If we specify <code>condfunc: playerdir("right")</code>, then the
 rule will trigger only if the "right" direction key is pressed (which is in the underlying engine translated to a cursor-right or swipe-right).  Note that if
-we place multiple player tiles on the map, they will all move. 
+we place multiple player tiles on the map, they will all move.  In the IDE,
+controls are specified with the <i>mouse</i> and <i>keybrd</i> options. These
+are translated internally into a <code>condfunc</code>.
 
 <p>
 
@@ -352,7 +427,7 @@ printRule(array(
 If we specify <code>transform: rot4</code> for this rule, the monster will
 move randomly in 4 directions.  This behaviour does not look very intelligent,
 so let's say we want the monster to go straight on until it hits something,
-and then turn.  This brings us to another CellSpace feature, namely
+and then turn.  This brings us to another Cellspace feature, namely
 directions.  Each tile has a direction associated with it, which is
 represented by <code>U</code>, <code>D</code>, <code>L</code>, <code>R</code>
 for up/down/left/right.
@@ -362,23 +437,31 @@ we specify <code>conddir: L</code>, the monster will only move left when its
 direction is left (that is, it is "facing left").  As yet,
 <code>conddir:</code> only checks the center tile, which is enough for most
 cases.  <code>outdir:</code> takes 9 parameters, specifying the directions to
-write for each cell in the 3x3 grid when the rule is triggered.
+write for each cell in the 3x3 grid when the rule is triggered.  The <i>conddir</i> and <i>outdir</i> options work the same in the IDE.
 
-<p>
+</p>
 
 Now, we still have to make the monster turn. We do this with the following
 cellscript:
 
-<pre>
-rule: monsterturn
-. . .   . . .
-. M .   . . .
-. . .   . . .
-outdir:
-- - -
-- L -
-- - -
-transform: rot4
+<?php printRule(array(
+	"", "", "",
+	"", "bug", "",
+	"", "", "",
+), array(
+	"", "", "",
+	"", "", "",
+	"", "", "",
+),
+ "rule: monsterturn  . . .   . . .\n"
+."                   . M .   . . .\n"
+."                   . . .   . . .\n");
+?>
+<pre style='margin-top:0px;'>
+                                  outdir: - - -
+                                          - L -           
+                                          - - -
+                                  transform: rot4
 </pre>
 
 This will cause the monster to turn randomly. Note that the right hand side
@@ -394,7 +477,7 @@ monster behaviour.
 
 <p>
 
-An important feature of CellScript rules is rule delays.  These are specified
+An important feature of Cellscript rules is rule delays.  These are specified
 by the <code>delay:</code> statement.  A number indicates that the rule is
 checked only once per the specified number of time ticks.  The enables
 different objects to move at different speeds.
@@ -419,6 +502,91 @@ This specifies that the rule triggers immediately as soon as its conditions
 are met, but then will wait for 4 time ticks before it triggers again on any
 cell. Any other rules referring to the same variable <code>playertimer</code>
 will be similarly delayed.  
+<p>
+
+The IDE supports a single "keyboard" timer, which can be selected by setting
+<i>delay</i> to one of the values ending in <i>kbd</i>, e.g. <i>3 kbd</i>.
+This is useful in combination with a <i>keybrd</i> setting, resulting in
+smoother control.
+
+
+<h2><a name="ide"></a>Cellspace IDE</h2>
+
+The Cellspace IDE user interface consists of several areas.  See the picture
+below.
+
+<ul>
+<li>At the top is the tileset bar, where you can select a tile to draw, change
+the tileset size, and load and edit the tiles.
+
+<li>At the bottom is the game and level bar, where you can start the level
+editor, restart the game, load and save, and set title and tile count based
+win and lose conditions.
+
+<li>At the middle left is the gameplay and level editor screen (switch between
+them using "Edit" and "Play" buttons).
+
+<li>At the middle right is the rules editor. Here you can set the input and
+output cells of each rule, and rule settings, user input, and sound.
+</ul>
+
+
+<img src="cellspace-ui-explanation.png" />
+
+<p>
+
+The IDE currently uses a tileset with 16 tiles.  The appearance and animation
+settings (as set by <code>cell:</code> statements) are hard-coded, but the tile
+pixel size and tiles themselves can be changed. A detault tileset is provided.
+The 16 tiles are subdivided as follows:
+<br>
+<img src="genericimages-explanation.png" />
+<br>
+The first 4 are materials, the second 4 are characters, and the last 8 are
+various objects.  The tiles with a red square do not animate, the other ones
+do.  Some have directional animations, in particular the tile rotates when
+facing in a certain direction. The animation settings are given by the
+following cell statements (for more detail see next sections):
+
+<pre>
+cell: - 0 - no - no       cell: H 4 - mirx - yes        cell: * 8 - no - yes       cell: [ 12 - rot4 - yes  
+cell: # 1 - no - no       cell: P 5 - rot-mir - yes     cell: o 9 - no - yes       cell: = 13 - rot4 - no
+cell: % 2 - no - no       cell: T 6 - rot4 - yes        cell: & 10 - no - yes      cell: + 14 - no - yes
+cell: ~ 3 - no - yes      cell: B 7 - rot4 - yes        cell: $ 11 - no - yes      cell: @ 15 - rot4 - no 
+</pre>
+
+The rule settings are the most complex, but follow the Cellscript language
+closely.  A rule can be copied and pasted using the copy/paste buttons.  You
+can define <i>mouse</i> and <i>keybrd </i>triggers for each rule, which are
+translated to a <code>condfunc</code> statement.  A mouse trigger involves
+clicking with the mouse on the center tile.
+
+<p> You can win or lose the game by triggering a rule, using the
+<i>outfunc</i> options.
+
+<p> For each rule, a sound can be defined, played when the rule is triggered.
+If you select a sound type other than "-", a random seed appears, along with
+play and random buttons.  The sound is generated by the ZzFX 8 bit style sound
+generator, using the type and random seed to generate a sound.  Sounds can be
+copied and pasted separately.
+
+<h2><a name="cellscript"></a>The Cellscript language</h2>
+
+The following sections describe the Cellscript language in more detail. A
+Cellscript specification consists of 3 types of sections:
+
+<ul>
+
+<li>Game - You can define globals, game title, background, tile set, and cell
+definitions. The game section is always at the top.
+
+<li>Rule - A rule section starts with a <code>rule:</code> statement, followed
+by any of the rule options.
+
+<li>Level - a level section starts with a <code>level:</code> statement,
+followed by the level map, and win, lose, tick statements.
+
+</ul>
 
 <h2><a name="appearance"></a>Cell appearance and animation</h2>
 
@@ -506,12 +674,12 @@ staying in the same location
 
 </ul>
 
-More details can be found in the IDE's code forms and the examples.
+More details can be found in the editor's code forms and the examples.
 
 
 <h2><a name="examplegame"></a>A complete game</h2>
 
-CellScript also includes level definition keywords, and a number of other
+Cellscript also includes level definition keywords, and a number of other
 directives for graphical appearance, such as the image to use for a tilemap,
 titles and instructions, and some shorthands.  To explain these, we will now
 look at a complete example game (with one level).  Download it here: <a
@@ -582,7 +750,7 @@ on your own server.
 
 The recommended way to specify your own tilemap is to use the sprite editor.
 When you've got your sprites loaded in the sprite editor, use the
-<i>CellScript: export</i> function.  A <code>tilemap:</code> statement will
+<i>Cellscript: export</i> function.  A <code>tilemap:</code> statement will
 appear in the textarea at the bottom, which you can copy/paste into your code.
 The generated tilemap statement uses a <a href="http://dataurl.net/">data
 URL</a>, which embeds the image data in a base64 encoded string. Of course,
@@ -780,27 +948,48 @@ Finally, here is a short function and variable reference.
 
 <div class="func">playerdir(dir)</div>
 
+<div class="funcparam">dir: "left", "right", "up", "down" (A,D,W,S or cursor keys)</div>
+<div class="funcparam">For twin-stick style controls, you can also use:</div>
+<div class="funcparam">"left1", "right1", "up1", "down1", "left2", "right2", "up2", "down2" (A,D,W,S and cursor keys)</div>
+
 <div class="funcdesc">returns true if the player indicates a particular
 direction by a keypress or swipe.</div>
 
-<div class="funcparam">dir: "left", "right", "up", "down" (A,D,W,S)</div>
-<div class="funcparam">For twin-stick style controls, you can also use:</div>
-<div class="funcparam">"left1", "right1", "up1", "down1", "left2", "right2", "up2", "down2" (A,D,W,S and J,L,I,K)</div>
-
 <div class="func">keypress(key)</div>
 
-<div class="funcdesc">returns: true when key is pressed</div>
+<div class="funcdesc">returns: true when key is pressed. Key is a 
+single-character string.</div>
+
+<div class="func">mousex()</div>
+
+<div class="funcdesc">returns: tile x position of mouse</div>
+
+<div class="func">mousey()</div>
+
+<div class="funcdesc">returns: tile y position of mouse</div>
+
+<div class="func">mousebutton(butnr)</div>
+
+<div class="funcdesc">returns: state of given mouse button</div>
+
+<div class="func">mouseclick(butnr)</div>
+
+<div class="funcdesc">returns: true if mouse is clicked inside current tile</div>
 
 <div class="func">countCells(cell_list) </div>
 
-<div class="funcdesc">returns the number of cells of the specified type(s).
-Note this actually counts all cells, so it's slow.</div>
 <div class="funcparam">cell_list: a string of one or more characters
 indicating cell types</div>
+<div class="funcdesc">returns the number of cells of the specified type(s).
+Note this actually counts all cells, so it's slow.</div>
 
-<div class="func">playSound(url) </div>
+<div class="func">loadsound(name,datasource) </div>
 
-<div class="funcdesc">play sound from the given URL</div>
+<div class="funcdesc">Load sound. Datasource can be URL or array of floats.</div>
+
+<div class="func">sound(url) </div>
+
+<div class="funcdesc">play sound with given name</div>
 
 <div class="func">win()</div>
 
@@ -808,7 +997,7 @@ indicating cell types</div>
 
 <div class="func">lose()</div>
 
-<div class="funcdesc">lose the game</div>
+<div class="funcdesc">loses the game</div>
 
 <div class="func">panto(x,y)</div>
 

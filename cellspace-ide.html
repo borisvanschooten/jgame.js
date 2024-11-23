@@ -16,6 +16,9 @@
 
 <script type="text/javascript" src="lib/kissc.js"></script>
 
+<script type="text/javascript" src="lib/ZzFX/ZzFX.js"></script>
+<script type="text/javascript" src="lib/ZzFX/zzfx_generate.js"></script>
+
 <script type="text/javascript" src="jgame/math.js"></script>
 <script type="text/javascript" src="jgame/jgstate.js"></script>
 <script type="text/javascript" src="jgame/jgcanvas.js"></script>
@@ -87,7 +90,34 @@ select.rule::-ms-expand {
 	font-size: 14px;
 }
 
+#cellrules .outdirselect {
+	font-size: 12px;
+}
 
+#cellrules .sounddisabled {
+	clear: both;
+	position:relative;
+	top: -6px;
+	width: 150px;
+	height: 14px;
+}
+#cellrules .sounddisabled input, #cellrules .sounddisabled button.soundhide {
+	display:none;
+}
+#cellrules .sounddisabled select {
+	font-size: 12px;
+	margin-left: 20px;
+}
+
+#cellrules .soundenabled {
+	clear: both;
+}
+#cellrules .soundenabled input, #cellrules .soundenabled button {
+}
+#cellrules .soundenabled select {
+	font-size: 14px;
+	width: 60px;
+}
 
 #cellrules {
 }
@@ -302,7 +332,7 @@ input[type="file"] {
 	<input type="file" id="sourcefile" onchange="loadSource(this.files)" accept="text/plain">
 	<button onclick='clearLevel()'>Clear level</button>
 	<button onclick='getURL()'>Game URL</button>
-	Title: <input id='leveltitle' type="text" value='User defined level' size=25></input>
+	Title: <input id='leveltitle' type="text" value='Cellspace game' size=25></input>
 	<table style='display: inline-block;vertical-align:middle;'><tr><td>
 	<input id='winenabled' type="checkbox" ></input>Win when <div id='wintile' style='vertical-align: middle;' class="rulecell rulecell1" onclick='setCondTile("win",pencil);'></div> reaches zero
 	</td></tr><tr><td>

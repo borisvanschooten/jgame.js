@@ -430,6 +430,7 @@ function webGLStart(gametype1) {
 				if (err) {
 					alert("Error loading game source");
 				} else {
+					console.log("Loaded game:");
 					console.log(res)
 					initCSGame(res);
 				}
@@ -1695,6 +1696,15 @@ Particle.prototype.paint = function(gl) {
 
 
 // ----------------------------------------------------------------------
+// CellSpace functions (move to Main.js?)
+
+function sfxdef(name,type,seed) {
+	var sound = buildPresetSound(seed,type)
+	JGAudio.load(""+name,sound.samples,true)
+}
+
+
+// ----------------------------------------------------------------------
 // game type specific stuff
 
 // ----------------------------------------------------------------------
@@ -1781,5 +1791,6 @@ var GameConfigs = {
 		fn: {}
 	},
 };
+
 
 

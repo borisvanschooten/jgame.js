@@ -95,6 +95,8 @@ CS.GameParser.removeComments = function(src) {
 }
 
 CS.GameParser.prototype.parseGame = function(gamesrc) {
+	// remove /r characters
+	gamesrc = gamesrc.replaceAll(/\r/g,"");
 	//ScriptContext.initContext();
 	this.linenr = -1;
 	CS.clearErrorLog();
