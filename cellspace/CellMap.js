@@ -266,7 +266,29 @@ CS.CellMap.prototype.applyRules = function(rules,worldtimer,callback) {
 					this.active[this.dsti][x+1][y+2] = true;
 					this.active[this.dsti][x+2][y+2] = true;
 				}
-				// select a rule from the triggered rules
+				// shuffle triggered rules
+				var triggered = [];
+				for (var i=0; i<this._nrtriggered[prioidx]; i++) {
+					triggered.push(this._triggered[prioidx][i]);
+				}
+				// from: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+				var shuffled = triggered
+					.map(value => ({ value, sort: Math.random() }))
+					.sort((a, b) => a.sort - b.sort)
+					.map(({ value }) => value)
+				//if (triggered.length > 0) {
+				//	console.log("Triggered:")
+				//	console.log(triggered)
+				//	console.log(shuffled)
+				//}
+				for (var i=0; i<shuffled.length; i++) {
+					var prob = random(0,1);
+					if (shuffled[i].probability > prob) {
+						this._triggerRule(shuffled[i],x,y,callback);
+					}
+				}
+				// old algo: find one rule to trigger
+				/*// select a rule from the triggered rules
 				trigger_rules: for (var p=CS.MAXPRIO-1; p>=0; p--) {
 					if (this._nrtriggered[p]!=0) {
 						//active[dsti][x+1][y+1] = true;
@@ -284,7 +306,7 @@ CS.CellMap.prototype.applyRules = function(rules,worldtimer,callback) {
 							// fall through to lower priority level
 						}
 					}
-				}
+				}*/
 			}
 		}
 	}
@@ -319,18 +341,6 @@ CS.CellMap.prototype._checkRuleAtPos = function(rule,x,y) {
 		// cell inactive
 		this._potentialtrigger=true;
 		cidx=0;
-		// block rule if any output cell was already changed by
-		// another rule
-		for (var dy=-1; dy<=1; dy++) {
-			for (var dx=-1; dx<=1; dx++) {
-				cidx++;
-				if (this.changed[1+x+dx][1+y+dy]) {
-					if (rule.outputs[i][cidx-1]!=0
-					||  rule.outdirs[i][cidx-1]!=-1)
-						continue nextsubrule;
-				}
-			}
-		}
 		// set explicit variables for condfunc and outfunc
 		window.x = x;
 		window.y = y;
@@ -355,10 +365,28 @@ CS.CellMap.prototype._checkRuleAtPos = function(rule,x,y) {
 	return any_trigger;
 }
 
+// triggerRule is called when all conditions except blocking through changed
+// are met. So it checks only for blocking.
+// It currently executes only one of the triggred subrules in case there are
+// multiple. Maybe shuffle and trigger all?
 // r: Rule
 CS.CellMap.prototype._triggerRule = function(r, x,y, callback) {
 	if (r.nrtriggers==0) CS.reportConsole("RuntimeError","No triggers in rule");
+	// choose one of the triggered subrules
 	var ri = r.triggers[randomstep(0,r.nrtriggers-1,1)];
+	// block rule if any output cell was already changed by
+	// another rule
+	var cidx=0;
+	for (var dy=-1; dy<=1; dy++) {
+		for (var dx=-1; dx<=1; dx++) {
+			cidx++;
+			if (this.changed[1+x+dx][1+y+dy]) {
+				if (r.outputs[ri][cidx-1]!=0
+				||  r.outdirs[ri][cidx-1]!=-1)
+					return;
+			}
+		}
+	}
 	// There can be max. 2 animations, one from center and one to center.
 	// From center:
 	// (1) the rule source's center tile is defined
@@ -477,7 +505,7 @@ CS.CellMap.prototype._triggerRule = function(r, x,y, callback) {
 			if (outdir!=-1) this.dir[this.dsti][xi][yi] = outdir;
 			// note, we include center tile in changed to ensure only one rule
 			// is triggered per tile if we traverse the grid multiple times
-			if (out!=0 || outdir!=-1 || (dx==0&&dy==0)) {
+			if (out!=0 || outdir!=-1) {// || (dx==0&&dy==0)) {
 				this.changed[xi+1][yi+1] = true;
 				if (didx==4 && anim_idx_dst!=-1) continue;
 				if (didx == anim_idx_src) continue;
