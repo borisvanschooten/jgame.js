@@ -1096,7 +1096,7 @@ function getRuleGrid(name,x1,y1,emptycell,use_class,raw_values) {
 	var yy1=y1
 	if (y1 == 3) { // check if 3-line grid
 		for (var y=0; y<y1; y+=2) {
-			for (var x=0; x<3; x++) {
+			for (var x=0; x<x1; x++) {
 				var cellitem = document.getElementById(name+"_"+x+"_"+y)
 				if (use_class) {
 					var cellidx = cellitem.className.match(/([0-9-]+)/)

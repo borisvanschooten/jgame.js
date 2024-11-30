@@ -227,9 +227,10 @@ CS.CellMap.prototype.applyRules = function(rules,worldtimer,callback) {
 				&&  !this.active[this.srci][x+1][y+2]
 				&&  !this.active[this.srci][x+2][y+2]) continue;
 				//var cur_prio = -32768;
-				var cur_prob = CS.initArray([CS.MAXPRIO],0.0);
+				//var cur_prob = CS.initArray([CS.MAXPRIO],0.0);
 				// XXX make more efficient with fixed array size
-				this._nrtriggered = CS.initArray([CS.MAXPRIO],0.0);
+				//this._nrtriggered = CS.initArray([CS.MAXPRIO],0.0);
+				var triggered = [];
 				this._potentialtrigger=false;
 				for (var r=0; r<rules.length; r++) {
 					var rule = rules[r];
@@ -247,10 +248,11 @@ CS.CellMap.prototype.applyRules = function(rules,worldtimer,callback) {
 						}
 						// rule is actually triggered
 						//cur_prio = rule.priority;
-						cur_prob[prio] += rule.probability;
-						this._triggered[prio][this._nrtriggered[prio]] = rule;
-						this._trigprob[prio][this._nrtriggered[prio]++] =
-							cur_prob[prio];
+						//cur_prob[prio] += rule.probability;
+						triggered.push(rule);
+						//this._triggered[prio][this._nrtriggered[prio]] = rule;
+						//this._trigprob[prio][this._nrtriggered[prio]++] =
+						//	cur_prob[prio];
 					}
 				}
 				// set active state for every cell that can be potentially
@@ -267,10 +269,6 @@ CS.CellMap.prototype.applyRules = function(rules,worldtimer,callback) {
 					this.active[this.dsti][x+2][y+2] = true;
 				}
 				// shuffle triggered rules
-				var triggered = [];
-				for (var i=0; i<this._nrtriggered[prioidx]; i++) {
-					triggered.push(this._triggered[prioidx][i]);
-				}
 				// from: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 				var shuffled = triggered
 					.map(value => ({ value, sort: Math.random() }))
