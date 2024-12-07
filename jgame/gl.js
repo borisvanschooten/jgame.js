@@ -75,6 +75,7 @@ function goFullscreen(elem_id) {
 	} else if (elem.webkitRequestFullscreen) {
 		elem.webkitRequestFullscreen();
 	}
+	elem.focus();
 }
 
 

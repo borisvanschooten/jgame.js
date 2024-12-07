@@ -18,6 +18,7 @@ var CS = {
 
 	// direction and position values
 
+	IGNOREDIR: -2, // only used for rules
 	NODIR: -1,
 	DIRU: 0,
 	DIRUR: 1,
@@ -27,7 +28,7 @@ var CS = {
 	DIRDL: 5,
 	DIRL: 6,
 	DIRUL: 7,
-	DIRCEN: 8,
+	DIRCEN: 8, // UNUSED
 
 	// copy pos masks
 	POSTL: 1,

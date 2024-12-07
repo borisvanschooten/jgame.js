@@ -321,7 +321,7 @@ CS.CellMap.prototype._checkRuleAtPos = function(rule,x,y) {
 	var m = this.map[this.srci];
 	nextsubrule: for (var i=0; i<rule.contexts.length; i++) {
 		// check dir
-		if (rule.srcdirs[i]!=-1 &&
+		if (rule.srcdirs[i]!=CS.IGNOREDIR &&
 		rule.srcdirs[i]!=this.dir[this.srci][x][y]) continue;
 		// check cell context
 		var c = rule.contexts[i];
@@ -380,7 +380,7 @@ CS.CellMap.prototype._triggerRule = function(r, x,y, callback) {
 			cidx++;
 			if (this.changed[1+x+dx][1+y+dy]) {
 				if (r.outputs[ri][cidx-1]!=0
-				||  r.outdirs[ri][cidx-1]!=-1)
+				||  r.outdirs[ri][cidx-1]!=CS.IGNOREDIR)
 					return;
 			}
 		}
@@ -500,10 +500,10 @@ CS.CellMap.prototype._triggerRule = function(r, x,y, callback) {
 			var out = r.outputs[ri][didx];
 			var outdir = r.outdirs[ri][didx];
 			if (out!=0) this.map[this.dsti][xi+1][yi+1] = out;
-			if (outdir!=-1) this.dir[this.dsti][xi][yi] = outdir;
+			if (outdir!=CS.IGNOREDIR) this.dir[this.dsti][xi][yi] = outdir;
 			// note, we include center tile in changed to ensure only one rule
 			// is triggered per tile if we traverse the grid multiple times
-			if (out!=0 || outdir!=-1) {// || (dx==0&&dy==0)) {
+			if (out!=0 || outdir!=CS.IGNOREDIR) {// || (dx==0&&dy==0)) {
 				this.changed[xi+1][yi+1] = true;
 				if (didx==4 && anim_idx_dst!=-1) continue;
 				if (didx == anim_idx_src) continue;

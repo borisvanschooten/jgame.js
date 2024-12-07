@@ -41,8 +41,8 @@ CS.Rule = function() {
 	this.transformspec=0;
 	this.context = null; /* Long[9] */
 	this.output = []; /* Long[9] */
-	this.outdir = [-1,-1,-1, -1,-1,-1, -1,-1,-1]; /* Long */
-	this.srcdir=-1;
+	this.outdir = [-2,-2,-2, -2,-2,-2, -2,-2,-2]; /* Long, CS.IGNOREDIR */
+	this.srcdir=CS.IGNOREDIR;
 	this.animdir=-1;
 
 	this.priority=1;
@@ -126,14 +126,14 @@ CS.Rule.prototype.toString = function() {
 	if (this.outfuncstr) {
 		src += "outfunc: "+this.outfuncstr+"\n";
 	}
-	if (this.srcdir > -1) {
+	if (this.srcdir != CS.IGNOREDIR) {
 		src += "conddir: "+this.dirToString(this.srcdir)+"\n";
 	}
 	var emptyrows = [true,true,true];
 	var rowspecs = ["","",""]
 	for (var y=0; y<3; y++) {
 		for (var x=0; x<3; x++) {
-			if (this.outdir[x+3*y] > -1) emptyrows[y]=false;
+			if (this.outdir[x+3*y] != CS.IGNOREDIR) emptyrows[y]=false;
 			rowspecs[y] += this.dirToString(this.outdir[x+3*y])+" "
 		}
 	}
@@ -175,6 +175,7 @@ CS.Rule.prototype.mouseToString = function() {
 
 CS.Rule.prototype.dirToString = function(dirmask) {
 	switch(dirmask) {
+		case CS.NODIR: return "N"; // deprecate "C"?
 		case CS.DIRU: return "U";
 		case CS.DIRD: return "D";
 		case CS.DIRL: return "L";
@@ -183,7 +184,7 @@ CS.Rule.prototype.dirToString = function(dirmask) {
 		case CS.DIRR: return "R";
 		case CS.DIRUR: return "UR";
 		case  CS.DIRDR: return "DR";
-		default: /*CS.NODIR*/ return "-";
+		default: /*CS.IGNOREDIR*/ return "-";
 	}
 }
 
@@ -312,7 +313,8 @@ CS.Rule.getTransform = function(transform,src) {
 
 
 CS.Rule.getTransformDir = function(transform,dir) {
-	if (dir==-1) return -1;
+	if (dir==CS.IGNOREDIR) return CS.IGNOREDIR;
+	if (dir==CS.NODIR) return CS.NODIR;
 	var rot = transform&7;
 	var mirx = transform&8;
 	var miry = transform&16;

@@ -95,17 +95,18 @@ select.rule::-ms-expand {
 }
 
 #cellrules .sounddisabled {
+	margin-top: -5px;
 	clear: both;
-	position:relative;
+	/*position:relative;
 	top: -6px;
 	width: 150px;
-	height: 14px;
+	height: 14px;*/
 }
 #cellrules .sounddisabled input, #cellrules .sounddisabled button.soundhide {
 	display:none;
 }
 #cellrules .sounddisabled select {
-	font-size: 12px;
+	/*font-size: 12px;*/
 	margin-left: 20px;
 }
 
@@ -126,6 +127,7 @@ select.rule::-ms-expand {
 	background-color: #444;
 	color: #fff;
 	font-size: 14px;
+	line-height: 16px;
 }
 
 #cellrules button {
@@ -135,9 +137,18 @@ select.rule::-ms-expand {
 	font-size:10px;
 }
 
+#cellrules .toggle {
+	display: block;
+	clear: both;
+	font-weight: bold;
+	color: #faa;
+	border: 2px solid #faa;
+	font-size: 14px;
+}
+
 #controlpanel {
 	border: 2px solid black;
-	font-size: 18px;
+	font-size: 16px;
 }
 #controlpanel input {
 	font-size:16px;
@@ -192,6 +203,7 @@ input[type="file"] {
 .ruleblock {
 	border: 3px solid #777;
 	margin: 2px;
+	float: left;
 }
 
 
@@ -272,6 +284,11 @@ input[type="file"] {
 	border: 2px solid white;
 }
 
+input[type=color] {
+	height: 22px;
+	vertical-align: middle;
+}
+
 </style>
 
 <style id="tilestyle">
@@ -298,12 +315,14 @@ input[type="file"] {
 <table id='mainblock' style='width:100%; height:100%;table-layout:fixed;'>
 <colgroup>
 <col />
-<col style='width:390px;' />
+<col id="colgroup-rules" style='width:390px;' />
 </colgroup>
 <tr><td colspan=2>
 <div id='palette' style="height: 38px;">
 	<div id='palette-large' style='float:left;'></div>
-	<div style='float:left; margin-top:8px; margin-left:8px;'>Tileset: tilesize:</div>
+	<div style='float:left; margin-top:8px; margin-left:8px;'>Tile anim: </div>
+	<div id='cellanim-select-container' style='float:left;margin-top:6px; margin-left:4px;'></div>
+	<div style='float:left; margin-top:8px; margin-left:8px;'>Tileset: </div>
 	<div id='tileset-select-container' style='float:left;margin-top:6px; margin-left:4px;'></div>
 	<button onclick='readTileset()' style='margin-left:8px; margin-top:6px;'>Load</button>
 	<button onclick='editTileset()' style='margin-left:8px; margin-top:6px;'>Edit</button>
@@ -321,7 +340,7 @@ input[type="file"] {
 <!--<div id='cellrules' style='height:600px;overflow:scroll;'></div>-->
 </td>
 </tr>
-<tr><td colspan=2 id='controlpanel' style="height: 50px;">
+<tr><td colspan=2 id='controlpanel' style="height: 45px;">
 	<button onclick='editLevel()'>Edit</button>
 	<button onclick='runLevel()'>Run</button>
 	<!--<button onclick='incLevel(-1)'>&lt;&lt; Level</button>
@@ -332,7 +351,8 @@ input[type="file"] {
 	<input type="file" id="sourcefile" onchange="loadSource(this.files)" accept="text/plain">
 	<button onclick='clearLevel()'>Clear level</button>
 	<button onclick='getURL()'>Game URL</button>
-	Title: <input id='leveltitle' type="text" value='Cellspace game' size=25></input>
+	Title: <input id='leveltitle' type="text" value='Cellspace game' size=22></input>
+	BG: <input id='backgroundcolor' type="color" value='#444444' onchange='updateBackgroundColor()'></input>
 	<table style='display: inline-block;vertical-align:middle;'><tr><td>
 	<input id='winenabled' type="checkbox" ></input>Win when <div id='wintile' style='vertical-align: middle;' class="rulecell rulecell1" onclick='setCondTile("win",pencil);'></div> reaches zero
 	</td></tr><tr><td>

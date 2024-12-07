@@ -284,11 +284,14 @@ CS.GameParser.prototype.createRule = function(par) {
 }
 
 // dir can be U,D,R,L, and legal combinations like UL,UR,DL,DR.
+// "N" or "C" on its own indicates IGNOREDIR.
 // Other characters are ignored. Combinations resulting in impossible dirs
-// (like TB) result in NODIR.
-// passing null results in NODIR.
+// (like TB) result in IGNOREDIR.
+// Passing null results in IGNOREDIR.
 CS.GameParser.prototype.parseDir = function(dirstr) {
-	if (dirstr==null) return CS.NODIR;
+	if (dirstr==null) return CS.IGNOREDIR;
+	if (dirstr.trim() == "N") return CS.NODIR;
+	if (dirstr.trim() == "C") return CS.NODIR;
 	var dirmask=0;
 	for (var i=0; i<dirstr.length; i++) {
 		switch (dirstr.charAt(i)) {
@@ -307,7 +310,7 @@ CS.GameParser.prototype.parseDir = function(dirstr) {
 		case 8: return CS.DIRR;
 		case 9: return CS.DIRUR;
 		case 10: return CS.DIRDR;
-		default: return CS.NODIR;
+		default: return CS.IGNOREDIR;
 	}
 }
 
@@ -589,7 +592,7 @@ CS.GameParser.prototype.keyword_outdir = function(par) {
 		}
 	} else if (par.length==3) { // horiz
 		for (var i=0; i<9; i++) {
-			this.currule.outdir[i] = CS.NODIR;
+			this.currule.outdir[i] = CS.IGNOREDIR;
 		}
 		for (var i=3; i<6; i++) {
 			this.currule.outdir[i] = this.parseDir(par[i-3]);

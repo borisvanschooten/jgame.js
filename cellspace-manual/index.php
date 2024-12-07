@@ -430,14 +430,16 @@ so let's say we want the monster to go straight on until it hits something,
 and then turn.  This brings us to another Cellspace feature, namely
 directions.  Each tile has a direction associated with it, which is
 represented by <code>U</code>, <code>D</code>, <code>L</code>, <code>R</code>
-for up/down/left/right.
-Initially the direction is undefined, but we can set it using
+for up/down/left/right.  Initially the direction is none (represented by
+<code>N</code> meaning "no direction").  We can set direction using
 <code>outdir:</code> and check it using <code>conddir:</code> statements.  If
 we specify <code>conddir: L</code>, the monster will only move left when its
 direction is left (that is, it is "facing left").  As yet,
 <code>conddir:</code> only checks the center tile, which is enough for most
-cases.  <code>outdir:</code> takes 9 parameters, specifying the directions to
-write for each cell in the 3x3 grid when the rule is triggered.  The <i>conddir</i> and <i>outdir</i> options work the same in the IDE.
+cases.  <code>outdir:</code> takes 9 parameters, specifying the directions
+to write for each cell in the 3x3 grid when the rule is triggered.  Note that
+specifying <code>-</code> indicates direction should be ignored.  The
+<i>conddir</i> and <i>outdir</i> options work the same in the IDE.
 
 </p>
 

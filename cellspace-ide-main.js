@@ -4,14 +4,34 @@ gametype = "minimal-noresize"
 //              "disableAudio": true, "disableRestart": true }
 
 levelsizes = {
+	"21x12": "21x12",
+	"26x15": "26x15",
+	"32x18": "32x18",
 	"38x22": "38x22",
+	"48x27": "48x27",
 	"56x33": "56x33",
 }
 
 levelspecs = {
+	"21x12": {
+		w: 21, h: 12,
+		tilex: 90, tiley: 90,
+	},
+	"21x15": {
+		w: 26, h: 15,
+		tilex: 72, tiley: 72,
+	},
+	"32x22": {
+		w: 32, h: 18,
+		tilex: 60, tiley: 60,
+	},
 	"38x22": {
 		w: 38, h: 22,
 		tilex: 48, tiley: 48,
+	},
+	"48x27": {
+		w: 48, h: 27,
+		tilex: 40, tiley: 40,
 	},
 	"56x33": {
 		w: 56, h: 33,
@@ -192,12 +212,22 @@ celldefs = [
 	["@","15","-","rot4","-","no"],
 ]
 
+cellanims = {
+	"": "-",
+	"none": "nodir",
+	"rot4": "rot4",
+	"mirx": "mirx",
+	"miry": "miry",
+	"rot-mir": "rot-mir",
+}
+
 
 emptycell = "."
 emptycell_index = -1
 
 directions = {
 	"-": "-",
+	"N": "N",
 	"L": "L",
 	"R": "R",
 	"U": "U",
@@ -205,8 +235,8 @@ directions = {
 }
 
 conddirections = {
-	" ": " ",
 	"-": "-",
+	"N": "N",
 	"L": "L",
 	"R": "R",
 	"U": "U",
@@ -335,7 +365,7 @@ var tileset_image = null
 
 
 levels = [
-{ nr_rules:25,
+{ nr_rules:30,
 fixedrules: ""
 /*`
 rule: rule0
@@ -443,24 +473,35 @@ title: Maze generator
 ]
 
 
+// helpers ----------------------------------------------------------------
+
+function elbyid(id) {
+	return document.getElementById(id)
+}
+
+
 // UI events ----------------------------------------------------------------
 
 function runLevel() {
+	toggleExpandRules(true)
 	pauseWebGL(false)
 	var spec = createCellspaceSpec()
 	console.log(spec)
 	initCSGame(spec)
-	for (var i=0; i<CS.Main.game.rules.length; i++) {
+	//for (var i=0; i<CS.Main.game.rules.length; i++) {
 		//console.log(CS.Main.game.rules[i])
 		//console.log(CS.Main.game.rules[i].toString())
-	}
+	//}
 	document.getElementById("leveleditor").style.display='none'
 	document.getElementById("game-canvas").style.display='block'
 	document.getElementById("game-canvas").focus()
-	
+	resizeUI()
 }
 
-function editLevel() {
+function editLevel(do_not_minimize_rules) {
+	if (!do_not_minimize_rules) {
+		toggleExpandRules(true)
+	}
 	pauseWebGL(true)
 	// parse level map
 	var spec = createCellspaceSpec()
@@ -605,6 +646,10 @@ function updateSpritesheets() {
 	document.getElementById("spritesheets").textContent = css
 }
 
+function updateBackgroundColor() {
+	var col = document.getElementById("backgroundcolor").value
+}
+
 
 function clearRule(name) {
 	var yes = confirm("Clear "+name+"?")
@@ -630,12 +675,41 @@ function pasteRule(name) {
 	}
 }
 
+function toggleExpandRules(force_minimize) {
+	if (force_minimize || elbyid("colgroup-rules").style.width == "100%") {
+		elbyid("colgroup-rules").style.width="390px"
+	} else {
+		elbyid("colgroup-rules").style.width="100%"
+	}
+}
+
 function setPalette(idx) {
 	document.getElementById("object"+pencil).style.borderColor='black'
 	document.getElementById("objectsmall"+pencil).style.borderColor='black'
 	pencil = idx
 	document.getElementById("object"+idx).style.borderColor='white'
 	document.getElementById("objectsmall"+idx).style.borderColor='white'
+	document.getElementById("cellanim-select").value = getCellAnim(idx)
+}
+
+function getCellAnim(idx) {
+	var celldef = CS.Main.game.cellsyms[celldefs[idx][0]]
+	console.log(celldef)
+	return celldef.should_anim ? celldef.directional : ""
+}
+
+// set anim of selected tile from cellanim-select
+function setCellAnim() {
+	var value = document.getElementById("cellanim-select").value
+	var should_anim = "yes"
+	var directional = "no"
+	if (value == "") {
+		should_anim = "no"
+	} else {
+		directional = value
+	}
+	CS.Main.game.cellsyms[celldefs[pencil][0]].should_anim = should_anim
+	CS.Main.game.cellsyms[celldefs[pencil][0]].directional = directional
 }
 
 function checkSetMap(event,x,y) {
@@ -694,7 +768,14 @@ function setLevelCond(type,condstr) {
 	}
 }
 
+// a ignored
+function rgbToHex(rgba) {
+	return "#" + (1 << 24 | rgba[0] << 16 | rgba[1] << 8 | rgba[2]).toString(16).slice(1);
+}
+
 function copyGameParam() {
+	document.getElementById("backgroundcolor").value =
+		rgbToHex(CS.Main.game.backgroundcolor)
 	tileset = CS.Main.game.tilemapurl
 	tileset_tilex = CS.Main.game.tiletex_tilex
 	tileset_tiley = CS.Main.game.tiletex_tiley
@@ -819,6 +900,7 @@ function initIDE() {
 			createRuleUI()
 			clearTimeout(timer)
 			resizeUI()
+			setPalette(0)
 		}
 	}, 20)
 }
@@ -874,6 +956,8 @@ function createPalette() {
 	document.getElementById("palette-small").innerHTML = html2
 	var select = createSelect(tilesetsizes,"tileset-select",null,"changeTilesetSize()")
 	document.getElementById("tileset-select-container").innerHTML = select
+	var select = createSelect(cellanims,"cellanim-select",null,"setCellAnim()")
+	document.getElementById("cellanim-select-container").innerHTML = select
 }
 
 function createLevelEditor() {
@@ -955,6 +1039,7 @@ function createRuleUI() {
 	var elem = document.getElementById("cellrules_td")
 	var height = getMiddleTRHeight()
 	html = "<div id='cellrules' style='height:"+height+"px;'>"
+	html += "<button class='toggle' onclick='toggleExpandRules(); editLevel(true)'>&lt;&lt;&lt; Toggle expand rules &gt;&gt;&gt;</button>"
 	//html = "<div id='cellrules' style='height:"+elem.parentNode.offsetHeight+"px;overflow:scroll;'>"
 	for (var i=0; i<levels[lev].nr_rules; i++) {
 		html += "<div  class='ruleblock'>"
@@ -1336,12 +1421,19 @@ function createCellspaceSpec() {
 	var cellstatements = ""
 	for (var i=0; i<celldefs.length; i++) {
 		var def = celldefs[i]
+		var altdef = null
+		if (CS.Main.game && CS.Main.game.cellsyms[def[0]]) {
+			altdef = CS.Main.game.cellsyms[def[0]]
+			console.log(altdef)
+		}
 		cellstatements += "cell: " +def[0]+" "+def[1]+" "+def[2]
-			+" "+def[3]+" "+def[4]+" "+def[5]+"\n"
+			+" "+(altdef ? altdef.directional : def[3])
+			+" "+def[4]
+			+" "+(altdef ? (altdef.should_anim?"yes":"no") : def[5])+"\n"
 	}
 	return initcode+"\n"
 +`
-gamebackground: #648
+gamebackground: #444
 
 tilemap: `
 	+tileset_tilex+" "+tileset_tiley+" "
@@ -1350,7 +1442,7 @@ tilemap: `
 display: `+levels[lev].display+
 `
 
-background: #444
+background: `+document.getElementById("backgroundcolor").value+`
 empty: .
 
 `
