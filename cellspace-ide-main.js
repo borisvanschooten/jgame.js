@@ -249,6 +249,7 @@ playercontrols = {
 	'playerdir("down")': "down",
 	'playerdir("left")': "left",
 	'playerdir("right")': "right",
+	'playerbutton("fire")': "fire",
 	'keypress("x")': "Key X",
 	'keypress("z")': "Key Z",
 	'keypress("k")': "Key K",
@@ -303,6 +304,8 @@ delays = {
 	"7":"7",
 	"8":"8",
 	"9":"9",
+	"15":"15",
+	"30":"30",
 	"1 trigger player":"1 kbd",
 	"2 trigger player":"2 kbd",
 	"3 trigger player":"3 kbd",
@@ -312,6 +315,8 @@ delays = {
 	"7 trigger player":"7 kbd",
 	"8 trigger player":"8 kbd",
 	"9 trigger player":"9 kbd",
+	"15 trigger player":"15 kbd",
+	"30 trigger player":"30 kbd",
 }
 
 transforms = {
@@ -671,7 +676,7 @@ function pasteRule(name) {
 		var r = getRuleBlock(rulecopysource,true)
 		setRuleBlock(name,r.pattern,r.outdir,r.conddir,r.transform,
 			r.player,r.mouse,r.priority,r.probability,r.delay,r.outfunc,
-			r.sound)
+			r.sounddef)
 	}
 }
 
@@ -689,10 +694,13 @@ function setPalette(idx) {
 	pencil = idx
 	document.getElementById("object"+idx).style.borderColor='white'
 	document.getElementById("objectsmall"+idx).style.borderColor='white'
-	document.getElementById("cellanim-select").value = getCellAnim(idx)
+	if (idx >= 0) {
+		document.getElementById("cellanim-select").value = getCellAnim(idx)
+	}
 }
 
 function getCellAnim(idx) {
+	if (idx < 0) return;
 	var celldef = CS.Main.game.cellsyms[celldefs[idx][0]]
 	console.log(celldef)
 	return celldef.should_anim ? celldef.directional : ""
@@ -700,6 +708,7 @@ function getCellAnim(idx) {
 
 // set anim of selected tile from cellanim-select
 function setCellAnim() {
+	if (pencil < 0) return
 	var value = document.getElementById("cellanim-select").value
 	var should_anim = "yes"
 	var directional = "no"

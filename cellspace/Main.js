@@ -559,6 +559,19 @@ function playerdir(basedirstr) {
 	return false;
 }
 
+// Abstract button.  butstr is one of:
+//   fire - space, "L", mouse button anywhere, tap anywhere
+//   fire1 - todo fire left
+//   fire2 - todo fire right
+function playerbutton(butstr) {
+	var delay = ruletriggerparam.rule.delay;
+	if (butstr == "fire") {
+		return CS.IO.getMouseButton(1)
+		|| CS.Main.getFlankKey(" ",delay)
+		|| CS.Main.getFlankKey("L",delay);
+	}
+}
+
 function keypress(keystr) {
 	keystr = keystr.toLowerCase();
 	var delay = ruletriggerparam.rule.delay;
