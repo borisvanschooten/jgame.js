@@ -182,13 +182,15 @@ function processImageURL(url,is_tileset) {
 	if (!url.match(/^[a-zA-Z0-9]+:/)) {
 		// relative URL -> use default directory
 		if (is_tileset) {
-			url = "../images/"+url;
+			//url = "../images/"+url;
+			url = "images/"+url;
 		} else {
 			url = "images/"+url;
 		}
 	} 
 	if (is_tileset) {
-		url = "php/transformimage.php?url="+encodeURIComponent(url);
+		url = url+"?transform_rotmir=true";
+		//url = "php/transformimage.php?url="+encodeURIComponent(url);
 	}
 	return url;
 }
@@ -377,7 +379,7 @@ function initCSGame(gamesrc) {
 	return true;
 }
 
-function webGLStart(gametype1) {
+function webGLStart(gametype1,gamesrc1) {
 	gametype2 = PersistentState.getUrlParameter("gametype");
 	if (!gametype) gametype = "building";
 	if (gametype1) gametype = gametype1
@@ -424,7 +426,7 @@ function webGLStart(gametype1) {
 		initCSGame(gamesrc);
 	} else {
 		var gamesrc = PersistentState.getUrlParameter("game");
-		//if (!gamesrc) gamesrc = "simpleboulder";
+		if (!gamesrc) gamesrc = gamesrc1;
 		if (gamesrc) {
 			httpGet("cellspace-games/"+gamesrc,function(err,res) {
 				if (err) {

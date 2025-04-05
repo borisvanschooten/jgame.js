@@ -17,7 +17,7 @@ levelspecs = {
 		w: 21, h: 12,
 		tilex: 90, tiley: 90,
 	},
-	"21x15": {
+	"26x15": {
 		w: 26, h: 15,
 		tilex: 72, tiley: 72,
 	},
@@ -391,6 +391,8 @@ delay: 3
 ,
 levelsize: "38x22",
 display: "48 48",
+//levelsize: "26x15",
+//display: "72 72",
 levelmap: null,
 map:`
 --------------------------------------
@@ -1433,7 +1435,7 @@ function createCellspaceSpec() {
 		var altdef = null
 		if (CS.Main.game && CS.Main.game.cellsyms[def[0]]) {
 			altdef = CS.Main.game.cellsyms[def[0]]
-			console.log(altdef)
+			//console.log(altdef)
 		}
 		cellstatements += "cell: " +def[0]+" "+def[1]+" "+def[2]
 			+" "+(altdef ? altdef.directional : def[3])

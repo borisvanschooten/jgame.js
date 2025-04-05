@@ -1,0 +1,195 @@
+globals: sfxdef(2,'Blip',20567); sfxdef(3,'Powerup',543935); sfxdef(5,'Pickup',595807); sfxdef(6,'Hit',573027); sfxdef(7,'Hit',513411); sfxdef(9,'Hit',583012); sfxdef(10,'Hit',583012); sfxdef(11,'Hit',573027); sfxdef(12,'Hit',573027); sfxdef(13,'Powerup',906553); sfxdef(14,'Hit',583012); sfxdef(15,'Hit',498048); sfxdef(16,'Hit',498048); 
+
+gamebackground: #444
+
+tilemap: 8 8 4 4 no data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADD0lEQVRYR+2WMWhTQRjH/wfFoTo8aBCnQrEFFzt0qcNDY8DXoR0yOTg5BJSCQUyGuJRQBzMUkQxFMENxrA4B06FvSKO8QURaqYKplj6oIFpim0E6Ked9994976WJiSaQpUfDu9zdu///+33fF8rQfvD2R/6ciEajqFQqckGfqxON+6yDy9saaCak3+vvs2w2K+8Sz2C7JwaaRdtoikSVMD2JEn26NtBh9CHQupmuDTRB3TT3ipIyrOqkawP/Q0A33bWBvhNo1W76eitKtB4QeLWQDLXbhXT+CJ2FhbI8k07HOiHXQYfDM1DKZJr2eiRyCGWExFOpy1hZAarVtZ6ZkAb06Ccn4mCxGHi5TE9G5uz1deRtm+kEkpbFrYkJzORyXdFgjeKKG4krOmTASq5iehqSAA07P4WeGKDLEgkeSkGhwFrmXxnsVR0wgZpTtMoEidP88bU1mQIS1POvDPSqDqQACaqo9bmegmErE6rqXTvXuxTwRcgUsFkwfa4MVCMWVAfoBM7V7O6LkC5cLCf56K8Zebe74+LDlouHD8LVLaqEi8qQxPQ5fU/G5/mwaQaEdh0H+eKcd1b8iUlQUxQgBRrskfiV4VvYOjuGw2fLqA5dxYnXOXzdq4dMlJcyPHbdM6XP9bzoRkwUg9+QkOhmlLPxiiRNRtjy02VeG3JAJlzXDQjQxfVaHUtPHh0RbWWA3qG2dhCXvkIkKM2zYnEzCjji/wCfAiMCke8evoP9A3wbu4GdpZswIgY23mzgxctVxkVlolDAXXHmfiIBNc9paJX45GAe92wLg6ZXtKnBGGAKURrnK97Ty4kMTBJQwvulcKX/iwGKXInPFW2m0qF+L6gWvFIX451viEjcvpPhZ04b2P5SwqkBE+62i5HREfz46cB+vodd92NbAo3ivowszqAYKQVEYlxQWPQ6zocBkAnK94DxXpog8U9vT0r8dOhvKWglrkzI9/2C434B6mtBe1y6OMUNw0C9Xof72ZWRq0va1cB83OKEXRcN3tXaUO8GacLb6+84NnBM4JhA3wn8Bk6Q9jg2zdIyAAAAAElFTkSuQmCC
+
+display: 48 48
+
+background: #515151
+empty: .
+
+cell: - 0 - none - no
+cell: # 1 - none - no
+cell: % 2 - none - no
+cell: ~ 3 - none - yes
+cell: H 4 - mirx - yes
+cell: P 5 - rot4 - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - rot4 - yes
+cell: * 8 - none - yes
+cell: o 9 - none - yes
+cell: & 10 - none - yes
+cell: $ 11 - none - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - rot4 - no
+cell: + 14 - none - yes
+cell: @ 15 - rot4 - no
+
+rule: rule0
+. H - . - H 
+condfunc: playerdir("right")
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- N R 
+delay: 3 trigger player
+rule: rule1
+. H % . . - 
+priority: 1
+transform: rot4
+conddir: -
+delay: 1
+rule: rule2
+. H % . . * 
+priority: 2
+transform: rot4
+conddir: -
+probability: 0.5
+delay: 1
+outfunc: sound(2)
+rule: rule3
+. H ~ . . P 
+priority: 2
+transform: rot4
+conddir: -
+delay: 1
+outfunc: sound(3)
+rule: rule4
+. P - . - P 
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- N R 
+delay: 6
+rule: rule5
+. H % . . & 
+priority: 2
+transform: rot4
+conddir: -
+probability: 0.1
+delay: 1
+outfunc: sound(5)
+rule: rule6
+. P * . - P 
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- - R 
+delay: 6
+outfunc: sound(6)
+rule: rule7
+. P * . - - 
+priority: 1
+transform: rot4
+conddir: -
+probability: 0.2
+delay: 6
+outfunc: sound(7)
+rule: rule8
+H P - . - P 
+priority: 2
+conddir: -
+outdir:
+- - R 
+delay: 6
+rule: rule9
+H * - - H * 
+condfunc: playerdir("right")
+priority: 1
+transform: rot4
+conddir: -
+delay: 3 trigger player
+outfunc: sound(9)
+rule: rule10
+H & - - H & 
+condfunc: playerdir("right")
+priority: 1
+transform: rot4
+conddir: -
+delay: 3 trigger player
+outfunc: sound(10)
+rule: rule11
+H & * - H - 
+condfunc: playerdir("right")
+priority: 1
+transform: rot4
+conddir: -
+delay: 3 trigger player
+outfunc: sound(11)
+rule: rule12
+H * & - H - 
+condfunc: playerdir("right")
+priority: 1
+transform: rot4
+conddir: -
+delay: 3 trigger player
+outfunc: sound(12)
+rule: rule13
+. H ~ . . o 
+priority: 2
+transform: rot4
+conddir: -
+delay: 1
+outfunc: sound(13)
+rule: rule14
+H o - - H o 
+condfunc: playerdir("right")
+priority: 1
+transform: rot4
+conddir: -
+delay: 3 trigger player
+outfunc: sound(14)
+rule: rule15
+H o * - H $ 
+condfunc: playerdir("right")
+priority: 2
+transform: rot4
+conddir: -
+delay: 3 trigger player
+outfunc: sound(15)
+rule: rule16
+. $ * . $ $ 
+priority: 3
+transform: rot4
+conddir: -
+delay: 1
+outfunc: sound(16)
+rule: rule17
+. $ . . - . 
+priority: 1
+conddir: -
+delay: 3
+
+
+
+level: #
+
+H-----%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+--&-&-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-&-&--%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+--&-&-%%%%%%%%%%%%%%%%%%%%%~~%%%%%%%%%
+------%%%%%%%%%%%%%%%%%%%%~~~~%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%~~~~%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%~~%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%~~%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%~~~~%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%~~~~%%%%%%%%%%%%%%%~~%%%
+%%%%%%%%%%%%%%%~~%%%%%%%%%%%%%%%~~~~%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%~~~~%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%~~%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+win: countCells('%')==0
+
+title: Explore the cave

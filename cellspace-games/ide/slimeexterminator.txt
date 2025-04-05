@@ -1,0 +1,229 @@
+globals: sfxdef(9,'Explo',883984); sfxdef(11,'Blip',70322); sfxdef(12,'Pickup',648960); sfxdef(19,'Hit',963712); sfxdef(20,'Blip',70322); sfxdef(23,'Blip',240941); 
+
+gamebackground: #444
+
+tilemap: 8 8 4 4 no data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACDElEQVRYR+2Xr14CQRDHZ5/AYuYNMJANQsCAgWQmYJCqVYNWrBAk8AgECRLEYCZ4b0D2HdaZXeY+s+fc3d7HEwtXgJvd+X3n3y1nIPL67IKVS09WYCK3Fi6LckLizT7A9thC48tvSRYAdUCUAkjx5BKg0fVbCKgOiCiAo6EFKb53AI5WFnOvGdAAtivsByzHb/ugtAQUNfcBZ2A5qkec/EUBMMS/jWEd857nIzoDfwVxADhk4JCBIAMPb/7Mv+/8fECxjccxu8bCOPi/YOA2KrvpIhJotb37zTqEkDYGkGuc+LwZPioGCUZRDuEAOLq7tg/ice25KEoWJ0FpJ1h3rzMGJ46CYG88hHlK75VBpAIXqGmtBzDGwAt+JQG6SCzPzgBmcB7st/NXB1UJQOZQA9DsEkDaKwPsaup8YNpd1DIDeXZZAozW7ceeqF6CsIP8L260vTQhTwCDaJMgIWsdw2yEWXEtO9q94dB38WyGXRx5pWNYloEyfyTex7/qdC3wnUGDQDoHiKIpYDqGRT1QRZzXahB2sgMYCQAct+ARmhXD+S9MJzm92ljg6CXAcws3o5iLfIKW6511ip8jnwlTJ0Cvh46TNiy3a1eGKABtxGQWqmSg1/CHSRaA/aklIGPenJNNOxklIDmld0R6eYHTM2/6eHfvjXSPSpACaE3IxqLTsKgJAwCxUAPQ/HwDawwxMA3gU5cAAAAASUVORK5CYII=
+
+display: 48 48
+
+background: #72573a
+empty: .
+
+cell: - 0 - none - no
+cell: # 1 - none - no
+cell: % 2 - none - no
+cell: ~ 3 - none - yes
+cell: H 4 - mirx - yes
+cell: P 5 - rot-mir - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - rot4 - yes
+cell: * 8 - none - yes
+cell: o 9 - none - yes
+cell: & 10 - none - yes
+cell: $ 11 - none - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - none - yes
+cell: + 14 - rot4 - yes
+cell: @ 15 - none - yes
+
+rule: rule0
+. . [ . . . 
+. - [ . [ . 
+. . [ . . . 
+priority: 1
+transform: rot4
+conddir: -
+probability: 0.05
+delay: 3
+rule: rule1
+. . . . . . 
+[ - . . [ . 
+[ [ . . . . 
+priority: 1
+transform: rot4
+conddir: -
+probability: 0.05
+delay: 3
+rule: rule2
+- [ - . - . 
+priority: 1
+transform: rot4
+conddir: -
+probability: 0.1
+delay: 3
+rule: rule3
+. - . . . . 
+- [ . . - . 
+. - . . . . 
+priority: 1
+transform: rot4
+conddir: -
+probability: 0.1
+delay: 3
+rule: rule4
+. . . . . . 
+[ [ [ . . . 
+. - . . o . 
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- - - 
+- - - 
+- D - 
+probability: 0.005
+delay: 1
+rule: rule5
+. . . . . . 
+. o . . [ . 
+. - . . o . 
+priority: 2
+transform: rot4
+conddir: D
+outdir:
+- - - 
+- - - 
+- D - 
+delay: 9
+rule: rule6
+. + - . - + 
+condfunc: playerdir("right1")
+priority: 2
+transform: rot4
+conddir: -
+outdir:
+- - R 
+delay: 2
+rule: rule7
+. + - . . @ 
+condfunc: playerdir("right2")
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- - R 
+delay: 2
+rule: rule8
+. - . . @ . 
+. @ . . - . 
+. . . . . . 
+priority: 2
+transform: rot4
+conddir: U
+outdir:
+- U - 
+- - - 
+- - - 
+delay: 1
+rule: rule9
+. + [ . - . 
+priority: 1
+transform: -
+conddir: -
+delay: 3
+outfunc: lose(); sound(9)
+rule: rule10
+. @ . . - . 
+priority: 1
+conddir: -
+delay: 1
+rule: rule11
+. . . . . . 
+. o . . - . 
+. @ . . - . 
+priority: 4
+transform: rot4
+conddir: -
+delay: 1
+outfunc: sound(11)
+rule: rule12
+- . - . . . 
+- o - . & . 
+- @ - . . . 
+priority: 5
+transform: rot4
+conddir: -
+probability: 0.5
+delay: 1
+outfunc: sound(12)
+rule: rule16
+. o . . [ . 
+priority: 1
+conddir: -
+delay: 9
+rule: rule17
+. & . . # . 
+- - - - & - 
+- - - - - - 
+priority: 2
+transform: rot4
+conddir: -
+probability: 0.7
+delay: 9
+rule: rule18
+- & - - # - 
+- - - - & - 
+- - - - - - 
+priority: 3
+transform: rot4
+conddir: -
+probability: 0.5
+delay: 9
+rule: rule19
+. & . . - . 
+priority: 1
+conddir: -
+probability: 0.1
+delay: 9
+outfunc: sound(19)
+rule: rule20
+. . . . . . 
+. & . . & . 
+. @ . . - . 
+condfunc: keypress(" ")
+priority: 4
+transform: mirx
+conddir: -
+outdir:
+L U R 
+delay: 1
+outfunc: sound(20)
+rule: rule23
+. [ . . - . 
+. @ . . - . 
+. . . . . . 
+priority: 6
+transform: rot4
+conddir: -
+delay: 1
+outfunc: sound(23)
+
+
+
+level: #
+
+[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------+-----------------
+--------------------------------------
+win: countCells('[')==0
+
+title: Slime Exterminator

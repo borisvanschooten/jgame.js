@@ -87,43 +87,118 @@ function setTextureRootDir(dir) {
 	_textureRootDir = dir;
 }
 
+// returns an image url with 8 flipped and rotated subimages
+// arranged in a 3x3 grid (9th position is empty). Order:
+// 0 = orig
+// 1 = 90 deg
+// 2 = 180 deg
+// 3 = 270 deg
+// 4,5,6,7 = image is x mirrored, then rotated according to 0,1,2,3
+// This replaces transformimage.php used by cellspace.
+function getImageTransformRotMir(image) {
+	var w = image.width;
+	var h = image.height;
+	var buffer = document.createElement("canvas");
+	buffer.width = w*3
+	buffer.height = h*3
+	var ctx = buffer.getContext('2d');
+	ctx.clearRect(0,0,w*3,h*3)
+	for (var idx=0; idx<8; idx++) {
+		var dx = w * (idx % 3);
+		var dy = h * Math.floor(idx/3);
+		var flip = Math.floor(idx/4);
+		var rot = idx % 4;
+		//if (flip) {
+		//	if (rot == 1) {
+		//		rot = 3;
+		//	} else if (rot == 3) {
+		//		rot = 1;
+		//	}
+		//}
+		// From: https://stackoverflow.com/questions/3129099/how-to-flip-images-horizontally-with-html5 (answer by DesignConsult)
+		ctx.save();
+		ctx.translate(dx + w/2, dy + h/2);
+		// not clear why rotate needs to go before flip, while in 
+		// transformimage.php it is the other way round.
+		ctx.rotate(rot*Math.PI/2);
+		if (flip) {
+			ctx.scale(-1,1);
+		}
+		ctx.drawImage(image,-w/2,-h/2,w,h);
+		ctx.restore();
+	}
+	return buffer.toDataURL();	
+}
+
 function initTexture(gl,imageurl,smooth,wrap,callback,mipmap) {
 	var texture = gl.createTexture();
 	var image = new Image();
+	var doTransform = false;
 	image.onload = function() {
-		gl.bindTexture(gl.TEXTURE_2D, texture);
-		gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA, gl.UNSIGNED_BYTE, image);
-		if (smooth) {
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-			if (!mipmap) {
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-			} else {
-				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
-					gl.LINEAR_MIPMAP_LINEAR);
-				gl.generateMipmap(gl.TEXTURE_2D);
+		if (doTransform) {
+			var transurl = getImageTransformRotMir(image);
+			var transimage = new Image();
+			transimage.onload = function() {
+				initTextureWithImage(gl,texture,transimage,smooth,wrap,
+					callback,mipmap);
+				//document.body.appendChild(transimage);
 			}
+			//console.log("!!!!!!!!!transurl:");
+			//console.log(transurl);
+			transimage.src = transurl;
 		} else {
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+			initTextureWithImage(gl,texture,image,smooth,wrap,
+				callback,mipmap);
 		}
-		if (wrap) {
-			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S, gl.REPEAT);
-			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T, gl.REPEAT);
-		} else {
-			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		}
-		gl.bindTexture(gl.TEXTURE_2D, null);
-		if (callback) callback();
 	};
+	var finalurl = imageurl;
+	// check if image needs to be extended with flipped/mirrored versions
+	// indicated by a query parameter "transform_rotmir=true"
 	if (imageurl.indexOf(":") >= 0 && imageurl.indexOf(":") <= 5) {
 		// absolute url with http:// or image: protocol
-		image.src = imageurl;
+		finalurl = imageurl;
 	} else {
 		// relative url
-		image.src = _textureRootDir+imageurl;
+		finalurl = _textureRootDir+imageurl;
 	}
+	if (finalurl.indexOf("?transform_rotmir=true") > 0) {
+		doTransform = true;
+		finalurl = finalurl.substring(0,finalurl.indexOf("?transform_rotmir=true"));
+	}
+	if (finalurl.indexOf("&transform_rotmir=true") > 0) {
+		doTransform = true;
+		finalurl = finalurl.substring(0,finalurl.indexOf("&transform_rotmir=true"));
+	}
+	image.src = finalurl;
 	return texture;
+}
+
+
+function initTextureWithImage(gl,texture,image,smooth,wrap,callback,mipmap) {
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA, gl.UNSIGNED_BYTE, image);
+	if (smooth) {
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		if (!mipmap) {
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		} else {
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
+				gl.LINEAR_MIPMAP_LINEAR);
+			gl.generateMipmap(gl.TEXTURE_2D);
+		}
+	} else {
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+	}
+	if (wrap) {
+		gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S, gl.REPEAT);
+		gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T, gl.REPEAT);
+	} else {
+		gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+	}
+	gl.bindTexture(gl.TEXTURE_2D, null);
+	if (callback) callback();
 }
 
 
