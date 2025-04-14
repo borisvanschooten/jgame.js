@@ -10,7 +10,7 @@
 		"jsdoc": "rm -R jsdocs/;jsdoc -d=jsdocs jgame/*.js jgame-games/jgame-main.js"
 	},
 	"dependencies": {
-		"codemirror": "5.14.2",
+		"codemirror": "5.58.2",
 		"jshint": "2.9.5",
 		"@tensorflow/tfjs": "4.17.0"
 	}
