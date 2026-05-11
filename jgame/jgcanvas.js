@@ -90,7 +90,7 @@ function JGCanvas(canvas,logicalwidth,logicalheight) {
 	for (var i=0; i<260; i++) {
 		this.keymap[i] = false;
 		//this.prevkeymap[i] = false;
-		this.keyflankmap[i] = 0;
+		this.keyflankmap[i] = -99999;
 	}
 	this.mousex = 0;
 	this.mousey = 0;

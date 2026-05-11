@@ -296,14 +296,14 @@ JGTileMap.prototype.getTilePos = function(tx,ty) {
 
 /** Note, x2,y2 exclusive */
 JGTileMap.prototype.countTileCids = function(tilecidmask,x1,y1,x2,y2) {
-	if (!typecheckInt(x1,"x1")) return;
-	if (!typecheckInt(y1,"y1")) return;
-	if (!typecheckInt(x2,"x2")) return;
-	if (!typecheckInt(y2,"y2")) return;
 	if (!x1 || x1<0) x1=0;
 	if (!y1 || y1<0) y1=0;
 	if (!x2 || x2>this.nrtilesx) x2 = this.nrtilesx;
 	if (!y2 || y2>this.nrtilesy) y2 = this.nrtilesy;
+	if (!typecheckInt(x1,"x1")) return;
+	if (!typecheckInt(y1,"y1")) return;
+	if (!typecheckInt(x2,"x2")) return;
+	if (!typecheckInt(y2,"y2")) return;
 	var count = 0;
 	for (var y=y1; y<y2; y++) {
 		for (var x=x1; x<x2; x++) {

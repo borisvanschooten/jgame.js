@@ -1764,6 +1764,33 @@ var GameConfigs = {
 		levels: [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
 		fn: {}
 	},
+	"minimal-restart": {
+		name: "Minimal",
+		gamemode: "no-title",
+		disableAudio: true,
+		disableRestart: false,
+		strings: {
+			//bonusobject: { single: "anker", plural: "ankers" }
+		},
+		sounds: {
+			//"chimeii-1":"sounds/242501-powerup-success+1t",
+		},
+		textures: {
+			bg:"images/MLP-Cave.jpg",
+			spritesheet:"images/violinist7.png",
+			manual: [
+				//"images/swap-match-example1-nomarks-pp.jpg",
+			]
+		},
+		spritesheet: {
+			totalx: 120,
+			totaly: 120,
+			unitx: 14,
+			unity: 14
+		},
+		levels: [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0],
+		fn: {}
+	},
 	"minimal-noresize": {
 		name: "Minimal",
 		gamemode: "no-title",

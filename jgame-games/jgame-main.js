@@ -200,8 +200,10 @@ function StdGame() {
 
 	this.prevmousebut=false,curmousebut=false;
 
-	this.targetxofs = -1, targetyofs = -1;
-	this.scrollspeedx = 0, scrollspeedy = 0;
+	this.targetxofs = -1;
+	this.targetyofs = -1;
+	this.scrollspeedx = 0;
+	this.scrollspeedy = 0;
 
 	this.bgxofs = 0;
 
@@ -605,7 +607,7 @@ StdGame.prototype.updateScreenOfs = function(x,y) {
 	}
 	if (x===undefined || y===undefined) {
 		var objtofollow;
-		if (GameConfig.scroll) objtofollow = GameConfig.scroll.followObject;
+		if (GameConfig.scroll && GameConfig.scroll.followObject) objtofollow = GameConfig.scroll.followObject;
 		// object not defined -> default
 		if (objtofollow === undefined) objtofollow = "player";
 		// no coords and object set to null -> disabled
@@ -615,11 +617,13 @@ StdGame.prototype.updateScreenOfs = function(x,y) {
 		player = {x:x, y:y};
 	}
 	if (player) {
-		this.targetxofs = player.x - width/2 + 0.5*tilex + thisleveldef.playerofs.x;
+		var playerofs = SG.getLevelInfo("playerofs");
+		if (!playerofs) playerofs = {x:0, y:0};
+		this.targetxofs = player.x - width/2 + 0.5*tilex + playerofs.x;
 		if (this.targetxofs < 0) this.targetxofs = 0;
 		var maxofs = tilemap.tilex*tilemap.nrtilesx-width;
 		if (this.targetxofs > maxofs) this.targetxofs = maxofs;
-		this.targetyofs = player.y - height/2 + 0.5*tiley + thisleveldef.playerofs.y;
+		this.targetyofs = player.y - height/2 + 0.5*tiley + playerofs.y;
 		if (this.targetyofs < 0) this.targetyofs = 0;
 		maxofs = tilemap.tiley*tilemap.nrtilesy-height;
 		if (this.targetyofs > maxofs) this.targetyofs = maxofs;
@@ -631,29 +635,39 @@ StdGame.prototype.updateScreenOfs = function(x,y) {
 	if (GameConfig.scroll && GameConfig.scroll.speed)
 		accel = GameConfig.scroll.speed;
 	if (this.targetxofs != -1) {
-		// x
 		var diff = screenxofs - this.targetxofs;
-		if ((diff>0 && this.scrollspeedx<0)
-		||  (diff<0 && this.scrollspeedx>0)) {
-			this.scrollspeedx = 0;
+		if (Math.abs(diff) > width) {
+			// jump when diff is too high
+			screenxofs = this.targetxofs;
+		} else {
+			if ((diff>0 && this.scrollspeedx<0)
+			||  (diff<0 && this.scrollspeedx>0)) {
+				this.scrollspeedx = 0;
+			}
+			this.scrollspeedx = (1.0-accel)*this.scrollspeedx + accel*(-1.0*diff);
+			if (this.scrollspeedx > 1.5*tilemap.tilex) this.scrollspeedx = 1.5*tilemap.tilex;
+			if (this.scrollspeedx < -1.5*tilemap.tilex) this.scrollspeedx =-1.5*tilemap.tilex;
+			if (Math.abs(this.scrollspeedx) > 0.002*tilemap.tilex) {
+				screenxofs += this.scrollspeedx;
+			}
 		}
-		this.scrollspeedx = (1.0-accel)*this.scrollspeedx + accel*(-1.0*diff);
-		if (this.scrollspeedx > 1.5*tilemap.tilex) this.scrollspeedx = 1.5*tilemap.tilex;
-		if (this.scrollspeedx < -1.5*tilemap.tilex) this.scrollspeedx =-1.5*tilemap.tilex;
-		if (Math.abs(this.scrollspeedx) > 0.002*tilemap.tilex) {
-			screenxofs += this.scrollspeedx;
-		}
-		// y
-		diff = screenyofs - this.targetyofs;
-		if ((diff>0 && this.scrollspeedy<0)
-		||  (diff<0 && this.scrollspeedy>0)) {
-			this.scrollspeedy = 0;
-		}
-		this.scrollspeedy = (1.0-accel)*this.scrollspeedy + accel*(-1.0*diff);
-		if (this.scrollspeedy > 0.5*tilemap.tiley) this.scrollspeedy = 0.5*tilemap.tiley;
-		if (this.scrollspeedy < -0.5*tilemap.tiley) this.scrollspeedy =-0.5*tilemap.tiley;
-		if (Math.abs(this.scrollspeedy) > 0.002*tilemap.tiley) {
-			screenyofs += this.scrollspeedy;
+	}
+	if (this.targetyofs != -1) {
+		var diff = screenyofs - this.targetyofs;
+		if (Math.abs(diff) > height) {
+			// jump when diff is too high
+			screenyofs = this.targetyofs;
+		} else {
+			if ((diff>0 && this.scrollspeedy<0)
+			||  (diff<0 && this.scrollspeedy>0)) {
+				this.scrollspeedy = 0;
+			}
+			this.scrollspeedy = (1.0-accel)*this.scrollspeedy + accel*(-1.0*diff);
+			if (this.scrollspeedy > 0.5*tilemap.tiley) this.scrollspeedy = 0.5*tilemap.tiley;
+			if (this.scrollspeedy < -0.5*tilemap.tiley) this.scrollspeedy =-0.5*tilemap.tiley;
+			if (Math.abs(this.scrollspeedy) > 0.002*tilemap.tiley) {
+				screenyofs += this.scrollspeedy;
+			}
 		}
 	}
 }
@@ -815,17 +829,21 @@ function startNewLevel(timer) {
 
 	var tmdef = SG.getLevelInfo("tilemap");
 	console.log(JSON.stringify(tmdef));
-	if (tmdef && tmdef.tilex) {
-		tilex = tmdef.tilex;
-		tiley = tmdef.tiley;
-		nrtilesx = tmdef.nrtilesx;
-		nrtilesy = tmdef.nrtilesy;
+	if (tmdef) {
+		// copy any values from new tilemap definition otherwise retain old values
+		if (tmdef.tilex) tilex = tmdef.tilex;
+		if (tmdef.tiley) tiley = tmdef.tiley;
+		if (tmdef.nrtilesx) nrtilesx = tmdef.nrtilesx;
+		if (tmdef.nrtilesy) nrtilesy = tmdef.nrtilesy;
 		tilemap=new JGTileMap(gl,tilex,tiley, nrtilesx,nrtilesy,
-			tmdef.filltile,tmdef.filltilecid, tiles_tex, 
-			tmdef.unitx,
-			tmdef.unity,
-			tmdef.countx,
-			tmdef.county,GameConfig.tilemap.texture.smooth);
+			tmdef.filltile ?  tmdef.filltile : GameConfig.filltile,
+			tmdef.filltilecid ?  tmdef.filltilecid : GameConfig.filltilecid,
+			tiles_tex, 
+			tmdef.unitx ?  tmdef.unitx : GameConfig.unitx,
+			tmdef.unity ?  tmdef.unity : GameConfig.unity,
+			tmdef.countx ?  tmdef.countx : GameConfig.countx,
+			tmdef.county ?  tmdef.county : GameConfig.county,
+			GameConfig.tilemap.texture.smooth);
 	}
 
 	thisleveldef.newlevel();
@@ -1317,7 +1335,7 @@ TileSprite.prototype = new JGObject();
 /** You must call this in constructor to init variables. */
 TileSprite.prototype.init = function() {
 	if (this.colid) {
-		tilemap.setTileCid(this.colid,TILEAND,this.tx,this.ty);
+		tilemap.setTileCid(this.colid,TILEAND,Math.round(this.tx),Math.round(this.ty));
 		setTileSpriteIndex(this);
 	}
 	this.setTileBBox(0,0,tilex,tiley);
@@ -1338,7 +1356,7 @@ TileSprite.prototype.moveFunc = function() {
 			this.xspeed = 0;
 			this.yspeed = 0;
 			if (this.occupyOrigin) {
-				tilemap.setTileCid(0, TILEAND,this.oldtx,this.oldty);
+				tilemap.setTileCid(0, TILEAND,Math.round(this.oldtx),Math.round(this.oldty));
 			}
 		}
 	}
@@ -1390,7 +1408,7 @@ TileSprite.prototype.setTile = function(tileid,xofs,yofs) {
 TileSprite.prototype.dispose = function() {
 	if (this.disposePre) this.disposePre();
 	if (this.colid) {
-		tilemap.setTileCid(0, TILEAND, this.tx,this.ty);
+		tilemap.setTileCid(0, TILEAND, Math.round(this.tx),Math.round(this.ty));
 		setTileSpriteIndex(this,true);
 	}
 	if (this.disposePost) this.disposePost();
@@ -1449,7 +1467,7 @@ TileSprite.removeSprites = function() {
 * @andmask mask to AND with before returning result. */
 TileSprite.prototype.getEnv = function(xofs,yofs,andmask) {
 	if (!andmask) andmask = 0xffff;
-	return tilemap.getTileCidPos(this.tx+xofs,this.ty+yofs) & andmask;
+	return tilemap.getTileCidPos(Math.round(this.tx+xofs),Math.round(this.ty+yofs)) & andmask;
 }
 
 

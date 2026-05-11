@@ -241,13 +241,13 @@ JGCanvasAbstractControls.prototype.update = function() {
 			}
 		} // TODO relative
 		if (this.hasGamepads()) {
-			var mx = this.getGamepads(0)[this.config.pointer[i].gamepad.axes.x];
+			var mx = this.getGamepad(0)[this.config.pointer[i].gamepad.axes.x];
 			if (mx) {
 				this.pointers[i].x+=20.0*this.config.pointer[i].gamepad.sensitivity*mx;
 				if (this.pointers[i].x < -8) this.pointers[i].x = -8;
 				if (this.pointers[i].x > width-8) this.pointers[i].x = width-8;
 			}
-			var my = this.getGamepads(0)[this.config.pointer[i].gamepad.axes.y];
+			var my = this.getGamepad(0)[this.config.pointer[i].gamepad.axes.y];
 			if (my) {
 				this.pointers[i].y+=20.0*this.config.pointer[i].gamepad.sensitivity*my;
 				if (this.pointers[i].y < -8) this.pointers[i].y = -8;
@@ -315,8 +315,23 @@ JGCanvasAbstractControls.prototype.update = function() {
 		&& this.hasGamepads()) {
 			this.axes[i].x = this.getGamepad(0)
 				[axis.gamepad.axes.x];
+			// quick n dirty thresholding, does not play well with mouse and keyboard.
+			/*if (this.axes[i].x < -0.5) {
+				this.axes[i].x = -1
+			} else if (this.axes[i].x > 0.5) {
+				this.axes[i].x = 1
+			} else {
+				this.axes[i].x = 0
+			}*/
 			this.axes[i].y = this.getGamepad(0)
 				[axis.gamepad.axes.y];
+			/*if (this.axes[i].y < -0.5) {
+				this.axes[i].y = -1
+			} else if (this.axes[i].y > 0.5) {
+				this.axes[i].y = 1
+			} else {
+				this.axes[i].y = 0
+			}*/
 		}
 		if (axis.touch.enabled) {
 			var touch = this.getTouchInRegion(axis.touch.region);
