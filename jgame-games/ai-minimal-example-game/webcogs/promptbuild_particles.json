@@ -1,0 +1,20 @@
+{
+	"webcogs_buildfile_version": 1,
+	"name": "JGame game",
+	"description": "JGame game",
+	"version": "0.1",
+	"ai_vendor": "openai",
+	"ai_model": "gpt-5.5",
+	"system_prompts": [
+		{ "file": "../../webcogs/general.md"},
+		{ "file": "../../webcogs/particlesystem.md"}
+	],
+	"wd": "../generated-particles/",
+	"targets": [
+		{
+			"name": "explosion",
+			"prompts": [ { "text": "Create a particle generator that generates glowing red-yellow particles that expand radially, shrink and slow down." } ],
+			"file": "explosion.js"
+		}
+	]
+}

@@ -1,0 +1,11 @@
+{
+  "zzfx-sound-generator": "1.0",
+  "sounds": [
+    {"name": "playerdie", "type": "Explo", "seed": 73140857},
+
+    {"name": "ghostdie", "type": "Shoot", "seed": 35742146},
+
+    {"name": "pickup", "type": "Pickup", "seed": 23962807}
+
+  ]
+}

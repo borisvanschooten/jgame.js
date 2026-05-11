@@ -1,0 +1,30 @@
+{
+	"webcogs_buildfile_version": 1,
+	"name": "JGame game",
+	"description": "JGame game",
+	"version": "0.1",
+	"ai_vendor": "openai",
+	"ai_model": "gpt-5.5",
+	"system_prompts": [
+		{ "file": "../../webcogs/general.md"},
+		{ "file": "../../webcogs/gameentities.md"}
+	],
+	"wd": "../generated-entities/",
+	"targets": [
+		{
+			"name": "pacmanplayer",
+			"prompts": [ { "text": "Create a player that moves through a maze like Pac-man using the left stick. It moves through 'empty' tiles and pickups but stops at 'wall' tiles. Dies when it hits an enemy." } ],
+			"file": "pacmanplayer.js"
+		},
+		{
+			"name": "pacmanghost",
+			"prompts": [ { "text": "Create an enemy that moves randomly through a maze like a Pac-man ghost. It moves through 'empty' tiles but stops at 'wall' tiles." } ],
+			"file": "pacmanghost.js"
+		},
+		{
+			"name": "bonus",
+			"prompts": [ { "text": "Create a stationary object that can be picked up by the player.  Is removed when it collides with the player." } ],
+			"file": "bonus.js"
+		}
+	]
+}

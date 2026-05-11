@@ -1,0 +1,11 @@
+{
+	"bonus": {"anim": {"start":12,"end":12,"speed":0.2,"mode":"always", "dir":"nodir"},
+	    "onRemove": {"sound": "pickup"}
+	},
+	"pacman": {"anim": {"start":16,"end":16,"speed":0.2,"mode":"moving", "dir":"rot-mir"},
+	    "onRemove": {"particle": {"type": "explosion","size": 80,"sprite":30}, "sound": "playerdie"}
+	},
+	"ghost": {"anim": {"start":17,"end":17,"speed":0.2,"mode":"moving", "dir":"mirx"},
+	    "onRemove": {"particle": {"type": "explosion","size": 80,"sprite":30}, "sound": "ghostdie"}
+	}
+}

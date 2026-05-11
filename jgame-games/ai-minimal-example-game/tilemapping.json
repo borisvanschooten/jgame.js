@@ -1,0 +1,9 @@
+{
+	".": {"tile": 0, "mask_name": "empty"},
+	"#": {"tile":6, "mask_name": "wall",
+		"onRemove": {"particle": {"type": "flame","size": 40,"sprite":30}, "sound": "brickbreak"}
+	},
+	"*": {"entity": {"name":"bonus", "unique":true, "mask": "pickup", "sprite": "bonus"}},
+	"P": {"entity": {"name":"pacmanplayer", "unique":false, "mask": "player", "sprite": "pacman"}},
+	"p": {"entity": {"name":"pacmanghost", "unique":true, "mask": "enemy", "sprite": "ghost"}}
+}

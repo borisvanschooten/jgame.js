@@ -1,0 +1,20 @@
+{
+	"webcogs_buildfile_version": 1,
+	"name": "JGame game",
+	"description": "JGame game",
+	"version": "0.1",
+	"ai_vendor": "openai",
+	"ai_model": "gpt-5.5",
+	"system_prompts": [
+		{ "file": "../../webcogs/general.md"},
+		{ "file": "../../webcogs/mapgeneration.md"}
+	],
+	"wd": "../generated-maps/",
+	"targets": [
+		{
+			"name": "pacmanmaze",
+			"prompts": [ { "text": "Create a function that generates maze levels for a pac-man game, based on labyrinth generation with horizontal mirroring and extra corridors.  All empty spaces should be reachable from all other spaces.  Each tile is either wall (#), empty space (.), player (P), ghost (p), or pill (*).  Place a player, ghosts, and pills in some empty spaces." } ],
+			"file": "pacmanmaze.js"
+		}
+	]
+}
