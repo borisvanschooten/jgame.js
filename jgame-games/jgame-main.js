@@ -792,6 +792,8 @@ function startNewLevel(timer) {
 	thislevel = GameConfig.levels[level % GameConfig.levels.length];
 	if (thislevel.def) {
 		thisleveldef = GameConfig.leveldefs[thislevel.def];
+	} else if (GameConfig.defaultLeveldef) {
+		thisleveldef = GameConfig.leveldefs[GameConfig.defaultLeveldef];
 	} else {
 		thisleveldef = thislevel;
 	}
@@ -1254,8 +1256,6 @@ function paintFrameLevelDone(timer) {
 
 
 
-
-
 // --------------------------------------------------------------------
 // Tile sprites
 // --------------------------------------------------------------------
@@ -1319,7 +1319,8 @@ function TileSprite(name,unique,tx,ty,colid) {
 	this.flipy = false;
 	this.angle = 0;
 	this.color = null;
-	this.anim = null; // start, end, speed, vertical, always
+	this.anim = null; // start, end, speed, vertical, always (or mode as alternative for vertical/always)
+	this.animdir = 0;
 	this.tx = tx;
 	this.ty = ty;
 	this.oldtx = this.tx;
@@ -1361,20 +1362,72 @@ TileSprite.prototype.moveFunc = function() {
 		}
 	}
 	if (this.anim) {
-		if (this.anim.always) {
+		// mode options: always (always=true), moving (always=false,vertical=true), moving-x (always=false,vertical=false)
+		if (this.anim.always || this.anim.mode=="always") {
 			this.animpos += this.anim.speed;
 		} else {
 			var s = Math.abs(this.x - this.lastx);
-			if (this.anim.vertical) {
+			if (this.anim.vertical || this.anim.mode=="moving") {
 				var vs = Math.abs(this.y - this.lasty);
 				if (vs > s) s=vs;
-			}
+			} // else "moving-x"
 			//console.log("####"+this.x+"##"+this.lastx+"##"+(this.anim.speed*s));
 			this.animpos += this.anim.speed*s;
 		}
 		while (this.animpos >= this.anim.end + 1 - this.anim.start)
 			this.animpos -= this.anim.end + 1 - this.anim.start;
 		this.sprite = this.anim.start + Math.floor(this.animpos);
+		// [newly added] rotation scheme, taken from cellspace/Main.js. rot is one of: 
+		// nodir: no rotation
+		// rotany: rotate in any directions
+		// rot4: rotate according to move direction
+		// mirx: mirror x
+		// miry: mirror y
+		// rot-mir: mirror x, rotate-mirror y, pac-man style
+		// get transforms
+		var rot = this.anim.dir || "nodir";
+		// 0..7, where 0=up 2=right 4=down 6=left (diagonals are not used here, so only even nrs)
+		// only change animdir if speed > minimum value
+		if (Math.abs(this.x-this.lastx) > 0.1 || Math.abs(this.y-this.lasty) > 0.1) {
+			var animangle = Math.atan2(this.lastx-this.x, this.lasty-this.y);// + Math.PI*0.25;
+			this.animdir = (2 * (Math.round(2*animangle/Math.PI) + 2)) % 8;
+			//console.log(this.animdir);
+			var flip = 0; // 0 or 4 (flip x). flipy is done with rot+flipx
+			var dir = 0; // rotation: 0=0, 1=90, 2=180, 3=270
+			var d = this.animdir;
+			if (rot == "rotany") {
+				this.angle = animangle;
+			} else if (rot == "rot4") {
+				dir = (2+Math.floor(d/2)) % 4;
+				this.angle = dir*0.5*Math.PI;
+			} else if (rot == "mirx") {
+				if (this.x > this.lastx + 0.1) {
+					this.flipx = false;
+				}
+				if (this.x < this.lastx - 0.1) {
+					this.flipx = true;
+				}
+			} else if (rot == "miry") {
+				if (this.y > this.lasty + 0.1) {
+					this.flipy = false;
+				}
+				if (this.y < this.lasty - 0.1) {
+					this.flipy = true;
+				}
+			} else if (rot == "rot-mir") {
+				// head is on the right side when moving up/down
+				if (d==0) { // U
+					dir = 1;
+					flip = 4;
+				} else if (d==4) { // D
+					dir = 1;
+				} else if (d==6) { // L
+					flip = 4;
+				}
+				this.flipx = flip !== 0;
+				this.angle = dir*0.5*Math.PI;
+			}
+		}
 	}
 }
 

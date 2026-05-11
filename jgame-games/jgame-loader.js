@@ -16,6 +16,20 @@ function loadScript(scriptname,callback) {
 	}
 }
 
+async function loadJSON(url) {
+	url = GameConfig.gamedir + url;
+	try {
+		const response = await fetch(url+"?t="+Date.now());
+		if (!response.ok) {
+			throw new Error(`HTTP error! Status: ${response.status}`);
+		}
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		console.error("Failed to load JSON:", error);
+		throw error;
+	}
+}
 
 /*var JGameBaseFiles = [
 	"jgame/jgcanvas.js",
@@ -43,8 +57,15 @@ for (var i=0; i<JGameBaseFiles.length; i++) {
 gamedir = PersistentState.getUrlParameter("game");
 if (!gamedir) gamedir=defaultgamedir;
 
-loadScript(gamedir+"game.js",function() {
-
+loadScript(gamedir+"game.js",async function() {
+	// copy gamedir if not set
+	if (!GameConfig.gamedir) {
+		GameConfig.gamedir = gamedir;
+	}
+	// use loadGame to load extra assets, using async-await to ensure loading is finished before webGLStart is called
+	if (GameConfig.loadGame) {
+		await GameConfig.loadGame();
+	}
 	// load extra scripts
 	if (GameConfig.scripts) {
 		for (var i=0; i<GameConfig.scripts.length; i++) {
