@@ -5,6 +5,6 @@
 		"tilemap": { "nrtilesx": 32, "nrtilesy": 18},
 		"bg": "levelbg",
 		"wincond": {"type": "no_pickups" },
-		"params": {}
+		"options": {}
 	}
 ]

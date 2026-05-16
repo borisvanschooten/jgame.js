@@ -193,7 +193,7 @@ class GameEntity extends TileSprite {
 					if (this.spritedef.onCreate.particle) {
 						var part = this.spritedef.onCreate.particle
 						if (loadedParticles[part.type]) {
-							loadedParticles[part.type](this.x, this.y, part.size, part.sprite)
+							loadedParticles[part.type](this.x, this.y, part.size, part.sprite, part.options)
 						} else {
 							console.log(`Cannot find particle generator '${part.type}'`)
 						}
@@ -225,7 +225,7 @@ class GameEntity extends TileSprite {
 		if (this.spritedef && this.spritedef.onRemove) {
 			if (this.spritedef.onRemove.particle) {
 				var part = this.spritedef.onRemove.particle
-				loadedParticles[part.type](this.x, this.y, part.size, part.sprite)
+				loadedParticles[part.type](this.x, this.y, part.size, part.sprite, part.options)
 			}
 			if (this.spritedef.onRemove.sound) {
 				JGAudio.play(this.spritedef.onRemove.sound, null, null, 0.75)
@@ -418,14 +418,14 @@ function getFunctionParams(func) {
 
 
 
-function createEntity(name,unique,tx,ty,mask,sprite) {
+function createEntity(name,unique,tx,ty,mask,sprite,options) {
 	var entityname = name
 	if (name.indexOf("player") !== -1) {
 		entityname = "player"
 	}
 	//console.log(`Creating entity: ${name} ${tx} ${ty}`)
 	if (typeof loadedEntities[name] !== "undefined") {
-		new loadedEntities[name](entityname,unique,tx,ty,mask,sprite)
+		new loadedEntities[name](entityname,unique,tx,ty,mask,sprite,options)
 	} else {
 		new GameEntity(name,unique,tx,ty,mask,sprite)
 		console.log(`Warning: entity ${name} does not exit, creating dummy entity.`)
@@ -455,7 +455,7 @@ function setTile(tile_index,tile_mask,tx,ty) {
 	if (event && event.onCreate) {
 		if (event.onCreate.particle) {
 			var part = event.onCreate.particle
-			loadedParticles[part.type](tilex*tx, tiley*ty, part.size, part.sprite)
+			loadedParticles[part.type](tilex*tx, tiley*ty, part.size, part.sprite, part.options)
 		}
 		if (event.onCreate.sound) {
 			JGAudio.play(event.onCreate.sound,null,null,0.75)
@@ -465,7 +465,7 @@ function setTile(tile_index,tile_mask,tx,ty) {
 	if (event && event.onRemove) {
 		if (event.onRemove.particle) {
 			var part = event.onRemove.particle
-			loadedParticles[part.type](tilex*tx, tiley*ty, part.size, part.sprite)
+			loadedParticles[part.type](tilex*tx, tiley*ty, part.size, part.sprite, part.options)
 		}
 		if (event.onRemove.sound) {
 			JGAudio.play(event.onRemove.sound,null,null,0.75)
@@ -544,7 +544,9 @@ function aiLayerStartNewLevel() {
 	tilemap.setOffscreenTile(-1,wall_mask);
 	// create level
 	var map;
-	if (typeof thislevel.params !== "undefined") {
+	if (typeof thislevel.options !== "undefined") {
+		var map = loadedMapGens[thislevel.type](nrtilesx,nrtilesy,randomstep(1,10000,1),thislevel.options)
+    } else if (typeof thislevel.params !== "undefined") {
 		var map = loadedMapGens[thislevel.type](nrtilesx,nrtilesy,randomstep(1,10000,1),thislevel.params)
 	} else {
 		var map = loadedMapGens[thislevel.type](nrtilesx,nrtilesy,randomstep(1,10000,1))
@@ -568,7 +570,7 @@ function aiLayerStartNewLevel() {
                             mask = 0;
                             console.error(`Entity mask ${mapping.entity.mask} not found.`)
                         }
-                        createEntity(mapping.entity.name, mapping.entity.unique, x,y, mask, mapping.entity.sprite)
+                        createEntity(mapping.entity.name, mapping.entity.unique, x,y, mask, mapping.entity.sprite,mapping.entity.options)
                     }
 				}
 			}

@@ -13,7 +13,10 @@
 	"targets": [
 		{
 			"name": "pacmanmaze",
-			"prompts": [ { "text": "Create a function that generates maze levels for a pac-man game, based on labyrinth generation with horizontal mirroring and extra corridors.  All empty spaces should be reachable from all other spaces.  Each tile is either wall (#), empty space (.), player (P), ghost (p), or pill (*).  Place a player, ghosts, and pills in some empty spaces." } ],
+			"prompts": [ 
+					{ "text": "Create a function that generates a level map for a game. Each tile on the map is either: wall (#), empty space (.), player (P), ghost (p), pill (*). The description follows. " },
+					{ "text": "A pac-man maze level, based on labyrinth generation with horizontal mirroring and extra corridors.  All empty spaces should be reachable from all other spaces.  Place a player, ghosts, and pills in some empty spaces." }
+			],
 			"file": "pacmanmaze.js"
 		}
 	]
