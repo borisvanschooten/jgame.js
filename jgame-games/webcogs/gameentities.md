@@ -6,13 +6,15 @@ A game entity is always a subclass of GameEntity.  There are two ways to use it,
 
 A game entity can spawn other entities. Define them as additional classes (not export classes) which can be spawned using new (). They do not need to be registered. 
 
+A game entity can also spawn an externally defined entity, which are referred to via an 'entity character' or 'entity char' (a 1-character string) by calling the global function createEntityFromChar(entitychar,x,y).
+
 A game entity can be deleted by calling its remove() method.
 
-Collision is performed using bit masks.  Each tile and entity has a bit mask which determines its collision type. Use the bitwise OR operator (|) to combine bit masks for collision detection. There are two ways to detect collision: one is to use the getEnv method, which looks up the bit masks of tiles and entities at a given position, and the hit callback method, which is called with as parameter the entity that you collided with.
+Collision is performed using bit masks.  Each tile and entity has a bit mask which determines its collision type.  Always specifically check for masks using bitwise AND (&) and bitwise OR (|) to test for and combine bit masks for collision detection. Tile masks are never 0; empty space also has a nonzero tile mask. There are two ways to detect collision: one is to use the getEnv method, which looks up the bit masks of tiles and entities at a given position. The other is the hit and hit\_bg callback methods, which is called with as parameter the entity that you collided with.
 
 Always define a game entity as an export class.  The class will be created by the game engine.  Its contructor should always follow the following signature:
 
-constructor(name,unique,tx,ty,mask,sprite,{extraParameters}) - name and unique define the instance name. If unique=true, a number is added to the name to make it unique.  tx and ty are the position, mask is the collision mask, sprite is the sprite name. Extra configuration parameters can be added, via a named parameter object, with default values for each, specified using parameter destructuring, e.g. {parameter1,parameter2,...}={}. The constructor should always call super(name,unique,tx,ty,mask,sprite).
+constructor(name,unique,tx,ty,mask,sprite,{extraParameters}) - name and unique define the instance name. If unique=true, a number is added to the name to make it unique.  tx and ty are the position, mask is the collision mask, sprite is the sprite name. Extra configuration parameters can be added, via a named parameter object, with default values for each, specified using parameter destructuring, e.g. {parameter1,parameter2,...}={}. The constructor should always call super(name,unique,tx,ty,mask,sprite). Add configuration parameters for anything that is meaningful to configure.
 
 General methods:
 
@@ -50,6 +52,9 @@ Set a tile at a particular position with the function setTile(tile_index,tile_ma
 
 Get a tile mask at a particular position with the function getTileMask(tx,ty)
 
+The screen bounds are as follows: the top left has tile coordinate 0,0; the bottom right has coordinate nrtilesx,nrtilesy, where nrtilesx and nrtilesx are globals.
+
+
 ## Controls
 
 You can detect player movement and fire buttons using the following functions, available via the global io object:
@@ -75,4 +80,9 @@ var enemy_mask = 2 // for enemies and enemy bullets
 var pickup_mask = 4 // mask for bonuses and other things that can be picked up
 var player_bullet_mask = 8 // for player bullets
 
-Tile masks can be obtained by name using the function getTileMaskDef(mask_name).
+Tile masks can be obtained by name using the global function getTileMaskDef(mask_name).
+
+Tile indexes and mask names can be obtained from a tile character using the
+global function getTileDef(tilechar) which returns an object {tile_index,
+mask_name} which can be used for calls to setTile().
+

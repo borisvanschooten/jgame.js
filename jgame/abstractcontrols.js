@@ -114,6 +114,7 @@ function JGCanvasAbstractControls(canvas,logicalwidth,logicalheight,config) {
 					sensitivity: 1.0, // for relative
 				},
 				gamepad: {
+					enabled: true,
 					axes: {x:"lx",y:"ly"},
 					sensitivity: 1.0,
 				},
@@ -126,6 +127,7 @@ function JGCanvasAbstractControls(canvas,logicalwidth,logicalheight,config) {
 					sensitivity: 1.0, // for relative
 				},
 				gamepad: {
+					enabled: true,
 					axes: {x:"lx",y:"ly"},
 					sensitivity: 1.0,
 				},
@@ -138,6 +140,7 @@ function JGCanvasAbstractControls(canvas,logicalwidth,logicalheight,config) {
 					sensitivity: 1.0, // for relative
 				},
 				gamepad: {
+					enabled: true,
 					axes: {x:"rx",y:"ry"},
 					sensitivity: 1.0,
 				},
@@ -153,6 +156,9 @@ JGCanvasAbstractControls.prototype = new JGCanvas();
 
 
 JGCanvasAbstractControls.prototype.initState = function() {
+	// for detecting movement for pointer emulation
+	this.prevmousex = this.mousex;
+	this.prevmousey = this.mousey;
 	// TODO
 	this.axis_touchcen = [];
 	this.axis_prevtouch = [];
@@ -228,8 +234,15 @@ JGCanvasAbstractControls.prototype.update = function() {
 	for (i=0; i<this.config.pointer.length; i++) {
 		// pointers
 		if (this.mouseinside) {
-			this.pointers[i].x = this.mousex;
-			this.pointers[i].y = this.mousey;
+			// only update pointer if mouse moved, to allow combination with
+			// game controller
+			if (this.mousex != this.prevmousex
+			||  this.mousey != this.prevmousey) {
+				this.pointers[i].x = this.mousex;
+				this.pointers[i].y = this.mousey;
+			}
+			this.prevmousex = this.mousex;
+			this.prevmousey = this.mousey;
 		}
 		if (this.config.pointer[i].touch.control == "absolute") {
 			// XXX original touch->mouse code uses pageX/Y rather than
@@ -240,7 +253,7 @@ JGCanvasAbstractControls.prototype.update = function() {
 				this.pointers[i].y = touch.y;
 			}
 		} // TODO relative
-		if (this.hasGamepads()) {
+		if (this.hasGamepads() && this.config.pointer[i].gamepad.enabled) {
 			var mx = this.getGamepad(0)[this.config.pointer[i].gamepad.axes.x];
 			if (mx) {
 				this.pointers[i].x+=20.0*this.config.pointer[i].gamepad.sensitivity*mx;
@@ -315,23 +328,24 @@ JGCanvasAbstractControls.prototype.update = function() {
 		&& this.hasGamepads()) {
 			this.axes[i].x = this.getGamepad(0)
 				[axis.gamepad.axes.x];
-			// quick n dirty thresholding, does not play well with mouse and keyboard.
-			/*if (this.axes[i].x < -0.5) {
+			// XXX currently does not play nice with keyboard ctrl
+			// TODO thresholding always on, add thresholding option
+			if (this.axes[i].x < -0.5) {
 				this.axes[i].x = -1
 			} else if (this.axes[i].x > 0.5) {
 				this.axes[i].x = 1
 			} else {
 				this.axes[i].x = 0
-			}*/
+			}
 			this.axes[i].y = this.getGamepad(0)
 				[axis.gamepad.axes.y];
-			/*if (this.axes[i].y < -0.5) {
+			if (this.axes[i].y < -0.5) {
 				this.axes[i].y = -1
 			} else if (this.axes[i].y > 0.5) {
 				this.axes[i].y = 1
 			} else {
 				this.axes[i].y = 0
-			}*/
+			}
 		}
 		if (axis.touch.enabled) {
 			var touch = this.getTouchInRegion(axis.touch.region);

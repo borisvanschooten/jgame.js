@@ -157,6 +157,27 @@ function getTileMaskDefsDesc() {
 	return ret;
 }
 
+function getTileDef(tilechar) {
+	var tiledef = tilemapping[tilechar]
+	if (!tiledef) return false;
+	if (typeof tiledef.tile == "undefined") return false;
+	return {tile_index: tiledef.tile, mask_name: tiledef.mask_name}
+}
+
+function createEntityFromChar(entitychar,x,y) {
+	var entdef = tilemapping[entitychar]
+	if (!entdef || typeof entdef.entity == "undefined") {
+		console.log(`Warning: Entity with char ${entitychar} does not exist.`)
+		return;
+	}
+	var mask = mask_mapping[entdef.mask]
+	if (!mask) {
+		mask = 0;
+		console.error(`Entity mask ${mapping.entity.mask} not found.`)
+	}
+	createEntity(entdef.name, entdef.unique, x,y, mask, entdef.sprite,entdef.options)
+}
+
 // AI layer ------------------------------------------
 
 var loadedMapGens = {}
@@ -434,11 +455,14 @@ function createEntity(name,unique,tx,ty,mask,sprite,options) {
 
 
 function levelDone() {
+	io.config.pointer[0].gamepad.enabled=true;
 	if (JGState.isIn("GameOver")) return;
 	JGState.add("LevelDone")
+	JGObject.removeObjects(null,player_mask);
 }
 
 function gameOver() {
+	io.config.pointer[0].gamepad.enabled=true;
 	if (JGState.isIn("LevelDone")) return;
 	JGState.add("GameOver")
 }
@@ -488,6 +512,8 @@ function aiLayerInitGame() {
 	// set controls
 	io.config.axis[1].keys.enabled=true;
 	io.config.button[0].keys.code="L";
+	// enable gamepad pointer control except in game, so you can select menus
+	io.config.pointer[0].gamepad.enabled=true;
 
 	loadModulesFromManifest(loadedMapGens,"../"+GameConfig.gamedir+"/webcogs",".",GameConfig.gamedir+"/webcogs/promptbuild_maps.json")
 	.then(() => {
@@ -540,6 +566,23 @@ function aiLayerStartTitle() {
 }
 
 function aiLayerStartNewLevel() {
+	io.config.pointer[0].gamepad.enabled=false;
+	// set BG
+	if (thislevel.bg)  {
+		// for now we support CSS gradients only
+		try {
+			var dataurl = GradientPngDataUrl
+				.fromString(thislevel.bg)
+				.toDataURL(480,270);
+			TexLoader.load(gl,'levelbg',dataurl,/*smooth*/true,/*wrap*/false,/*lazy*/true);
+			//thisleveldef.scenery.bg = dataurl;
+		} catch (err) {
+			TexLoader.load(gl,'levelbg',"images/levelbg.png",/*smooth*/true,/*wrap*/false,/*lazy*/true);
+			console.log(`Error parsing CSS gradient ${thislevel.bg}: ${err}.`);
+		}
+	} else {
+		TexLoader.load(gl,'levelbg',"images/levelbg.png",/*smooth*/true,/*wrap*/false,/*lazy*/true);
+	}
 	// currently hard coded
 	tilemap.setOffscreenTile(-1,wall_mask);
 	// create level
@@ -565,6 +608,7 @@ function aiLayerStartNewLevel() {
     				if (typeof mapping.entity === "function") {
     					mapping.entity(x,y)
                     } else {
+						// replace with createEntityFromChar?
                         var mask = mask_mapping[mapping.entity.mask]
                         if (!mask) {
                             mask = 0;

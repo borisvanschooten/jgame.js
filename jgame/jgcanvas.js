@@ -199,11 +199,12 @@ JGCanvas.prototype.updateInputs = function(timer) {
 	if (navigator.getGamepads) {
 		var pads = navigator.getGamepads();
 		// circumvent error in Chrome, which returns an array-like
-		// thing on desktop that doesn't actually contain elements
+		// object on desktop that doesn't actually contain elements
 		if (pads.length > 0 && pads[0]) {
 			this.hasgamepads = true;
 			// add up all values from all axes
 			for (var i=0; i<pads.length; i++) {
+				if (!pads[i]) continue; // skip nulls (returned by chrome)
 				// detect shield controller, has different axes
 				var nvidiaShield =
 					pads[i].id.substr(0,16) == "0955-7214-NVIDIA";

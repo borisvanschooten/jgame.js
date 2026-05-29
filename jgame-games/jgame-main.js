@@ -623,10 +623,12 @@ StdGame.prototype.updateScreenOfs = function(x,y) {
 		if (this.targetxofs < 0) this.targetxofs = 0;
 		var maxofs = tilemap.tilex*tilemap.nrtilesx-width;
 		if (this.targetxofs > maxofs) this.targetxofs = maxofs;
+		if (maxofs < 0) this.targetxofs = -width/2 + (tilemap.tilex*tilemap.nrtilesx)/2;
 		this.targetyofs = player.y - height/2 + 0.5*tiley + playerofs.y;
 		if (this.targetyofs < 0) this.targetyofs = 0;
 		maxofs = tilemap.tiley*tilemap.nrtilesy-height;
 		if (this.targetyofs > maxofs) this.targetyofs = maxofs;
+		if (maxofs < 0) this.targetyofs = -height/2 + (tilemap.tiley*tilemap.nrtilesy)/2;
 	} else {
 		this.targetxofs = -1;
 		this.targetyofs = -1;
@@ -1087,6 +1089,11 @@ function paintFrameTitle(timer) {
 	drawSpriteText(fontbatch,GameConfig.title,
 		width/2,100,80,80,0,0.25,
 		font_color);
+	if (GameConfig.description) {
+		drawSpriteText(fontbatch,GameConfig.description,
+			width/2,height-200,40,40,0,0.25,
+			[1,1,1,1]);
+	}
 	if (!frameskip) {
 		gl.disable(gl.BLEND);
 		if (GameConfig.titlebg!=null) {
@@ -1409,10 +1416,10 @@ TileSprite.prototype.moveFunc = function() {
 				}
 			} else if (rot == "miry") {
 				if (this.y > this.lasty + 0.1) {
-					this.flipy = false;
+					this.flipy = true;
 				}
 				if (this.y < this.lasty - 0.1) {
-					this.flipy = true;
+					this.flipy = false;
 				}
 			} else if (rot == "rot-mir") {
 				// head is on the right side when moving up/down
