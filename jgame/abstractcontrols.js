@@ -256,12 +256,18 @@ JGCanvasAbstractControls.prototype.update = function() {
 		if (this.hasGamepads() && this.config.pointer[i].gamepad.enabled) {
 			var mx = this.getGamepad(0)[this.config.pointer[i].gamepad.axes.x];
 			if (mx) {
+				if (i==0) {
+					this.lastEventType="mouse";
+				}
 				this.pointers[i].x+=20.0*this.config.pointer[i].gamepad.sensitivity*mx;
 				if (this.pointers[i].x < -8) this.pointers[i].x = -8;
 				if (this.pointers[i].x > width-8) this.pointers[i].x = width-8;
 			}
 			var my = this.getGamepad(0)[this.config.pointer[i].gamepad.axes.y];
 			if (my) {
+				if (i==0) {
+					this.lastEventType="mouse";
+				}
 				this.pointers[i].y+=20.0*this.config.pointer[i].gamepad.sensitivity*my;
 				if (this.pointers[i].y < -8) this.pointers[i].y = -8;
 				if (this.pointers[i].y > height-8) this.pointers[i].y = height-8;

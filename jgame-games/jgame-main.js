@@ -212,6 +212,8 @@ function StdGame() {
 	this.persistentstate=null;
 	this.gamestate_loaded=false;
 	this.pausedWebGL = false;
+
+	this.hideMouse = false;
 }
 
 
@@ -532,9 +534,11 @@ StdGame.prototype.doWebGLFrame = function() {
 			if (GameConfig.mouse && GameConfig.mouse.centerPointer) center=true;
 			//var color = cyclecol[Math.floor(gametime/8) % cyclecol.length];
 			if (!GameConfig.mouse || !GameConfig.mouse.disabled) {
-				drawSprite(pointerx,pointery, pointersize.x, pointersize.y,
-					0.0, mousepointer_tex,
-					null, color, !center);
+				if (!GameConfig.mouse || !GameConfig.mouse.hideOnInput || io.lastEventType == "mouse") {
+					drawSprite(pointerx,pointery, pointersize.x, pointersize.y,
+						0.0, mousepointer_tex,
+						null, color, !center);
+				}
 			}
 			//particlebatch.addSprite(0,pointerx,pointery,true,
 			//	96, 96, 0.0, color);
@@ -553,7 +557,7 @@ StdGame.prototype.doWebGLFrame = function() {
 // call to start a new game
 StdGame.prototype.startNewGame = function(continuegame) {
 	JGState.set("Game",-1);
-	JGState.add("NewLevel",450);
+	JGState.add("NewLevel",1);
 	if (continuegame) return;
 	if (GameConfig.score && GameConfig.score.reset
 	&&  GameConfig.gamemode && GameConfig.gamemode!="separate-levels") {
@@ -934,9 +938,13 @@ function doFrameGame(timer) {
 
 	//JGState.add("LevelDone",-1);
 
-	JGObject.checkCollision(1,4); // player hits goodies
-	JGObject.checkCollision(2,1); // enemy hits player
-	JGObject.checkCollision(8,2); // bullet hits enemy
+	if (!GameConfig.collision && GameConfig.collision.allObjects) {
+		JGObject.checkCollision(1,4); // player hits goodies
+		JGObject.checkCollision(2,1); // enemy hits player
+		JGObject.checkCollision(8,2); // bullet hits enemy
+	} else {
+		JGObject.checkCollision(0xff,0xff); // player hits goodies
+	}
 	if (tilemap && !GameConfig.disableBGCollision) JGObject.checkBGCollision(tilemap,0xffff,0xff); // all tiles hit all
 
 	if (thisleveldef.doFramePost) thisleveldef.doFramePost();
@@ -1369,6 +1377,11 @@ TileSprite.prototype.moveFunc = function() {
 		}
 	}
 	if (this.anim) {
+		if (this.anim.end < this.anim.start) {
+			var end = this.anim.start;
+			this.anim.start = this.anim.end;
+			this.anim.end = end;
+		}
 		// mode options: always (always=true), moving (always=false,vertical=true), moving-x (always=false,vertical=false)
 		if (this.anim.always || this.anim.mode=="always") {
 			this.animpos += this.anim.speed;
@@ -1381,8 +1394,11 @@ TileSprite.prototype.moveFunc = function() {
 			//console.log("####"+this.x+"##"+this.lastx+"##"+(this.anim.speed*s));
 			this.animpos += this.anim.speed*s;
 		}
-		while (this.animpos >= this.anim.end + 1 - this.anim.start)
+		if (this.animpos >= this.anim.end + 1 - this.anim.start)
 			this.animpos -= this.anim.end + 1 - this.anim.start;
+		// reset pos if it's too far out of bounds
+		if (this.animpos >= this.anim.end + 1 - this.anim.start)
+			this.animpos = 0;
 		this.sprite = this.anim.start + Math.floor(this.animpos);
 		// [newly added] rotation scheme, taken from cellspace/Main.js. rot is one of: 
 		// nodir: no rotation
@@ -1479,13 +1495,16 @@ TileSprite.prototype.dispose = function() {
 * @param ty tile x coordinate
 * @param steps how many frames to take in the transition */
 TileSprite.prototype.goTo = function(tx,ty,steps) {
+	tx = Math.round(tx);
+	ty = Math.round(ty);
 	// TODO: check if premature call to goTo will clear old destination tile
 	// clear bits set by colid
 	//tilemap.setTileCid(0, (TILEANDOBJ^this.colid) | TILEAND, this.tx,ty);
 	if (tx == this.tx && ty==this.ty) return;
 	if (this.colid) {
 		setTileSpriteIndex(this,true);
-		if (!this.occupyOrigin) tilemap.setTileCid(0, TILEAND,this.tx,this.ty);
+		if (!this.occupyOrigin) tilemap.setTileCid(0, TILEAND,
+			Math.round(this.tx), Math.round(this.ty));
 		tilemap.setTileCid(this.colid, TILEAND, tx,ty);
 	}
 	this.oldtx = this.tx;

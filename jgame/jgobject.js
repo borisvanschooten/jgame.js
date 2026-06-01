@@ -360,11 +360,13 @@ JGObject.prototype.remove = function() {
 };
 
 
-JGObject.prototype.getTiles = function(tilemap) {
+JGObject.prototype.getTiles = function(tilemap,dx,dy) {
+	if (!dx) dx = 0;
+	if (!dy) dy = 0;
 	var bbox = this.tilebbox;
 	if (!bbox) bbox = this.bbox;
-	var x1 = this.x + bbox.x;
-	var y1 = this.y + bbox.y;
+	var x1 = this.x + dx + bbox.x;
+	var y1 = this.y + dy + bbox.y;
 	var x2 = x1 + bbox.width - 1;
 	var y2 = y1 + bbox.height - 1;
 	x1 = Math.floor(x1/tilemap.tilex);

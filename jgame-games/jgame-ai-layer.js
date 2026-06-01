@@ -5,7 +5,13 @@ var GameConfig = {
 	name: "JGame AI game",
 	gamemode: "separate-levels",
 	mouse: {
-		color:null, pointerSize:{x:64,y:64}, centerPointer:false, disabled:false
+		color:null, pointerSize:{x:64,y:64},
+		centerPointer:false,
+		disabled:false,
+		hideOnInput:true,
+	},
+	collision: {
+		allObjects: true, // collide all object with all objects
 	},
 	//scroll: {
 	//	speed: 1000,
@@ -98,16 +104,21 @@ var spritedefs = {}
 
 // fixed definitions
 
-// entity masks
+// entity masks. NOTE: copy is found in gameentities.md
 var player_mask = 1
-var enemy_mask = 2 // for enemies and enemy bullets
+var enemy_mask = 2 // for enemies
 var pickup_mask = 4 // mask for bonuses and other things that can be picked up
 var player_bullet_mask = 8 // for player bullets
+var enemy_bullet_mask = 16 // for enemy bullets
+var special_mask = 32 // for other purposes 
+
 var mask_mapping = {
     "player": player_mask,
     "enemy": enemy_mask,
     "pickup": pickup_mask,
     "player_bullet": player_bullet_mask,
+    "enemy_bullet": enemy_bullet_mask,
+	"special": special_mask,
 }
 
 // tile masks
@@ -149,12 +160,14 @@ function getTileMaskDef(maskname) {
 	return definedMasks[maskname]
 }
 
-function getTileMaskDefsDesc() {
-	var ret = ""
-	Object.entries(definedMasks).forEach(([key, value]) => {
-		ret += `var ${key}_mask = ${value};\n`
-	});
-	return ret;
+/** parse mask expression, which is a set of names separated by "|". */
+function getTileMaskFromExpr(mask_expr) {
+    var mask_names = mask_expr.split("|")
+    var mask = 0
+    for (var i=0; i<mask_names.length; i++) {
+        mask |= getTileMaskDef(mask_names[i])
+    }
+    return mask
 }
 
 function getTileDef(tilechar) {
@@ -170,10 +183,11 @@ function createEntityFromChar(entitychar,x,y) {
 		console.log(`Warning: Entity with char ${entitychar} does not exist.`)
 		return;
 	}
+	entdef = entdef.entity
 	var mask = mask_mapping[entdef.mask]
 	if (!mask) {
 		mask = 0;
-		console.error(`Entity mask ${mapping.entity.mask} not found.`)
+		console.error(`Entity mask ${entdef.mask} not found.`)
 	}
 	createEntity(entdef.name, entdef.unique, x,y, mask, entdef.sprite,entdef.options)
 }
@@ -200,40 +214,72 @@ class GameEntity extends TileSprite {
 	getMask() {
 		return this.colid;
 	}
-	getTileCoords() {
-		return this.getTiles(tilemap)
+	setMask(mask) {
+		this.colid = mask;
+	}
+	getTileCoords(dx,dy) {
+		if (!dx) dx=0
+		if (!dy) dy=0
+		return this.getTiles(tilemap,dx*tilex,dy*tiley)
+	}
+	// more universal function, replaces getEnv
+	getTileMasks(dx,dy,and_mask) {
+		if (!and_mask) and_mask=-1
+		var rect = this.getTileCoords(dx,dy)
+		var mask = tilemap.getTileCidRect(rect)
+		//console.log(`###${dx} ${dy} ${and_mask} => ${JSON.stringify(rect)} => ${mask}`);
+		return mask&and_mask;
+	}
+	getSprite() {
+		return this.spritedefname;
+	}
+	setSprite(sprite) {
+		this.spritedefname = sprite
+		if (spritedefs[sprite]) {
+			this.spritedef = spritedefs[sprite]
+			this.anim = spritedefs[sprite].anim
+			if (spritedefs[sprite].spawnDelay) {
+				this.spawndelay = spritedefs[sprite].spawnDelay
+			}
+			if (this.spritedef && this.spritedef.onCreate) {
+				if (this.spritedef.onCreate.particle) {
+					var part = this.spritedef.onCreate.particle
+					if (loadedParticles[part.type]) {
+						loadedParticles[part.type](this.x, this.y, part.size, part.sprite, part.options)
+					} else {
+						console.log(`Cannot find particle generator '${part.type}'`)
+					}
+				}
+				if (this.spritedef.onCreate.sound) {
+					JGAudio.play(this.spritedef.onCreate.sound, null, null, 0.75)
+				}
+			}
+		} else {
+			console.log(`Cannot find sprite "${sprite}"`)
+		}
 	}
 	// sprite can be sprite index or name of spritedefs definition
 	constructor(name,unique,tx,ty,mask,sprite) {
 		super(name,unique,tx,ty,mask)
+		this.spawndelay = 0;
 		if (isNaN(sprite)) {
-			if (spritedefs[sprite]) {
-				this.spritedef = spritedefs[sprite]
-				this.anim = spritedefs[sprite].anim
-				if (this.spritedef && this.spritedef.onCreate) {
-					if (this.spritedef.onCreate.particle) {
-						var part = this.spritedef.onCreate.particle
-						if (loadedParticles[part.type]) {
-							loadedParticles[part.type](this.x, this.y, part.size, part.sprite, part.options)
-						} else {
-							console.log(`Cannot find particle generator '${part.type}'`)
-						}
-					}
-					if (this.spritedef.onCreate.sound) {
-						JGAudio.play(this.spritedef.onCreate.sound, null, null, 0.75)
-					}
-				}
-			} else {
-				console.log(`Cannot find sprite "${sprite}"`)
-			}
+			this.setSprite(sprite)
 		} else {
 			this.sprite = sprite
 			this.spritedef = null
 		}
 		this.init()
-		this.setBBox(0.1*tilex,0.1*tiley,0.8*tilex,0.8*tiley);
+		this.setBBox(0,0,0,0)
+		this.setTileBBox(0,0,0,0)
 	}
 	move() {
+		if (this.spawndelay <= 0) {
+			this.setTileBBox(0,0,tilex,tiley);
+			this.setBBox(0.1*tilex,0.1*tiley,0.8*tilex,0.8*tiley);
+		} else {
+			this.spawndelay--;
+			return;
+		}
 		this.moveFunc()
 		this.moveTick()
 		if (!this.transition) {
@@ -256,17 +302,9 @@ class GameEntity extends TileSprite {
 	moveTick() {}
 	moveTile() {}
 	paint(gl) {
-		//var spr = this.sprite
-		// hard coded flip logic
-		/*if (spr==16 || spr==27 || spr==29 || spr==11) {
-			if (this.lastx > this.x) {
-				this.flipx = true;
-			}
-			if (this.lastx < this.x) {
-				this.flipx = false;
-			}
-		}*/
-		this.paintFunc(gl)
+		if (this.spawndelay <= 0) {
+			this.paintFunc(gl)
+		}
 	}
 }
 
@@ -471,8 +509,12 @@ function getPlayer() {
 	return JGObject.getObject("player")
 }
 
-function setTile(tile_index,tile_mask,tx,ty) {
+function setTile(tile_index,tile_mask_name,tx,ty) {
+	var tile_mask = tile_mask_name
+	if (typeof tile_mask_name === 'string' || tile_mask_name instanceof String)
+		tile_mask = getTileMaskFromExpr(tile_mask_name)
 	var oldtile_index = tilemap.getTilePos(tx,ty)
+	if (oldtile_index == tile_index) return;
 	tilemap.setTile(tile_index,tile_mask,tx,ty)
 	// check for events
 	var event = tileEvents["T"+tile_index]
@@ -497,8 +539,11 @@ function setTile(tile_index,tile_mask,tx,ty) {
 	}
 
 }
-function getTileMask(tile_index,tile_mask,tx,ty) {
-	return tilemap.getTileCidPos(tile_index,tile_mask,Math.floor(tx),Math.floor(ty))
+
+// Old function, no longer advertised. Original desc:
+//Get a tile's bit mask value at a particular position with the method getTileMask(tx,ty), where tx and ty are integers. Note that if an entity does not have an integer tile position, it overlaps multiple tiles, and you need to use this.getTileCoords() to get all coordinates of overlapping tiles.
+function getTileMask(tx,ty) {
+	return tilemap.getTileCidPos(Math.round(tx),Math.round(ty))
 }
 
 
@@ -551,12 +596,7 @@ function aiLayerInitGame() {
 			tileEvents["T"+elem.tile] = elem
 		}
         if (elem.mask_name) {
-            var mask_names = elem.mask_name.split("|")
-            var mask = 0
-            for (var i=0; i<mask_names.length; i++) {
-                mask |= getTileMaskDef(mask_names[i])
-            }
-            elem.mask = mask
+			elem.mask = getTileMaskFromExpr(elem.mask_name)
         }
 	}
 	console.log(tileEvents)
@@ -668,6 +708,7 @@ function aiLayerDoFrame() {
 	&& JGObject.countObjects('Object',0) == 0) {
 		//JGState.add("LevelDone",-1);
 	}*/
+	tilemap.update(gl);
 }
 
 

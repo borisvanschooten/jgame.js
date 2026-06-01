@@ -99,6 +99,8 @@ function JGCanvas(canvas,logicalwidth,logicalheight) {
 
 	this.touches = []; // {id,x,y}
 
+	// for hide mouse on input
+	this.lastEventType=null; // keyboard, mouse, touch, gamepad
 
 	this.gamepad = {
 		/** analog left stick -1 ... 1 */
@@ -224,7 +226,10 @@ JGCanvas.prototype.updateInputs = function(timer) {
 						this.gamepad.ry += pads[i].axes[3];
 				}
 				for (var b=0; b<4; b++) {
-					if (pads[i].buttons[b].pressed) this.gamepad.anybut=true;
+					if (pads[i].buttons[b].pressed) {
+						this.gamepad.anybut=true;
+						this.lastEventType="gamepad";
+					}
 				}
 				if (pads[i].buttons[0].pressed) this.gamepad.but.a=true;
 				if (pads[i].buttons[1].pressed) this.gamepad.but.b=true;
@@ -291,6 +296,7 @@ JGCanvas.prototype.hasGamepads = function() {
 // input
 
 JGCanvas.prototype._jgkeydown = function (event) {
+	this.lastEventType="keyboard";
 	if (typeof JGAudio == "function") {
 		JGAudio._init(); // unsuspend audio
 	}
@@ -306,15 +312,18 @@ JGCanvas.prototype._jgkeydown = function (event) {
 }
 
 JGCanvas.prototype._jgkeyup = function (event) {
+	this.lastEventType="keyboard";
 	this.keymap[event.keyCode] = false;
 }
 
 JGCanvas.prototype._jgmouseup = function (event) {
+	this.lastEventType="mouse";
 	this.sawmouseevents = true;
 	this.mousebutton[event.button+1] = false;
 }
 
 JGCanvas.prototype._jgmousedown = function (event) {
+	this.lastEventType="mouse";
 	if (typeof JGAudio == "function") {
 		JGAudio._init(); // unsuspend audio
 	}
@@ -323,6 +332,7 @@ JGCanvas.prototype._jgmousedown = function (event) {
 }
 
 JGCanvas.prototype._jgmousemove = function (event) {
+	this.lastEventType="mouse";
 	this.sawmouseevents = true;
 	//console.log("##############MOUSE "+event.clientX + " "+event.clientY);
 	var rect = this.canvas.getBoundingClientRect();
@@ -334,6 +344,7 @@ JGCanvas.prototype._jgmousemove = function (event) {
 }
 
 JGCanvas.prototype._jgtouchmove = function (event) {
+	this.lastEventType="touch";
 	var rect = this.canvas.getBoundingClientRect();
 	this.touches = [];
 	for (var i=0; i<event.touches.length; i++) {
