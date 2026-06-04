@@ -1001,29 +1001,36 @@ function startTitle(timer) {
 	JGObject.removeObjects(null,0);
 	mousebutflank=false;
 
-	// handles up to 100 levels
+	// handles up to 88 levels
 	var lev = 0;
 	var nrlevels = GameConfig.levels.length;
 	var nrlevx = 0;
-	var itemsize = 140;
+	var itemsize = 120;
+	var starty = 2;
+	var maxheight = 3;
 	if (nrlevels < 3) {
 		nrlevx = nrlevels;
-	} else if (nrlevels > 70) {
+	} else if (nrlevels > 60) {
+		itemsize = 80;
+		starty = 3;
+		nrlevx = 22;
+		maxheight=4;
+	} else if (nrlevels > 51) {
+		itemsize = 90;
+		starty = 3;
+		nrlevx = 20;
+	} else if (nrlevels > 42) {
 		itemsize = 100;
-		nrlevx = 10;
-	} else if (nrlevels > 50) {
-		itemsize = 140;
-		nrlevx = 10;
-	} else if (nrlevels > 40) {
-		nrlevx = 10;
+		nrlevx = 17;
+		starty = 3;
 	}
 	if (GameConfig.levelsPerRow) {
 		nrlevx = GameConfig.levelsPerRow;
 	}
 	if (!nrlevx) {
 		levelsloop1:
-		for (var hght=2; hght<=5; hght++) {
-			for (var i=2; i<=8; i++) {
+		for (var hght=2; hght<=maxheight+1; hght++) {
+			for (var i=2; i<=14; i++) {
 				if (nrlevels % i == 0 && nrlevels / i <= hght) {
 					nrlevx = i;
 					break levelsloop1;
@@ -1033,8 +1040,8 @@ function startTitle(timer) {
 	}
 	if (!nrlevx) {
 		levelsloop2:
-		for (var hght=2; hght<=5; hght++) {
-			for (var i=3; i<=8; i++) {
+		for (var hght=2; hght<=maxheight+1; hght++) {
+			for (var i=3; i<=14; i++) {
 				if (nrlevels / i <= hght) {
 					nrlevx = i;
 					break levelsloop2;
@@ -1045,8 +1052,8 @@ function startTitle(timer) {
 	nrlevx--; // end inclusive
 	// XXX for large numbers of levels, starty should be 1, but it will
 	// overlap with title. Fix this!
-	var starty = 3;
-	if (nrlevels >= nrlevx+2) starty--;
+	//var starty = 3;
+	//if (nrlevels >= nrlevx+2) starty--;
 	for (var y=starty; y<=10; y+=2) {
 		for (var x=-nrlevx/2; x<=nrlevx/2+0.01; x++) {
 			if (lev >= nrlevels) break;
@@ -1064,7 +1071,7 @@ function startTitle(timer) {
 			function(args) {
 				drawSpriteText(fontbatch,
 					 GameConfig.levels[args.level].name,
-					this.x,this.y-120, 50,50,0,0.25,null);
+					this.x,this.y-itemsize+20, 40,40,0,0.25,null);
 				if (GameState.levels["level"+args.level]) {
 					if (GameConfig.score 
 					&& GameState.levels["level"+args.level].score!==undefined) {
@@ -1073,7 +1080,7 @@ function startTitle(timer) {
 						for (var i=0; i<strs.length; i++) {
 							drawSpriteText(fontbatch,
 								strs[i],
-								this.x,this.y+120 + 60*i, 50,50,0,0.25,null);
+								this.x,this.y+itemsize-20 + 35*i, 30,30,0,0.25,null);
 						}
 					}
 				}
@@ -1099,7 +1106,7 @@ function paintFrameTitle(timer) {
 		font_color);
 	if (GameConfig.description) {
 		drawSpriteText(fontbatch,GameConfig.description,
-			width/2,height-200,40,40,0,0.25,
+			width/2,height-150,40,40,0,0.25,
 			[1,1,1,1]);
 	}
 	if (!frameskip) {

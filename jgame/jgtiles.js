@@ -139,6 +139,7 @@ texatlas, texwidth,texheight, nr_tex_x,nr_tex_y,smooth_textures) {
 	//this.epsilonx = 0.5 / (this.texwidth * this.nr_tex_x);
 	//this.epsilony = 0.5 / (this.texheight * this.nr_tex_y);
 	// takes care of seams
+	this.smooth_textures = smooth_textures;
 	if (smooth_textures) {
 		this.epsilonx = 0.55;
 		this.epsilony = 0.55;
@@ -197,6 +198,15 @@ JGTileMap.prototype.fill = function(tileidx,tilecid,x1,y1,x2,y2) {
 
 
 JGTileMap.prototype.update = function(gl) {
+	if (!this.smooth_textures) {
+		// epsilon depends on physical width of one tile pixel
+		// smaller -> higher epsilon
+		var logical_pix_per_tile_pix = this.tilex / this.texwidth;
+		var pix_per_tile_pix = logical_pix_per_tile_pix*(gl.canvas.width/width);
+		// empirically, the seams disappear on Chrome around mulfactor=0.4
+		this.epsilonx = 0.51/pix_per_tile_pix;
+		this.epsilony = 0.51/pix_per_tile_pix;
+	}
 	gl.useProgram(this.program.program);
 	// uvidxes are always the same, so load them once
 	if (!this.uvidxes_loaded) {
