@@ -824,7 +824,7 @@ function startNewLevel(timer) {
 	leveldonetimer=0;
 	JGObject.removeObjects(null,0);
 	if (GameConfig.gamemode != "no-title" && !GameConfig.nomenubutton) {
-		new MenuObj(10, width-128,height*0.9, 128,128, 0, "to menu",60,0.3,
+		new MenuObj(10, width-96,height*0.925, 96,96, 0, "to menu",50,0.3,
 		function(args) {
 			JGState.set("Title",-1);
 		}, {});

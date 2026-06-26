@@ -98,6 +98,8 @@ var GameConfig = {
 	levels: []
 };
 
+var gameglobalstate = {}
+
 var tilemapping = {}
 
 var spritedefs = {}
@@ -105,6 +107,7 @@ var spritedefs = {}
 // fixed definitions
 
 // entity masks. NOTE: copy is found in gameentities.md
+var none_mask = 0
 var player_mask = 1
 var enemy_mask = 2 // for enemies
 var pickup_mask = 4 // mask for bonuses and other things that can be picked up
@@ -113,6 +116,7 @@ var enemy_bullet_mask = 16 // for enemy bullets
 var special_mask = 32 // for other purposes 
 
 var mask_mapping = {
+	"none": none_mask,
     "player": player_mask,
     "enemy": enemy_mask,
     "pickup": pickup_mask,
@@ -185,11 +189,33 @@ function createEntityFromChar(entitychar,x,y) {
 	}
 	entdef = entdef.entity
 	var mask = mask_mapping[entdef.mask]
-	if (!mask) {
+	if (mask===undefined) {
 		mask = 0;
 		console.error(`Entity mask ${entdef.mask} not found.`)
 	}
 	createEntity(entdef.name, entdef.unique, x,y, mask, entdef.sprite,entdef.options)
+}
+
+function getGlobal(name) {
+	if (!gameglobalstate[name]) return null
+	return gameglobalstate[name]
+}
+
+function setGlobal(name,value) {
+	var info = null
+	for (var i=0; i<gameglobals.length; i++) {
+		if (gameglobals[i].name == name) {
+			info = gameglobals[i]
+		}
+	}
+	// bounds check
+	if (info && value < info.min) {
+		value = info.min
+	}
+	if (info && value > info.max) {
+		value = info.max
+	}
+	gameglobalstate[name] = value
 }
 
 // AI layer ------------------------------------------
@@ -210,6 +236,12 @@ class GameEntity extends TileSprite {
 	}
 	getY() {
 		return this.y / tiley
+	}
+	getLastX() {
+		return this.lastx / tilex
+	}
+	getLastY() {
+		return this.lasty / tiley
 	}
 	getMask() {
 		return this.colid;
@@ -606,6 +638,11 @@ function aiLayerStartTitle() {
 }
 
 function aiLayerStartNewLevel() {
+	gameglobalstate = {}
+	for (var i=0; i<gameglobals.length; i++) {
+		var g = gameglobals[i]
+		gameglobalstate[g.name] = g.value;
+	}
 	io.config.pointer[0].gamepad.enabled=false;
 	// set BG
 	if (thislevel.bg)  {
@@ -700,6 +737,15 @@ function aiLayerDoFrame() {
 	//}
 	if (calcWinCondition(thislevel.wincond)) {
 		levelDone()
+	}
+	if (gameglobals) {
+		var ypos = height-50
+		for (var i=0; i<gameglobals.length; i++) {
+			var g = gameglobals[i]
+			var value = gameglobalstate[g.name]
+			drawSpriteText(fontbatch,`${g.label} ${value}`,50,ypos,35,35,-1,0.25,[1,1,1,1]);
+			ypos -= 35
+		}
 	}
 	/*if (checkTime(0,thislevel.par.levelduration,50)) {
 		// create enemy

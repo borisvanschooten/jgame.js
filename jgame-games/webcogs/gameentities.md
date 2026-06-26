@@ -32,7 +32,7 @@ hit_bg(tilemask) - is called when an entity collides with particular tiles. tile
 
 getTileCoords(dx=0,dy=0) - returns integer tile coordinates that overlap with the entity, in the format {x,y,width,height}.  dx and dy are optional position offsets.  Use this to get coordinates of colliding tiles if an entity is not aligned with a tile coordinate.
 
-getTileMasks(dx=0,dy=0,and_mask=-1) - get the tile masks at the given position relative from the entity. dx and dy are the integer relative tile coordinates to the entity's position.   Note that if an entity does not have an integer tile position, it overlaps multiple tiles, and the method ORs the masks of all overlapping tiles. and_mask performs a bitwise AND with the resulting mask value, and can be used to filter for particular mask bits.
+getTileMasks(dx=0,dy=0,and_mask=-1) - get the tile masks at the given position relative from the entity. dx and dy are the integer relative tile coordinates to the entity's position.   Note that if an entity does not have an integer tile position, it overlaps multiple tiles, and the method ORs the masks of all overlapping tiles. and_mask performs a bitwise AND with the resulting mask value, and can be used to filter for particular mask bits.  To detect tile collision properly, use a 'look ahead' method, passing the actual entity speed as dx, dy. To test floor support properly, use a small 'epsilon' value (dy=0.1 is a good choice for a normal floor), to prevent the entity from floating above the floor.
 
 ## Free movement methods
 
@@ -48,10 +48,14 @@ goTo(tilex,tiley,delay) - go to a particular tile position. tx and ty must be in
 
 Use the following getters and setters for the entity position:
 
-setX(tx) - tx is tile coordinate
-setY(ty) - ty is tile coordinate
-getX() - returns tile coordinate
-getY() - returns tile coordinate
+setX(tx) - tx is float tile coordinate
+setY(ty) - ty is float tile coordinate
+getX() - returns float tile coordinate
+getY() - returns float tile coordinate
+getLastX() - return coordinate on previous frame
+getLastY() - return coordinate on previous frame
+
+Use getLastX and getLastY can to determine an entity's direction of movement.
 
 Get the entity sprite using the method getSprite(); set a new sprite using
 setSprite(sprite_name).
@@ -90,7 +94,7 @@ To play a sound, use the global function playSound(name), where name is a string
 ## Tile and entity collision masks
 
 Entity masks are predefined, and are always one of the following:
-
+var none_mask = 0
 var player_mask = 1
 var enemy_mask = 2 // for enemies
 var pickup_mask = 4 // mask for bonuses and other things that can be picked up
@@ -104,4 +108,13 @@ Tile mask values can be obtained by name using the global function getTileMaskFr
 Tile indexes and mask names can be obtained from a tile character using the
 global function getTileDef(tilechar) which returns an object {tile_index,
 mask_name} which can be used for calls to setTile().
+
+## Game globals
+
+The game defines a small set of game globals.  Mentions of 'globals' can be
+assumed to refer to these game globals. Always access the globals using:
+
+getGlobal(name) - returns value of global
+
+setGlobal(name,value) - set the global to a new value
 
