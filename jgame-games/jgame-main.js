@@ -938,7 +938,7 @@ function doFrameGame(timer) {
 
 	//JGState.add("LevelDone",-1);
 
-	if (!GameConfig.collision && GameConfig.collision.allObjects) {
+	if (!GameConfig.collision || GameConfig.collision.allObjects) {
 		JGObject.checkCollision(1,4); // player hits goodies
 		JGObject.checkCollision(2,1); // enemy hits player
 		JGObject.checkCollision(8,2); // bullet hits enemy
@@ -1339,7 +1339,8 @@ function TileSprite(name,unique,tx,ty,colid) {
 	this.animpos = 0;
 	this.flipx = false;
 	this.flipy = false;
-	this.angle = 0;
+	this.animangle = 0; // store orientation here, can be used to set anim angle via anim settings
+	this.angle = 0; // used for animations, set via anim settings
 	this.color = null;
 	this.anim = null; // start, end, speed, vertical, always (or mode as alternative for vertical/always)
 	this.animdir = 0;
@@ -1408,6 +1409,7 @@ TileSprite.prototype.moveFunc = function() {
 			this.animpos = 0;
 		this.sprite = this.anim.start + Math.floor(this.animpos);
 		// [newly added] rotation scheme, taken from cellspace/Main.js. rot is one of: 
+		// copy: copy directly from rot variable
 		// nodir: no rotation
 		// rotany: rotate in any directions
 		// rot4: rotate according to move direction
@@ -1418,14 +1420,16 @@ TileSprite.prototype.moveFunc = function() {
 		var rot = this.anim.dir || "nodir";
 		// 0..7, where 0=up 2=right 4=down 6=left (diagonals are not used here, so only even nrs)
 		// only change animdir if speed > minimum value
-		if (Math.abs(this.x-this.lastx) > 0.1 || Math.abs(this.y-this.lasty) > 0.1) {
+		if (rot=="copy" || Math.abs(this.x-this.lastx) > 0.1 || Math.abs(this.y-this.lasty) > 0.1) {
 			var animangle = Math.atan2(this.lastx-this.x, this.lasty-this.y);// + Math.PI*0.25;
 			this.animdir = (2 * (Math.round(2*animangle/Math.PI) + 2)) % 8;
 			//console.log(this.animdir);
 			var flip = 0; // 0 or 4 (flip x). flipy is done with rot+flipx
 			var dir = 0; // rotation: 0=0, 1=90, 2=180, 3=270
 			var d = this.animdir;
-			if (rot == "rotany") {
+			if (rot == "copy") {
+				this.angle = -this.animangle;
+			} else if (rot == "rotany") {
 				this.angle = animangle;
 			} else if (rot == "rot4") {
 				dir = (2+Math.floor(d/2)) % 4;

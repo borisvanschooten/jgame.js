@@ -243,6 +243,12 @@ class GameEntity extends TileSprite {
 	getLastY() {
 		return this.lasty / tiley
 	}
+	getAngle() {
+		return this.animangle;
+	}
+	setAngle(angle) {
+		this.animangle = angle;
+	}
 	getMask() {
 		return this.colid;
 	}
@@ -588,7 +594,8 @@ function aiLayerInitGame() {
 
 	// set controls
 	io.config.axis[1].keys.enabled=true;
-	io.config.button[0].keys.code="L";
+	io.config.button[0].keys.code="K";
+	io.config.button[1].keys.code="L";
 	// enable gamepad pointer control except in game, so you can select menus
 	io.config.pointer[0].gamepad.enabled=true;
 

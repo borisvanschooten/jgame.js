@@ -55,7 +55,7 @@ for (var i=0; i<JGameBaseFiles.length; i++) {
 
 // load game defs
 gamedir = PersistentState.getUrlParameter("game");
-if (!gamedir) gamedir=defaultgamedir;
+if (!gamedir && typeof defaultgamedir != "undefined") gamedir=defaultgamedir;
 
 loadScript(gamedir+"game.js",async function() {
 	// copy gamedir if not set

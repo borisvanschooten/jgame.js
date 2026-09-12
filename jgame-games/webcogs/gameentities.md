@@ -7,7 +7,7 @@ A game entity is always a subclass of GameEntity.  There are two ways to use it,
 The following instance properties of GameEntity are reserved and should not be
 used in your game entities: this.sprite, this.anim, this.angle, this.x, this.y, this.tx, this.ty, this.xspeed, this.yspeed.
 
-A game entity can spawn other entities. Define them as additional classes (not export classes) which can be spawned using new (). They do not need to be registered. 
+A game entity can spawn other entities. Define them as additional classes (not export classes) which can be spawned using new(). They do not need to be registered. 
 
 A game entity can also spawn an externally defined entity, which are referred to via an 'entity character' or 'entity char' (a 1-character string) by calling the global function createEntityFromChar(entitychar,x,y).
 
@@ -67,6 +67,12 @@ Get the player entity using the function getPlayer(). It returns null if no play
 
 Set a tile at a particular position with the function setTile(tile_index,tile_mask_name,tx,ty), where tx and ty are integers.
 
+When the entity has a continuous orientation angle, use the following getter
+and setter to store it:
+
+setAngle(angle) - angle is a float (0.0 = up)
+getAngle(angle) - angle is a float (0.0 = up, default value is 0.0)
+
 
 ## screen bounds
 
@@ -74,6 +80,9 @@ The screen bounds are as follows: the top left has tile coordinate 0,0; the bott
 
 When entities go off the screen bounds, either constrain them within the
 screen (for example, enemies) or remove them (for example, bullets).
+
+To wrap around objects from right to left or bottom to top, wrap when the
+respective coordinate is -1 or less.
 
 ## Controls
 
