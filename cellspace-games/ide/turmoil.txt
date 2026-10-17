@@ -1,0 +1,222 @@
+globals: sfxdef(0,'Blip',796919); sfxdef(4,'Hit',842693); sfxdef(7,'Explo',400988); sfxdef(9,'Blip',5667); sfxdef(11,'Explo',400988); sfxdef(15,'Hit',903137); sfxdef(16,'Explo',290974); sfxdef(17,'Explo',290974); sfxdef(18,'Explo',290974); 
+
+gamebackground: #444
+
+tilemap: 8 8 4 4 no data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACNklEQVRYR+2WMUgbURjH/w+UQF2zSEE6WamIrVMoYk6HUCnC4RgQC0YEh1tMwUmCixbT5VYz2KWFlsoFRSWDXjBDJiVaSmilBaHtkiAIuj7vvcd5ORrvHjk11HrT3X3vfd/v+3//dxxBky/S5PoIDFBMa9SriUhS96wRGGBejXkCzBm5Ow7Q9BEENXFgD9wqQCJBueEyGVIXPF/9QDe+f8KbyOpf8VQq5TKr9czXSCvAiquq6NcwHIj+WdDCIkjvUiedGI/i148qtna/oPT6G7FjbA8DUBSF7zdNkz3LA9jFWWF2MRAbYn4b9Dyj4vPTIkYHnvM4Axjef4IHCQNzQ6JJqyiNRqM8ns/nYcFcD8A6BQ2/1ZAd+YkX4ThKoSyOyieIm49RmdHx8p3nZ8J/BLXdL/eJiU3u0UsVOuIEsT0B0P6wDX9+n+H09BxjZjdyfTq6hj56+tTXAy4AbVAA6DuXAOUwQTqsYYpuITb8CC2tISyU1lA81pCs6GD+oEjXlYEgWd/Ntch+CrATMRtX6eazr65OmQcW3xui+EoP8OrQkjvJG3a/8xQIqAXQjoVgeoczgtojyU4Ci7MTYKcNDODDFzjs64HAFXwSXCuA9Z3kI7CcJZ1XaqGdmDdzqAAFk9+SaaeQWGOb3SKQhJADOFCcY8SKTwtdrc2O2W4SQNYHNzYCWYBG1kmNoJHEsnv+DYCr/vv8frllVJBSgAHkCmVXvlh/F+4B/i8F6hnq1hSQcXOjay4ARpUQNH6w/AwAAAAASUVORK5CYII=
+
+display: 48 48
+
+background: #363752
+empty: .
+
+cell: - 0 - none - no
+cell: # 1 - none - no
+cell: % 2 - none - no
+cell: ~ 3 - none - yes
+cell: H 4 - mirx - yes
+cell: P 5 - rot4 - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - rot4 - yes
+cell: * 8 - none - yes
+cell: o 9 - none - yes
+cell: & 10 - rot4 - yes
+cell: $ 11 - none - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - rot4 - no
+cell: + 14 - none - yes
+cell: @ 15 - rot4 - no
+
+rule: rule0
+. = - . . P 
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+- - R 
+probability: 0.03
+delay: 9
+outfunc: sound(0)
+rule: rule1
+. % . . . . 
+. P - . - P 
+. % . . . . 
+priority: 1
+transform: mirx
+conddir: R
+outdir:
+- - R 
+delay: 9
+rule: rule2
+. P = . - . 
+priority: 1
+transform: mirx
+conddir: R
+delay: 9
+rule: rule3
+. - . . B . 
+. B . . - . 
+. . . . . . 
+condfunc: playerdir("up")
+priority: 1
+transform: miry
+conddir: -
+outdir:
+- U - 
+- - - 
+- - - 
+delay: 2
+rule: rule4
+- B . o . . 
+condfunc: playerdir("left")
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+L - - 
+delay: 2
+outfunc: sound(4)
+rule: rule5
+. o - . - o 
+priority: 2
+transform: mirx
+conddir: R
+outdir:
+- - R 
+delay: 1
+rule: rule6
+. o . . - . 
+priority: 1
+conddir: -
+delay: 1
+rule: rule7
+. o P . - - 
+priority: 3
+transform: mirx
+conddir: R
+delay: 1
+outfunc: sound(7)
+rule: rule8
+. - . . B . 
+% B % . - . 
+. . . . . . 
+priority: 2
+transform: miry
+conddir: U
+outdir:
+- U - 
+- - - 
+- - - 
+delay: 2
+rule: rule9
+. = - . . T 
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+- - R 
+probability: 0.05
+delay: 30
+outfunc: sound(9)
+rule: rule10
+. % . . . . 
+. T - . - T 
+. % . . . . 
+priority: 1
+transform: mirx
+conddir: R
+outdir:
+- - R 
+delay: 15
+rule: rule11
+. o T . - - 
+priority: 3
+transform: mirx
+conddir: R
+delay: 1
+outfunc: sound(11)
+rule: rule12
+. T - . T & 
+priority: 2
+transform: mirx
+conddir: R
+outdir:
+- R R 
+probability: 0.07
+delay: 15
+rule: rule13
+. & - . - & 
+priority: 2
+transform: mirx
+conddir: R
+outdir:
+- - R 
+delay: 2
+rule: rule14
+. & . . - . 
+priority: 1
+conddir: -
+delay: 2
+rule: rule15
+. o = . - - 
+priority: 3
+transform: mirx
+conddir: R
+delay: 1
+outfunc: sound(15)
+rule: rule16
+. T B . . - 
+priority: 5
+transform: rot4
+conddir: -
+delay: 1
+outfunc: lose(); sound(16)
+rule: rule17
+. P B . . - 
+priority: 5
+transform: rot4
+conddir: -
+delay: 1
+outfunc: lose(); sound(17)
+rule: rule18
+. & B . . - 
+priority: 5
+transform: rot4
+conddir: -
+delay: 1
+outfunc: lose(); sound(18)
+rule: rule19
+. & o . . - 
+priority: 5
+transform: rot4
+conddir: -
+delay: 1
+
+
+
+level: #
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+=========--------------------=========
+%%%%%%%%%%%%%%%%%%%-%%%%%%%%%%%%%%%%%%
+=========--------------------=========
+%%%%%%%%%%%%%%%%%%%-%%%%%%%%%%%%%%%%%%
+=========--------------------=========
+%%%%%%%%%%%%%%%%%%%-%%%%%%%%%%%%%%%%%%
+=========--------------------=========
+%%%%%%%%%%%%%%%%%%%-%%%%%%%%%%%%%%%%%%
+=========--------------------=========
+%%%%%%%%%%%%%%%%%%%-%%%%%%%%%%%%%%%%%%
+=========----------B---------=========
+%%%%%%%%%%%%%%%%%%%-%%%%%%%%%%%%%%%%%%
+=========--------------------=========
+%%%%%%%%%%%%%%%%%%%-%%%%%%%%%%%%%%%%%%
+=========--------------------=========
+%%%%%%%%%%%%%%%%%%%-%%%%%%%%%%%%%%%%%%
+=========--------------------=========
+%%%%%%%%%%%%%%%%%%%-%%%%%%%%%%%%%%%%%%
+=========--------------------=========
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+--------------------------------------
+win: countCells('=')==0
+
+title: Turmoil

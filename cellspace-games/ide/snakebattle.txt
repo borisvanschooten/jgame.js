@@ -1,0 +1,149 @@
+globals: sfxdef(3,'Explo',911060); sfxdef(9,'Hit',194650); 
+
+gamebackground: #444
+
+tilemap: 8 8 4 4 no data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABbklEQVRYR+1UO1LDMBB9ugM3SIrU1DSkDW3SkiK+BgXXcApoTQstNNTUNLlB7iB2paxYjIKXGWvcaD1jayxp39u3H4eJzU2Mj0qgKlAVSArcv8JfXsem/HgD7pY/O2Rov0Pn11iH+0/0bLAxqZsOPXv4BXbBwSf2uHHfBARc72uSAs7AbEzESiIQ+AtA782aqNChjSSZxGLZJUA91KwkAgGOniKG9x4HNJi7Pf8LKvTJCUiOgMiuFRlKhRPpZ2gDuKRAaoG/XBsifzECWj6OLkegaAp0gfU7oXgRSh2ICpO0oU5Bbj3U50P75/ybhgVfpkbxeDi52YKGhEt3E7ja/9ccMEefAdDgzXv01F7Ri0haSJgU4Oh5MPKcwCNFv6U1PazCr+glmrEIJOlvyTOBByPnbHr0pvQUI6DzdIbAy0U8tDoWSIEuQIm+P3r1GUv+2Y+pBvhgSMXJcs6Lt6HOwJhrswJjgmpflUBVoCrwBc8V9yE71pNBAAAAAElFTkSuQmCC
+
+display: 48 48
+
+background: #527c38
+empty: .
+
+cell: - 0 - none - no
+cell: # 1 - none - no
+cell: % 2 - none - no
+cell: ~ 3 - none - yes
+cell: H 4 - rot4 - yes
+cell: P 5 - rot4 - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - rot4 - yes
+cell: * 8 - none - yes
+cell: o 9 - rot4 - yes
+cell: & 10 - rot4 - yes
+cell: $ 11 - none - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - rot4 - no
+cell: + 14 - none - yes
+cell: @ 15 - rot4 - no
+
+rule: rule0
+. H - . P H 
+priority: 3
+transform: rot4
+conddir: R
+outdir:
+- - R 
+delay: 3
+rule: rule1
+. H - . P H 
+condfunc: playerdir("right")
+priority: 4
+transform: rot4
+conddir: -
+outdir:
+- R R 
+delay: 3
+rule: rule2
+. H - . P H 
+priority: 2
+transform: rot4
+conddir: -
+outdir:
+- R R 
+delay: 3
+rule: rule3
+. H . . - . 
+priority: 1
+transform: rot4
+conddir: R
+delay: 3
+outfunc: lose(); sound(3)
+rule: rule4
+. T . . - . 
+priority: 1
+transform: -
+conddir: -
+delay: 1
+rule: rule5
+. - . . o . 
+. o . . & . 
+. . . . . . 
+priority: 3
+transform: rot4
+conddir: R
+outdir:
+- U - 
+- U - 
+- - - 
+delay: 4
+rule: rule6
+. o - . & o 
+priority: 4
+transform: rot4
+conddir: R
+outdir:
+- - R 
+delay: 4
+rule: rule7
+. o . . . . 
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- R - 
+delay: 4
+rule: rule8
+. . . . . . 
+. o . . & . 
+. - . . o . 
+priority: 3
+transform: rot4
+conddir: R
+outdir:
+- - - 
+- D - 
+- D - 
+delay: 4
+rule: rule9
+. o . . T . 
+priority: 2
+transform: rot4
+conddir: R
+delay: 4
+outfunc: sound(9)
+rule: rule10
+. & T . T - 
+priority: 3
+transform: rot4
+conddir: R
+delay: 1
+
+
+
+level: #
+
+-------o------------------------------
+--------------------------------------
+--------------------------------------
+-----------------o--------------------
+--------------------------------------
+------------------------------o-------
+--------------------------------------
+---o----------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+-------------------H------------------
+--------------------------------------
+-------o------------------------------
+--------------------------------o-----
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--o----------------------o------------
+--------------o--------------------o--
+--------------------------------------
+win: countCells('o')==0
+
+title: Snake Battle

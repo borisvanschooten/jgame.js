@@ -1,0 +1,195 @@
+globals: sfxdef(0,'Blip',433518); sfxdef(7,'Explo',496261); sfxdef(8,'Explo',496261); sfxdef(9,'Explo',496261); sfxdef(10,'Explo',504727); sfxdef(11,'Blip',811414); sfxdef(12,'Blip',531939); 
+
+gamebackground: #444
+
+tilemap: 8 8 4 4 no data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAB6ElEQVRYR+1WLXPCQBB9sf0R1TVBYGoqoAJDRBUaWwSGCipAUFEEWLBosMQgCgJRhQCDrkbXXnfvuHBkSHJlgJjsDHPJfb237+0CDiziu1cXs+X2aGf+IQ+v23V4ktf14m53F+zT63EQ8oKk0ARa9Sb82Qyr7QomgaTzFyPAoBypETAzSUWB1AlkNRBlwUXaUAwg8FRQGLkFqD9liwoKh0KDh99tWrDzBZEvqp2ruRrbz+p+BaLBXY/e3oANEYkgYRLQz3EAvNYqCvgEVaYceTRJKALrgoAEb9CnH5BwcovIzE3wOICpgPDoFhqhR60Eq5BIgIGkVBE2JAGY6mi7WAG2hEcrC075rIl9zB15mRkmAK+Vh4dV//W4FiSBJrnwOaAHowjf6bW7JyhtMorRfGYF4gD4bBzBwOOARA2IAk8qwFMSh8HNPUEX6EkyW9hmHlZlXYJwXw5SOzVlrznPc+F3q5/jUzVwztwUHVnQHtoB7k0IMHAZ9Edl5Cre1Q3ZfE81Vjl8w52Tke0ZgZ6Q4ATM8TNuYFNhJYzetr3sv/tk9qNHCe7jd3+8BXcMDCsTVSjXjNQJyG7ZW+BXSzJXzv5mFjCgLkL2noPBl5jcrgi1xU2MZRty9eu5q9dAUn1lBDIFMgVSV+APMBxWblcduCsAAAAASUVORK5CYII=
+
+display: 48 48
+
+background: #684d3e
+empty: .
+
+cell: - 0 - none - no
+cell: # 1 - none - no
+cell: % 2 - none - no
+cell: ~ 3 - none - yes
+cell: H 4 - miry - yes
+cell: P 5 - none - yes
+cell: T 6 - none - yes
+cell: B 7 - none - yes
+cell: * 8 - none - yes
+cell: o 9 - none - yes
+cell: & 10 - none - yes
+cell: $ 11 - none - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - rot4 - no
+cell: + 14 - none - yes
+cell: @ 15 - rot4 - no
+
+rule: rule0
+. - % . B . 
+priority: 1
+conddir: -
+outdir:
+- L - 
+probability: 0.07
+delay: 9
+outfunc: sound(0)
+rule: rule1
+- B . B - . 
+priority: 1
+conddir: -
+outdir:
+L - - 
+delay: 9
+rule: rule2
+. H . . . . 
+priority: 1
+transform: miry
+conddir: -
+outdir:
+- U - 
+delay: 1
+rule: rule3
+. - . . H . 
+. H . . - . 
+. . . . . . 
+priority: 2
+transform: miry
+conddir: U
+outdir:
+- U - 
+- - - 
+- - - 
+delay: 1
+rule: rule4
+. # . . . . 
+. H . . . . 
+. . . . . . 
+priority: 1
+transform: miry
+conddir: U
+outdir:
+- D - 
+delay: 1
+rule: rule5
+. - - . . H 
+. H . . - . 
+. . . . . . 
+condfunc: playerdir("right")
+priority: 3
+transform: miry
+conddir: U
+outdir:
+- - U 
+- - - 
+- - - 
+delay: 1
+rule: rule6
+- - . H . . 
+. H . . - . 
+. . . . . . 
+condfunc: playerdir("left")
+priority: 3
+transform: miry
+conddir: U
+outdir:
+U - - 
+- - - 
+- - - 
+delay: 1
+rule: rule7
+. B . . P . 
+. H . . H . 
+. . . . . . 
+priority: 4
+transform: miry
+conddir: U
+outdir:
+- D - 
+delay: 1
+outfunc: sound(7)
+rule: rule8
+. . B . . P 
+. H . . H . 
+. . . . . . 
+priority: 4
+transform: miry
+conddir: U
+outdir:
+- D - 
+delay: 1
+outfunc: sound(8)
+rule: rule9
+B . . P . . 
+. H . . H . 
+. . . . . . 
+priority: 4
+transform: miry
+conddir: U
+outdir:
+- D - 
+delay: 1
+outfunc: sound(9)
+rule: rule10
+# B . . - . 
+priority: 1
+conddir: -
+delay: 9
+outfunc: lose(); sound(10)
+rule: rule11
+. $ . . - . 
+. H . . H . 
+. . . . . . 
+priority: 5
+transform: rot4
+conddir: -
+delay: 1
+outfunc: sound(11)
+rule: rule12
+. . . . . . 
+- B . B - . 
+. - . . $ . 
+priority: 1
+transform: miry
+conddir: -
+outdir:
+L - - 
+probability: 0.02
+delay: 9
+outfunc: sound(12)
+rule: rule13
+. P . . - . 
+priority: 1
+conddir: -
+delay: 9
+
+
+
+level: #
+
+------$----------------$-------------#
+----------------------------------B--%
+----$------------------------------$-#
+--------------$-----------$----------#
+-------------------------------------%
+-$-------------------$---------------#
+----------------$-------------$------#
+------------------------------------B%
+-------------------------------------#
+-------$------------------------$----#
+-------------------------------------%
+---$---------------H-----------------#
+-------------$-----------------------#
+---------------------------------B---%
+-------------------------$-----------#
+-------$-------------$--------$------#
+-----------------------------------B-%
+-----------$-------------------------#
+----------------------------------$--#
+------------------------------B------%
+--$---------------------$------------#
+-----------------$-------------------#
+win: countCells('$')==0
+
+title: Bouncing fireball vs monsters

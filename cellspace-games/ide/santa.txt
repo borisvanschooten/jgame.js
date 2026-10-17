@@ -1,0 +1,206 @@
+globals: sfxdef(3,'Hit',811813); sfxdef(4,'Hit',811813); sfxdef(5,'Pickup',765107); sfxdef(7,'Pickup',960960); sfxdef(8,'Pickup',960960); sfxdef(11,'Explo',707812); sfxdef(14,'Pickup',919303); 
+
+gamebackground: #444
+
+tilemap: 8 8 4 4 no data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABt0lEQVRYR+2VLV/DMBDGL5YPgcaAwICEiSFaMYOfmAaDGJ+ACgzoifnZGhAbEg0GjeY7HHlSrsvSdWnXtJh2v23N293/nlwuijwP62fXFKUfd3xKxAlRoX+bHe+kugBw/qA93etvFYjgAIiycwX0HrGOxBtMK1tASIGPC6KTNxDUhvAuqJID2xR4OiK+/fIDBQFwpYXzy0Oi1TeRD6IVAADVViCdTvPzHieJF8xXP+xxs41/5cLNk9wRAKLh0KxTg0FQANh8f7zhs9NRwX5nAPCMZBVlRIk1QLouuXGsFC+XHEIJnkyMUzWbqVIAcZY6EHX2uWyuAAiEzEM/oHIFdHvj0rHHmoDYALYdODdQ+BHn4hTtUACSgOd3z3mwSEi08W868SJ0MoC2vWhfFWzbrg3YV+75Z2Je0IKu9SeTqHjf7wMDu2LPfjcA9vnn+UumxviTaH5ManzVuCbAIQIRxzZIJwBZDVgrKwoDykQnx8+c/xYUMACOXaOCVncDAJ3Rz2u2xQG3wAtg14CRLtfRwSr4fVCqgF0D3HqwT7aXrSkFaLMGVAmg8RGr4mTXnB6gV6BX4N8V+AUnMQTuUWhQbAAAAABJRU5ErkJggg==
+
+display: 48 48
+
+background: #222c59
+empty: .
+
+cell: - 0 - none - no
+cell: # 1 - none - no
+cell: % 2 - none - no
+cell: ~ 3 - none - yes
+cell: H 4 - mirx - yes
+cell: P 5 - rot-mir - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - mirx - yes
+cell: * 8 - mirx - yes
+cell: o 9 - none - yes
+cell: & 10 - none - yes
+cell: $ 11 - none - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - rot4 - no
+cell: + 14 - none - yes
+cell: @ 15 - rot4 - no
+
+rule: rule0
+. B - . . . 
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+- R - 
+delay: 2
+rule: rule1
+. B - . % B 
+priority: 2
+transform: mirx
+conddir: R
+outdir:
+- N R 
+delay: 2
+rule: rule2
+. . . . . . 
+. B # . - . 
+. - . . B . 
+priority: 2
+transform: mirx
+conddir: R
+outdir:
+- - - 
+- - - 
+- L - 
+delay: 2
+rule: rule3
+. . . . . . 
+. B # . - . 
+. H . . . . 
+priority: 3
+transform: mirx
+conddir: R
+outdir:
+- - - 
+- - - 
+- L - 
+delay: 1
+outfunc: lose(); sound(3)
+rule: rule4
+. B H . - . 
+priority: 3
+transform: mirx
+conddir: R
+delay: 1
+outfunc: lose(); sound(4)
+rule: rule5
+. . . . . . 
+. B . . . . 
+. - . . $ . 
+condfunc: playerbutton("fire")
+priority: 1
+conddir: -
+delay: 4 trigger player
+outfunc: sound(5)
+rule: rule6
+. . . . . . 
+. $ . . - . 
+. - . . $ . 
+priority: 2
+conddir: -
+delay: 1
+rule: rule7
+. . . . . . 
+. $ . . - . 
+. H . . * . 
+priority: 3
+transform: mirx
+conddir: -
+delay: 1
+outfunc: sound(7)
+rule: rule8
+. . . . . . 
+. $ . . - . 
+H . . * . . 
+priority: 3
+transform: mirx
+conddir: -
+delay: 1
+outfunc: sound(8)
+rule: rule9
+. H . . . . 
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+- R - 
+delay: 5
+rule: rule10
+. H - . - H 
+priority: 2
+transform: mirx
+conddir: R
+outdir:
+- N R 
+delay: 5
+rule: rule11
+. $ . . - . 
+priority: 1
+conddir: -
+delay: 1
+outfunc: lose(); sound(11)
+rule: rule12
+. * - . - * 
+priority: 3
+transform: mirx
+conddir: R
+outdir:
+- N R 
+delay: 3
+rule: rule13
+. * . . . . 
+priority: 1
+transform: mirx
+conddir: -
+outdir:
+- R - 
+delay: 3
+rule: rule14
+. * # . - . 
+priority: 2
+transform: mirx
+conddir: -
+delay: 3
+outfunc: sound(14)
+rule: rule15
+. - . . % . 
+. % . . - . 
+. . . . . . 
+priority: 1
+conddir: -
+probability: 0.05
+delay: 1
+rule: rule16
+- % . % . . 
+priority: 1
+transform: mirx
+conddir: -
+probability: 0.2
+delay: 1
+rule: rule17
+. % . . - . 
+priority: 1
+conddir: -
+probability: 0.2
+delay: 1
+
+
+
+level: #
+
+--------------------------------------
+-B------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+--------------------------------------
+-----H---------------------------H----
+------------H-------H-----------------
+--------------H---------H-------------
+-------H---------------------H--------
+-----------------H-------H------------
+-----------H-----------------------H--
+----------------H-----------H---------
+--H------------------H----------------
+------------H-------------------H-----
+-------H------------------H-----------
+--------------H-------------------H---
+---H----H------------H----------------
+--------------------------H-----------
+----------------H----------------H----
+------------------------H---H---------
+---------H--------H-------------------
+win: countCells('H')==0
+
+title: Kerstman

@@ -1,0 +1,87 @@
+globals: sfxdef(1,'Pickup',949493); sfxdef(2,'Hit',184632); 
+
+gamebackground: #444
+
+tilemap: 8 8 4 4 no data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACzElEQVRYR+1WPWwTMRR+t1VMN3U+dWJEnZiatKoiplBYGqGqQugimJjYWjpEQWKqGJFyA2JAzZQQMaCqau6YmLKwMGasOqAbuxl/vjzX5/tJlKNM8eKzffb7vu+9Zz9n76wpyGhxHJPrumrG9VyKp7H63jy7Uf3lo5vU+qeHnx1zv/3t+0J4HtF0mqygx5ibAwCm0bzDsL7zfY3eNs7p15Do5EVT/zZsjRYCgA1hmBg3QSgANluMGRQzxxwDGN5raAAnw/NSAN2uEMzeNM5zzvOfh4JlzmPPbgCQZRWwz2UXAIRWwGRt+p43mwBOO4c6NhZxAc7IY485p/5xS3gPPH2gjRauwPrG+6tKCpisTRspBZi5GZRVY8DOAjsjSrOAgRRlAebDVz9Kg3B3N0lDu3EmpBTgOBi/jPT/7fat/3iyR3Jy1pwgyAAQsul1xykFmFFgsP+VsAdnoJcSpsDDuDRKwvdVL1vKAIyb++11WwkFAEYzCzPgAGAyNpjrT5OxwVx/5qW3XgzDUNRqtcw/URTRh6tTGrRGJGXIniHZtyW4g4OIivbX6/VS+ZV8eejZ2pP+YxpcrBcSaEtter1iftIViwEAW5uFVgAA4GtbBTn3rivo6IioaP9CCkj8QsYByRuN5LVM8nUjeTkhvYjnEQcIdu7l/U7Hx7fjWaAhWsHY7stCINlgG2TDPG8DsMeVANx1PcDnb67LYDba5LpJ/v4oeYz4xhv8GWXee+ypUg98EyQmY1nQbBPZvcqCzl5D3zR57/2ktaZw288xg573GhYBeLbt05v+NaXqgTwFqtYDDAAGf1OgVQApKJJ6CxiA+d6z25atBzqXJGD8yzjQbuCxcoFZD+QpULUeYABgf5/SQBCIS8XA66dbujKeFwMIcmQAgtBsQT8pbEuz4F/UA5yGSDkoACXQNIDSa+o/LM59LO4awwrASoGVAn8BF2w9ZVouCf8AAAAASUVORK5CYII=
+
+display: 48 48
+
+background: #48932f
+empty: .
+
+cell: - 0 - none - no
+cell: # 1 - none - no
+cell: % 2 - none - no
+cell: ~ 3 - none - yes
+cell: H 4 - mirx - yes
+cell: P 5 - mirx - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - rot4 - yes
+cell: * 8 - none - yes
+cell: o 9 - none - yes
+cell: & 10 - none - yes
+cell: $ 11 - none - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - rot4 - no
+cell: + 14 - none - yes
+cell: @ 15 - rot4 - no
+
+rule: rule0
+. H - . - H 
+condfunc: playerdir("right")
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- - R 
+delay: 2
+rule: rule1
+. H $ . - H 
+condfunc: playerdir("right")
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- - R 
+delay: 2
+outfunc: sound(1)
+rule: rule2
+. H ~ . - P 
+condfunc: playerdir("right")
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- - R 
+delay: 2
+outfunc: lose(); sound(2)
+
+
+
+level: #
+
+HHHHH-----------o~~-----*-------o~~~~~
+HHHHH-----------o~~----$$$------o~~~~~
+HHHHH-----------o~~----$$$------o-----
+HHHHH-o---------o~~----$$$------o-----
+HHHHH-o---------o~~-------------o-$$$-
+------o----------~~-------------o-$$$-
+******#----------~~--------o------$$$-
+-----------------~~--------o----------
+----------*******~~--------o----------
+-$$$$----------------------o----------
+-$$$$----------------------o----------
+-$$$$----------------------o----------
+---------------------------o----******
+---------------------------o----~~~~~~
+***********-----#**********#----------
+~~~~~-----------o--------~~~----------
+----------------o-$$$$---~~~----------
+----------------o-$$$$---~~~-----$$$$-
+-$$$$-----------o----------------$$$$-
+-$$$$-----------~~~--------------$$$$-
+----------------~~~--------------$$$$-
+----------------~~~-------------------
+win: countCells('$')==0
+
+title: Guide the herd

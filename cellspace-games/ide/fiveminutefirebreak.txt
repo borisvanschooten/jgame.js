@@ -1,0 +1,160 @@
+globals: sfxdef(6,'Blip',228410); sfxdef(12,'Explo',680370); sfxdef(13,'Blip',994737); sfxdef(14,'Blip',994737); 
+
+gamebackground: #444
+
+tilemap: 8 8 4 4 no data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADaUlEQVRYR+2VW0hUQRzGv7EQMaWlvESpbGRlUBRiKlHuug9mdEEiJHxIg4UySKJ8UEJb9UGDEp+y0IfywaeIBVdYg7zRPbHoAptiLGqFaGSlIt6mmdmd7ayunTHMJ4c9zDln5+z3m+///c8S6IzyrAw6t++AWJU0OYmukBBxHvTmKVpHp2ApbYfBYMToqDvgbKgJwpmGT2TGmU7XZraRS4ejaU3LECk6vplWNX0hRA/AZrNRLhyWmSmWut1uRLhcAoRDGEp7AoonpgPdbcDplhTsuP6C3M/fTk/V9pLRijRqKOkknRW7aVrJe30AR1ERleImkwkdHR3+EGk2SLFATuTVRSE8IggVt/tQOjxMvl3eTzdWvyLOcztp5p2P+gDcAaPRiNzcXK9ZNxlEkoDgx4YTdxe1n5el+GoqyiMGUNH0mThTt9GXfT8FyJMj8fRR1w8olcBsNgtxk6lLiMtS8Lk/Lm9B7bWOZD/YhDAjQZj1GancGkUv7t2CMPtrYs8w0pCBIDUAbQa46JjTiZGEBCUHgkticWjXOiR/MOB7NkXkvRmMG+dQ/WQQJbFGfQDZBRKC284HD2K3qxsoePjXLiDnZzEyRWGeDkFyfCjsE2Pocf3C2ZRoNHQM6QMw+6nFEAzZirJrZBuerHaLDCwWxFILSHlkJP06M4209eHoHZ8UP8FzwGe/DFCAfTyDfaGbj/kt7HBQ6nK1obDQovysb6FWfKkQ8tlmBwUHuFJoUd6EAPATb20FsVhAPbPSTnirXrPZoAUoY9fsvu7zvgXPbxTQlMQsn6uq4vwBATA4iOasOo8DrkaUxcQsDUDrBK8/d0U1B8JBq9UPAPX1SjlaNAOq4loHtKFckgNyt2InwWuAqVkleikoS4CcHM+txn8oAaWeFmT/DkR7Pr/VAl37QsyCKwYLsWor66ZUK2i1MjQ26usD/4kVed8jVUt4hygDcPEsb5PY7QshuHill7aYzaoQSgBaca7hAfAWjE0+8VtegguAKoQSANscdTj8q691QQBw8YNm4HG7WFjMIFRcUAKQDkwc7Udoc5wQkAC+3b9l4nuOsW8KgVo2KbqwfADcgXx2vPO6sNwAfNc8hHzncpbdsAIZAHvT/mlBfj6/FWULyqSo1N/7rvAP10pfKWXgf0KtAqw6sOrAb9522+2KjmHgAAAAAElFTkSuQmCC
+
+display: 48 48
+
+background: #446226
+empty: .
+
+cell: - 0 - none - no
+cell: # 1 - none - no
+cell: % 2 - none - no
+cell: ~ 3 - none - yes
+cell: H 4 - mirx - yes
+cell: P 5 - rot-mir - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - rot4 - yes
+cell: * 8 - none - yes
+cell: o 9 - rot4 - yes
+cell: & 10 - none - yes
+cell: $ 11 - none - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - rot4 - no
+cell: + 14 - none - yes
+cell: @ 15 - rot4 - no
+
+rule: rule0
+. & % . - & 
+priority: 1
+transform: rot4
+conddir: -
+delay: 30
+rule: rule2
+. ~ - . . ~ 
+priority: 1
+transform: rot4
+conddir: 
+probability: 0.1
+delay: 9
+rule: rule3
+. T - . . o 
+priority: 1
+transform: rot4
+conddir: R
+outdir:
+- - R 
+delay: 4
+rule: rule4
+. o - . - o 
+priority: 2
+transform: rot4
+conddir: R
+outdir:
+- - R 
+delay: 1
+rule: rule5
+. o . . - . 
+priority: 1
+transform: -
+conddir: -
+delay: 1
+rule: rule6
+. o ~ . - - 
+priority: 2
+transform: rot4
+conddir: -
+delay: 1
+outfunc: sound(6)
+rule: rule7
+. H o . - H 
+condfunc: playerdir("right1")
+priority: 4
+transform: rot4
+conddir: -
+outdir:
+- N R 
+delay: 3 trigger player
+rule: rule8
+. H - . - H 
+condfunc: playerdir("right1")
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- N R 
+delay: 3 trigger player
+rule: rule9
+. H - . . T 
+condfunc: playerdir("right2")
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- - R 
+delay: 6
+rule: rule10
+. o P . - - 
+priority: 3
+transform: rot4
+conddir: -
+delay: 1
+rule: rule12
+. ~ T . . - 
+priority: 3
+transform: rot4
+conddir: 
+delay: 1
+outfunc: sound(12)
+rule: rule13
+H T - - H T 
+condfunc: playerdir("right1")
+priority: 5
+transform: rot4
+conddir: -
+outdir:
+- R R 
+delay: 3 trigger player
+outfunc: sound(13)
+rule: rule14
+H T o - H T 
+condfunc: playerdir("right1")
+priority: 5
+transform: rot4
+conddir: -
+outdir:
+- R R 
+delay: 3 trigger player
+outfunc: sound(14)
+
+
+
+level: #
+
+&H-T-%%%%%%%%%%%%%%%%-----%%%%%%------
+%--T-%----######-T--%-~---%----%------
+%--T-%----%%%%%%-T--%-----%----%----~-
+%--T-%--~-%----%-T--%-----%-~--%------
+%--T-%----%--~-%-T--%-----%----%%%%%%%
+%TTT-%---~%-~--%-T--%---%%%----------%
+%----%----%----%-T--%--~%--#%%%%---~-%
+%%%%%%#%%%%--~-%%%%%%---%-~#%--%-----%
+-------%-------####-----%--#%--%%%%%%%
+---~---%----%%%%%#%%%%%%%--#%--#------
+-----~-%-~--%---%#%---~--###%-%%%%%%%%
+-~-----%----%-T-%#%%%%%%%#%%%#%------%
+%%%%%%%%----%-T-%-------%#%---%-~----%
+%----###----%-T-%----~--%#%---%----~-%
+%-T--%%%%%%%%-T-%--~----%#%---%------%
+%-T--%------#---%-------%#%-~-%%#%%%%%
+%-T--%------%%%%%#%%%%%%%-%----%-%----
+%-T--%---~--%-----%------#%----%-%----
+%-T--%------%-~---%------#%--~-%-%--~-
+%-T--%------%-----%---~--#%----%-%----
+%----%-~----%-----%------#%----%-%-~--
+%%%%%%------%%%%%%%-----~-%%%%%%-%%%%%
+win: countCells('~')==0
+
+title: 5 minute fire break

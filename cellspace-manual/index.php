@@ -189,6 +189,11 @@ insert code using a code form.
 <ul>
 
 <li>
+<a href="../cellspace-games/ide/boulderdash.txt">Boulderdash</a>
+<a href="../cellspace-ide.html?game=ide/boulderdash.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/boulderdash.txt&gametype=minimal">[PLAY]</a>
+
+<li>
 <a href="../cellspace-games/ide/platformgame.txt">Platform game</a>
 <a href="../cellspace-ide.html?game=ide/platformgame.txt">[EDIT]</a>
 <a href="../cellspace.html?game=ide/platformgame.txt&gametype=minimal">[PLAY]</a>
@@ -197,6 +202,52 @@ insert code using a code form.
 <a href="../cellspace-games/ide/escaperoom.txt">Escape room</a>
 <a href="../cellspace-ide.html?game=ide/escaperoom.txt">[EDIT]</a>
 <a href="../cellspace.html?game=ide/escaperoom.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/matrixshooter.txt">Matrix shooter</a>
+<a href="../cellspace-ide.html?game=ide/matrixshooter.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/matrixshooter.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/guidetheherd.txt">Guide the herd</a>
+<a href="../cellspace-ide.html?game=ide/guidetheherd.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/guidetheherd.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/explorethecave.txt">Explore the cave</a>
+<a href="../cellspace-ide.html?game=ide/explorethecave.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/explorethecave.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/fiveminutefirebreak.txt">Five minute fire
+break</a>
+<a href="../cellspace-ide.html?game=ide/fiveminutefirebreak.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/fiveminutefirebreak.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/santa.txt">Santa</a>
+<a href="../cellspace-ide.html?game=ide/santa.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/santa.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/snakebattle.txt">Snake battle</a>
+<a href="../cellspace-ide.html?game=ide/snakebattle.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/snakebattle.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/bounceshooter.txt">Bounce shooter</a>
+<a href="../cellspace-ide.html?game=ide/bounceshooter.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/bounceshooter.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/turmoil.txt">Turmoil (originally an 8 bit shooter)</a>
+<a href="../cellspace-ide.html?game=ide/turmoil.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/turmoil.txt&gametype=minimal">[PLAY]</a>
+
+<li>
+<a href="../cellspace-games/ide/pengo.txt">Pengo</a>
+<a href="../cellspace-ide.html?game=ide/pengo.txt">[EDIT]</a>
+<a href="../cellspace.html?game=ide/pengo.txt&gametype=minimal">[PLAY]</a>
 
 <li>
 <a href="../cellspace-games/ide/dousethefires.txt">Douse the fires</a>
@@ -212,11 +263,6 @@ insert code using a code form.
 <a href="../cellspace-games/ide/cellshooter.txt">Cell shooter</a>
 <a href="../cellspace-ide.html?game=ide/cellshooter.txt">[EDIT]</a>
 <a href="../cellspace.html?game=ide/cellshooter.txt&gametype=minimal">[PLAY]</a>
-
-<li>
-<a href="../cellspace-games/ide/boulderdash.txt">Boulderdash</a>
-<a href="../cellspace-ide.html?game=ide/boulderdash.txt">[EDIT]</a>
-<a href="../cellspace.html?game=ide/boulderdash.txt&gametype=minimal">[PLAY]</a>
 
 <li>
 <a href="../cellspace-games/ide/harveywallbangers.txt">Harvey Wallbangers</a>

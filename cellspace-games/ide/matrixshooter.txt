@@ -1,0 +1,220 @@
+globals: sfxdef(3,'Hit',838211); sfxdef(8,'Explo',757699); sfxdef(12,'Explo',757699); sfxdef(13,'Shoot',876508); sfxdef(14,'Blip',994330); sfxdef(15,'Explo',541928); sfxdef(18,'Explo',466441); sfxdef(19,'Explo',466441); 
+
+gamebackground: #444
+
+tilemap: 8 8 4 4 no data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACqElEQVRYR+2UTWgTQRTH/wtKwXqSXkQ0njSHGiEKiizVVCgqRRZB8OMQsadWXC8R0ouiFyP2YtD2pHgRC4JEaYsIbVLMRZFATQ7xA0VFPRUhaK/jvNmddHezyXTbpbnksYed2Zn3/72v1aAw07jJDkQN31PnMzFNdV/1Xengcfo90+N7GvwUS2W8qeaQzV1T+mgFobwsAXactt2UE/hezaM9AFycrD0AUUu8bQDeOq5rCZo10bo0IYnTKPpBrHUCyKdrCqammBAaHNSU0yGBLr07yu7vnxXn5xefsJlPT3H74DOxdn6be5R2BdF/ISPOrBkg+/cMMzdPanvv7GJDycP4+WURL19XsHD1oya/kXgxV3IlUTfiIIg6AEXf2/sNkUgE09MrzwJFbT68jiVWw6m+Q0KEAMiyF2+gb8tZYALIb0pDQpA4WSKZsTIwNjbHonzMnABV/rNJpfqVpaAoH0yUcOLkbhzrOYeFruf4XP2D+fxXDA3Hcbl7khQ4REpASEske/hrCpphpJmuD0AC0IFKJQICKBZfIZezatXMqM7F/A8BsHVbN37/+odabQm0pye2496+WQvA1zwAzjNBAejuwPGd2LCxCzMvPghXAuAtBxheAQBdkCmnktA6SAb8AiQAmhA2DtYIwaPX+CNL4K03QQQBoK53QtBUSADatyCWT5A4rZRN1qr+dccj/G3cPqkf4akrAPaeNtJaIxDA3SiPgtuV6rJTEVkLCw2AxE3TUhrl0WXs7HF1JqKXkUsYex0KQF2caljmKY4VMMpfCcI3A46ShAvgqK8LQO57s0BNFlYP8H8Yu2WnV4rXm9DbAw5Q3mQt+yxQExIEacn6uwB8ohdjFlYGmjV6Qw94RlKLFcLLgOqfsJrvgUqwGgHVnQ5AJwOdDPwHvsldJBtmLvcAAAAASUVORK5CYII=
+
+display: 48 48
+
+background: #553355
+empty: .
+
+cell: - 0 - none - no
+cell: # 1 - none - no
+cell: % 2 - none - no
+cell: ~ 3 - none - yes
+cell: H 4 - rot4 - yes
+cell: P 5 - rot-mir - yes
+cell: T 6 - rot4 - yes
+cell: B 7 - rot4 - yes
+cell: * 8 - none - yes
+cell: o 9 - none - yes
+cell: & 10 - none - yes
+cell: $ 11 - none - yes
+cell: [ 12 - rot4 - yes
+cell: = 13 - rot4 - no
+cell: + 14 - none - yes
+cell: @ 15 - rot4 - no
+
+rule: rule0
+. H - . - H 
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- - R 
+delay: 3
+rule: rule1
+# - - # - # 
+- - - - - - 
+. . . . . . 
+priority: 1
+transform: rot4
+conddir: -
+delay: 1
+rule: rule2
+. T - . - T 
+condfunc: playerdir("right1")
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- - R 
+delay: 3
+rule: rule3
+T - . . o . 
+condfunc: playerdir("right2")
+priority: 1
+transform: rot4
+conddir: -
+outdir:
+- R - 
+delay: 3
+outfunc: sound(3)
+rule: rule4
+. o - . - o 
+priority: 2
+transform: rot4
+conddir: R
+outdir:
+- - R 
+delay: 1
+rule: rule5
+. o . . - . 
+priority: 1
+conddir: -
+delay: 1
+rule: rule6
+. H - . - H 
+priority: 2
+transform: rot4
+conddir: R
+outdir:
+- - R 
+delay: 3
+rule: rule7
+. . . . . . 
+. H - . - H 
+. # . . . . 
+priority: 2
+transform: rot4
+conddir: R
+outdir:
+- - D 
+delay: 3
+rule: rule8
+. o H . & & 
+priority: 4
+transform: rot4
+conddir: R
+outdir:
+- L R 
+delay: 1
+outfunc: sound(8)
+rule: rule9
+. & - . - & 
+priority: 3
+transform: rot4
+conddir: R
+outdir:
+- - R 
+delay: 1
+rule: rule10
+. & . . - . 
+priority: 1
+conddir: -
+probability: 0.7
+delay: 1
+rule: rule11
+. & o . - & 
+priority: 3
+transform: rot4
+conddir: R
+outdir:
+- - R 
+delay: 1
+rule: rule12
+o H . & & . 
+priority: 4
+transform: rot4
+conddir: R
+outdir:
+L R - 
+delay: 1
+outfunc: sound(12)
+rule: rule13
+. H - . B H 
+priority: 2
+transform: rot4
+conddir: R
+outdir:
+- R R 
+probability: 0.02
+delay: 3
+outfunc: sound(13)
+rule: rule14
+. B - . . H 
+priority: 1
+conddir: R
+outdir:
+- - R 
+probability: 0.005
+delay: 1
+outfunc: sound(14)
+rule: rule15
+. T B . . - 
+priority: 3
+transform: rot4
+conddir: -
+outdir:
+- - R 
+delay: 1
+outfunc: sound(15)
+rule: rule16
+B H B . - . 
+priority: 1
+transform: rot4
+conddir: -
+delay: 1
+rule: rule17
+. # . . . . 
+. T - . - T 
+. # . . . . 
+priority: 1
+transform: rot4
+conddir: R
+outdir:
+- - R 
+delay: 3
+rule: rule18
+. T H . - . 
+priority: 5
+conddir: -
+delay: 1
+outfunc: lose(); sound(18)
+rule: rule19
+. T & . - . 
+priority: 5
+conddir: -
+delay: 1
+outfunc: lose(); sound(19)
+
+
+
+level: #
+
+T------------------------------------#
+-#-----------------------------------#
+---------------H---------------------#
+---------------------H------------H--#
+-------------H--------------H--------#
+-------------------------------------#
+------------------------H------------#
+-------------------H-----------------#
+-----------H-------------------------#
+---H-------------------------H-------#
+-------H-------------------------H---#
+-------------------H-----------------#
+----------H--------------------------#
+-------------------------------------#
+----------------H---------H---------H#
+--------------------H----------------#
+---------------------------------H---#
+-----H-------H-----------------------#
+-------------------------------------#
+------------------H---------H-----H--#
+-------------------------------------#
+######################################
+win: countCells('H')==0
+
+title: Matrix shooter
