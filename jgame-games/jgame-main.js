@@ -237,6 +237,71 @@ StdGame.prototype.resizeCanvas = function() {
 }
 
 
+// ----------------------------------------------------------
+// Offscreen rendering
+// ----------------------------------------------------------
+
+StdGame.prototype.createFrameBuffer = function(gl,width,height) {
+	// Allocate the color texture.
+	const texture = gl.createTexture();
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+	// These settings make the texture usable without mipmaps.
+	gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+	gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+
+	// repeat X (for circular display)
+	gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);
+	gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+
+	// Create the framebuffer and attach the texture as its color buffer.
+	const framebuffer = gl.createFramebuffer();
+	gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+
+	gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,texture,0);
+
+	const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+
+	if (status !== gl.FRAMEBUFFER_COMPLETE) {
+		gl.deleteFramebuffer(framebuffer);
+		gl.deleteTexture(texture);
+
+		throw new Error(`Framebuffer is incomplete: 0x${status.toString(16)}`);
+	}
+
+	// Restore ordinary bindings.
+	gl.bindTexture(gl.TEXTURE_2D, null);
+	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+	return {
+		framebuffer,
+		texture,
+		width,
+		height,
+	};
+}
+
+StdGame.prototype.renderToScreen = function(gl,renderTarget) {
+	gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+	gl.viewport(io.viewportxofs,io.viewportyofs,io.viewportwidth,io.viewportheight);
+	gl.disable(gl.DEPTH_TEST);
+	gl.disable(gl.BLEND);
+
+	// default implementation: draw sprite upside down
+  	//gl.clearColor(0,0,0, 1.0);
+  	//gl.clear(gl.COLOR_BUFFER_BIT);
+	//drawSprite(0,height,width,-height,0,renderTarget.texture,null,null,true);
+
+	GameConfig.renderToTexture.renderToScreen(gl,renderTarget)
+
+}
+
+
+// -----------------------------------------------------
+// WebGL entry point
+// -----------------------------------------------------
 
 StdGame.prototype.webGLStart = function() {
 	if (!GameConfig) return;
@@ -355,9 +420,17 @@ StdGame.prototype.webGLStart = function() {
 
 	if (GameConfig.initGame) GameConfig.initGame();
 
+	if (GameConfig.renderToTexture) {
+		this.renderTarget = this.createFrameBuffer(gl,1024,1024);
+		GameConfig.renderToTexture.initRenderToScreen(gl);
+	} else {
+		this.renderTarget = null;
+	}
+
 	// start animation
 	this.webGLFrame();
 }
+
 
 
 StdGame.prototype.webGLFrame = function() {
@@ -381,7 +454,7 @@ StdGame.prototype.webGLFrame = function() {
 	SG.doWebGLFrame();
 }
 
-// paint list from updateObjects, filled in by cal within doFrame...
+// paint list from updateObjects, filled in by call within doFrame...
 var objToPaint = null; 
 
 StdGame.prototype.doWebGLFrame = function() {
@@ -393,8 +466,20 @@ StdGame.prototype.doWebGLFrame = function() {
 	// read gamepads
 	gamepadcontrols = io.hasGamepads();
 
-
+	// calculate viewport dimensions from canvas width/height
+	io.updateViewport();
+	//console.log(io.viewportwidth);
 	// init gl
+
+	// choose where to render to. If we render to texture, the texture is drawn later
+	if (GameConfig.renderToTexture) {
+		gl.bindFramebuffer(gl.FRAMEBUFFER,this.renderTarget.framebuffer);
+		gl.viewport(0, 0, this.renderTarget.width, this.renderTarget.height);
+	} else {
+		this.framebuffer = null;
+		// set viewport to preserve aspect ratio
+		gl.viewport(io.viewportxofs,io.viewportyofs,io.viewportwidth,io.viewportheight);
+	}
 
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 	gl.disable(gl.DEPTH_TEST);
@@ -406,12 +491,9 @@ StdGame.prototype.doWebGLFrame = function() {
 	//gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA,
 	//	gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 	// clear entire canvas
-	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+	//gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 	gl.clear(gl.COLOR_BUFFER_BIT);
 	//gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	// then set viewport to preserve aspect ratio
-	io.updateViewport();
-	gl.viewport(io.viewportxofs,io.viewportyofs,io.viewportwidth,io.viewportheight);
 
 
 	drawSimpleLineInitFrame(width,height);
@@ -516,6 +598,9 @@ StdGame.prototype.doWebGLFrame = function() {
 		//gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 		//gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
+		if (GameConfig.mouse && GameConfig.mouse.cssCursor) {
+			document.getElementById("game-canvas").style.cursor = GameConfig.mouse.cssCursor;
+		}
 		if (!touchcontrols) {
 			var color;
 			if (GameConfig.mouse && GameConfig.mouse.color) {
@@ -551,6 +636,15 @@ StdGame.prototype.doWebGLFrame = function() {
 	this.prevmousebut = this.curmousebut;
 	this.curmousebut = !this.gamemsgs.inModal() && io.getMouseButton(1);
 	mousebutflank = this.curmousebut && !this.prevmousebut;
+
+	// render texture to screen at the end of the frame
+	if (GameConfig.renderToTexture) {
+		// quick scanlines test
+		//drawSprite(0,0,width,height,0,TexLoader.texById["scanlines"],null,null,true);
+
+		this.renderToScreen(gl,this.renderTarget)
+	}
+
 }
 
 
@@ -853,8 +947,11 @@ function startNewLevel(timer) {
 			tmdef.county ?  tmdef.county : GameConfig.county,
 			GameConfig.tilemap.texture.smooth);
 	}
-
-	thisleveldef.newlevel();
+	if (thislevel.newlevel) {
+		thislevel.newlevel();
+	} else {
+		thisleveldef.newlevel();
+	}
 
 	if (thislevel.intro) {
 		SG.gamemsgs.addMessage({
@@ -938,14 +1035,18 @@ function doFrameGame(timer) {
 
 	//JGState.add("LevelDone",-1);
 
+	var wrapx = thisleveldef && thisleveldef.wrapx ? tilex*nrtilesx : null;
+	var wrapy = thisleveldef && thisleveldef.wrapy ? tiley*nrtilesy : null;
+
 	if (!GameConfig.collision || GameConfig.collision.allObjects) {
-		JGObject.checkCollision(1,4); // player hits goodies
-		JGObject.checkCollision(2,1); // enemy hits player
-		JGObject.checkCollision(8,2); // bullet hits enemy
+		JGObject.checkCollision(1,4, wrapx,wrapy); // player hits goodies
+		JGObject.checkCollision(2,1, wrapx,wrapy); // enemy hits player
+		JGObject.checkCollision(8,2, wrapx,wrapy); // bullet hits enemy
 	} else {
-		JGObject.checkCollision(0xff,0xff); // player hits goodies
+		JGObject.checkCollision(0xff,0xff, wrapx,wrapy); // player hits goodies
 	}
-	if (tilemap && !GameConfig.disableBGCollision) JGObject.checkBGCollision(tilemap,0xffff,0xff); // all tiles hit all
+	if (tilemap && !GameConfig.disableBGCollision)
+		JGObject.checkBGCollision(tilemap,0xffff,0xff,wrapx,wrapy); // all tiles hit all
 
 	if (thisleveldef.doFramePost) thisleveldef.doFramePost();
 
@@ -1085,6 +1186,7 @@ function startTitle(timer) {
 					}
 				}
 			}, {level: lev}
+			,null,null,null,null,""+(lev+1)
 			);
 			lev++;
 		}
@@ -1370,7 +1472,7 @@ TileSprite.prototype.init = function() {
 
 //** Call this in the move() function to handle transition from one tile to
 /* another. */
-TileSprite.prototype.moveFunc = function() {
+TileSprite.prototype.moveFunc = function(wrapx,wrapy) {
 	if (this.transition > 0) {
 		this.transition--;
 		if (this.transition <= 0) {
@@ -1381,6 +1483,16 @@ TileSprite.prototype.moveFunc = function() {
 			this.yspeed = 0;
 			if (this.occupyOrigin) {
 				tilemap.setTileCid(0, TILEAND,Math.round(this.oldtx),Math.round(this.oldty));
+			}
+		} else {
+			// wrap the transition animation, destination is already wrapped
+			if (wrapx) {
+				while (this.x < 0) this.x += tilex*nrtilesx;
+				while (this.x >= tilex*nrtilesx) this.x -= tilex*nrtilesx;
+			}
+			if (wrapy) {
+				while (this.y < 0) this.y += tiley*nrtilesy;
+				while (this.y >= tiley*nrtilesy) this.y -= tiley*nrtilesy;
 			}
 		}
 	}
@@ -1466,10 +1578,17 @@ TileSprite.prototype.moveFunc = function() {
 }
 
 /** Call this in paint() function to draw a standard animated sprite. */
-TileSprite.prototype.paintFunc = function(gl) {
+TileSprite.prototype.paintFunc = function(gl,wrapx,wrapy) {
 	this.spritebatch.addSprite(Math.floor(this.sprite),this.x-screenxofs,this.y-screenyofs,true,
 		this.flipx ? -tilex : tilex, this.flipy ? -tiley: tiley,
 		this.angle,this.color);
+
+	if (wrapx) {
+		this.spritebatch.addSprite(Math.floor(this.sprite),this.x-screenxofs - wrapx,this.y-screenyofs,true,
+			this.flipx ? -tilex : tilex, this.flipy ? -tiley: tiley,
+			this.angle,this.color);
+	}
+	// TODO wrapy and wrapx+y
 }
 
 
@@ -1481,14 +1600,24 @@ TileSprite.prototype.paintFunc = function(gl) {
 * @param xofs - number of tiles from this object in x direction
 * @param yofs - number of tiles from this object in y direction
 */
-TileSprite.prototype.setTile = function(tileid,xofs,yofs) {
+TileSprite.prototype.setTile = function(tileid,xofs,yofs,wrapx,wrapy) {
 	if (tileid==null) tileid = this.colid;
 	if (!xofs) xofs=0;
 	if (!yofs) yofs=0;
+	var destx = this.tx+xofs;
+	var desty = this.ty+yofs;
+	if (wrapx) {
+		while (destx < 0) destx += wrapx;
+		while (destx >= wrapx) destx -= wrapx;
+	}
+	if (wrapy) {
+		while (desty < 0) desty += wrapy;
+		while (desty >= wrapy) desty -= wrapy;
+	}
 	// check if tile id overlaps tile bitmask. If so, clear all original bits.
 	var tileand = TILEAND;
 	if (tileid & tileand) tileand = 0;
-	tilemap.setTileCid(tileid, tileand, this.tx+xofs,this.ty+yofs);
+	tilemap.setTileCid(tileid, tileand, destx,desty);
 	setTileSpriteIndex(this);
 }
 
@@ -1505,9 +1634,21 @@ TileSprite.prototype.dispose = function() {
 * @param tx tile x coordinate
 * @param ty tile x coordinate
 * @param steps how many frames to take in the transition */
-TileSprite.prototype.goTo = function(tx,ty,steps) {
+TileSprite.prototype.goTo = function(tx,ty,steps,wrapx,wrapy) {
+	// tx/y is the tile to animate towards
+	// tx/y_wrap is the destination tile
 	tx = Math.round(tx);
 	ty = Math.round(ty);
+	var tx_wrap = tx;
+	var ty_wrap = ty;
+	if (wrapx) {
+		while (tx_wrap < 0) tx_wrap += wrapx;
+		while (tx_wrap >= nrtilesx) tx_wrap -= wrapx;
+	}
+	if (wrapy) {
+		while (ty_wrap < 0) ty_wrap += wrapy;
+		while (ty_wrap >= nrtilesy) ty_wrap -= wrapy;
+	}
 	// TODO: check if premature call to goTo will clear old destination tile
 	// clear bits set by colid
 	//tilemap.setTileCid(0, (TILEANDOBJ^this.colid) | TILEAND, this.tx,ty);
@@ -1516,21 +1657,21 @@ TileSprite.prototype.goTo = function(tx,ty,steps) {
 		setTileSpriteIndex(this,true);
 		if (!this.occupyOrigin) tilemap.setTileCid(0, TILEAND,
 			Math.round(this.tx), Math.round(this.ty));
-		tilemap.setTileCid(this.colid, TILEAND, tx,ty);
+		tilemap.setTileCid(this.colid, TILEAND, tx_wrap,ty_wrap);
 	}
 	this.oldtx = this.tx;
 	this.oldty = this.ty;
-	this.tx = tx;
-	this.ty = ty;
+	this.tx = tx_wrap;
+	this.ty = ty_wrap;
 	if (this.colid) {
 		setTileSpriteIndex(this);
 	}
 	this.dest = {
-		tx: tx,
-		ty: ty,
+		tx: tx_wrap,
+		ty: ty_wrap,
 	}
-	var distx = this.x-this.dest.tx*tilex;
-	var disty = this.y-this.dest.ty*tiley;
+	var distx = this.x - tx*tilex;
+	var disty = this.y - ty*tiley;
 	var dist = Math.sqrt(distx*distx + disty*disty);
 	var speed = dist/steps;
 	var ang = Math.atan2(distx,disty);
@@ -1554,10 +1695,14 @@ TileSprite.removeSprites = function() {
 /** Get tile ID at position relative to this object.
 * @param xofs number of tiles from this object in x direction
 * @param yofs number of tiles from this object in y direction
-* @andmask mask to AND with before returning result. */
-TileSprite.prototype.getEnv = function(xofs,yofs,andmask) {
+* @param andmask mask to AND with before returning result. 
+* @param wrapx optional, number of x tiles at which to wrap
+* @param wrapy optional, number of y tiles at which to wrap */
+TileSprite.prototype.getEnv = function(xofs,yofs,andmask,wrapx,wrapy) {
 	if (!andmask) andmask = 0xffff;
-	return tilemap.getTileCidPos(Math.round(this.tx+xofs),Math.round(this.ty+yofs)) & andmask;
+	var xpos = Math.round(this.tx + xofs);
+	var ypos = Math.round(this.ty + yofs);
+	return tilemap.getTileCidPos(xpos,ypos,wrapx,wrapy) & andmask;
 }
 
 

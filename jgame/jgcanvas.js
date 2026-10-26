@@ -365,7 +365,8 @@ JGCanvas.prototype._jgmouseout = function (event) {
 
 
 JGCanvas.prototype._convertKeyToCode = function(key) {
-	if (!isNaN(parseFloat(key)) && isFinite(key)) {
+	if (typeof key == "number") {
+	//if (!isNaN(parseFloat(key)) && isFinite(key)) {
 		// number -> raw key code
 		return key;
 	}

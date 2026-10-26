@@ -149,8 +149,14 @@ JGObject.getObjects = function(nameprefix,colid) {
 JGObject._colsrcset = [];
 JGObject._coldstset = [];
 
-// call hit in dstcid when hit by srccid
-JGObject.checkCollision = function(srccid,dstcid) {
+/** Calls hit() in an object with dstcid when hit by an object with srccid.
+* wrap indicates whether an object on the right/bottom edge of the screen should collide with objects on the left/top edge.
+* if a wrapx/y value is passed, and an object's bbox intersects the edge of the screen, the bbox+screen width is also checked for collisions.
+* If the object is fully off-screen, wrap is not applied.
+* @param {Number} wrapx - right edge of the screen that should be wrapped 
+* @param {Number} wrapt - bottom edge of the screen that should be wrapped
+*/
+JGObject.checkCollision = function(srccid,dstcid,wrapx,wrapy) {
 	// precalculate src and dst set
 	var srcidx = 0;
 	var dstidx = 0;
@@ -169,16 +175,75 @@ JGObject.checkCollision = function(srccid,dstcid) {
 		var srcy1 = srco.y + srco.bbox.y;
 		var srcx2 = srcx1 + srco.bbox.width;
 		var srcy2 = srcy1 + srco.bbox.height;
+		// shifted coordinate to account for wrapping
+		var srcx1_b = null;
+		var srcy1_b = null;
+		var srcx2_b = null;
+		var srcy2_b = null;
+		// intersects with wrap edge?
+		if (wrapx) {
+			//if (srcx1 < 0 && srcx2 >= 0) {
+			//	srcx1_b = srcx1 + wrapx;
+			//	srcx2_b = srcx2 + wrapx;
+			//}
+			// assuming we keep 0 <= x < width
+			if (srcx2 >= wrapx) { // right side of bbox is > width
+				srcx1_b = srcx1 - wrapx;
+				srcx2_b = srcx2 - wrapx;
+				//console.log("####"+srcx1_b+"..."+srcx2_b)
+			}
+		}
+		if (wrapy) {
+			//if (srcy1 < 0 && srcy2 >= 0) {
+			//	srcy1_b = srcy1 + wrapy;
+			//	srcy2_b = srcy2 + wrapy;
+			//}
+			// assuming we keep 0 <= y < height
+			if (srcy2 >= wrapy) {
+				srcy1_b = srcy1 - wrapy;
+				srcy2_b = srcy2 - wrapy;
+			}
+		}
 		for (var j=0; j<dstidx; j++) {
 			var dsto = JGObject._coldstset[j];
 			if (dsto.name==srco.name) continue;
 			if (!dsto.alive) continue;
 			var dstx1 = dsto.x + dsto.bbox.x;
-			if (srcx1 > dstx1+dsto.bbox.width
-			||  dstx1 > srcx2) continue;
+			var dstx2 = dstx1 + dsto.bbox.width;
+			var dstx1_b = null;
+			var dstx2_b = null;
+			if (wrapx) {
+				// assuming we keep 0 <= x < width
+				if (dstx2 >= wrapx) { // right side of bbox is > width
+					dstx1_b = dstx1 - wrapx;
+					dstx2_b = dstx2 - wrapx;
+					//console.log("####"+srcx1_b+"..."+srcx2_b)
+				}
+			}
+			if ((srcx1 > dstx2 || dstx1 > srcx2)
+			&&  (srcx1_b===null || srcx1_b > dstx2 || dstx1 > srcx2_b)
+			&&  (dstx1_b===null || srcx1 > dstx2_b || dstx1_b > srcx2)
+			&&  (srcx1_b===null || dstx1_b===null || srcx1_b > dstx2_b || dstx1_b > srcx2_b) ) {
+				continue;
+			}
 			var dsty1 = dsto.y + dsto.bbox.y;
-			if (srcy1 > dsty1+dsto.bbox.height
-			||  dsty1 > srcy2) continue;
+			var dsty2 = dsty1 + dsto.bbox.height;
+			var dsty1_b = null;
+			var dsty2_b = null;
+			if (wrapy) {
+				// assuming we keep 0 <= y < height
+				if (dsty2 >= wrapy) { // right side of bbox is > width
+					dsty1_b = dsty1 - wrapy;
+					dsty2_b = dsty2 - wrapy;
+					//console.log("####"+srcy1_b+"..."+srcy2_b)
+				}
+			}
+			if ((srcy1 > dsty2 || dsty1 > srcy2)
+			&&  (srcy1_b===null || srcy1_b > dsty2 || dsty1 > srcy2_b)
+			&&  (dsty1_b===null || srcy1 > dsty2_b || dsty1_b > srcy2)
+			&&  (srcy1_b===null || dsty1_b===null || srcy1_b > dsty2_b || dsty1_b > srcy2_b) ) {
+				continue;
+			}
 			dsto.hit(srco);
 		}
 	}
@@ -217,13 +282,13 @@ JGObject.checkCollisionRectAll = function(rect,dstcid,limit) {
 }
 
 // call hit in dstcid when hit by tilecid
-JGObject.checkBGCollision = function(tilemap,tilecid,objcid) {
+JGObject.checkBGCollision = function(tilemap,tilecid,objcid,wrapx,wrapy) {
 	for (var objname in JGObject._objects) {
 		var obj = JGObject._objects[objname];
 		if (obj.suspended) continue;
 		if ((obj.colid&objcid) == 0) continue;
 		var rect = obj.getTiles(tilemap);
-		var tcid = tilemap.getTileCidRect(rect);
+		var tcid = tilemap.getTileCidRect(rect,wrapx,wrapy);
 		if (!(tcid&tilecid)) continue;
 		obj.hit_bg(tcid,rect);
 	}

@@ -261,46 +261,84 @@ JGTileMap.prototype.update = function(gl) {
 }
 
 
-JGTileMap.prototype.getTileCidRect = function(rect) {
+JGTileMap.prototype.getTileCidRect = function(rect,wrapx,wrapy) {
 	var ret = 0;
 	for (var y=rect.y; y<rect.y+rect.height; y++) {
+		var ywrap=y;
 		if (y<0 || y>=this.nrtilesy) {
-			ret |= this.offscreencid;
-			continue;
-		}
-		var cidsubmap = this.cidmap[y];
-		for (var x=rect.x; x<rect.x+rect.width; x++) {
-			if (x<0 || x>=this.nrtilesx) {
+			if (!wrapy) {
 				ret |= this.offscreencid;
 				continue;
+			} else {
+				while (ywrap<0) ywrap += wrapy;
+				while (ywrap>=wrapy) ywrap -= wrapy;
 			}
-			ret |= cidsubmap[x];
+		}
+		var cidsubmap = this.cidmap[ywrap];
+		for (var x=rect.x; x<rect.x+rect.width; x++) {
+			var xwrap=x;
+			if (x<0 || x>=this.nrtilesx) {
+				if (!wrapx) {
+					ret |= this.offscreencid;
+					continue;
+				} else {
+					while (xwrap<0) xwrap += wrapx;
+					while (xwrap>=wrapx) xwrap -= wrapx;
+				}
+			}
+			ret |= cidsubmap[xwrap];
 		}
 	}
 	return ret;
 }
 
 
-JGTileMap.prototype.getTileCidPos = function(tx,ty) {
+JGTileMap.prototype.getTileCidPos = function(tx,ty,wrapx,wrapy) {
 	if (!typecheckInt(tx,"tx")) return;
 	if (!typecheckInt(ty,"ty")) return;
-	if (ty<0 || ty>=this.nrtilesy
-	||  tx<0 || tx>=this.nrtilesx)
-		return this.offscreencid;
-	if (tx==null || ty==null) {
-		console.log("setTileCidPos: X or Y undefined!");
-		return;
+	//if (tx==null || ty==null) {
+	//	console.log("setTileCidPos: X or Y undefined!");
+	//	return;
+	//}
+	if (ty<0 || ty>=this.nrtilesy) {
+		if (wrapy) {
+			while (ty < 0) ty += wrapy;
+			while (ty >= wrapy) ty -= wrapy;
+		} else {
+			return this.offscreencid;
+		}
+	}
+	if (tx<0 || tx>=this.nrtilesx) {
+		if (wrapx) {
+			while (tx < 0) tx += wrapx;
+			while (tx >= wrapx) tx -= wrapx;
+		} else {
+			return this.offscreencid;
+		}
 	}
 	return this.cidmap[ty][tx];
 }
 
 
-JGTileMap.prototype.getTilePos = function(tx,ty) {
+JGTileMap.prototype.getTilePos = function(tx,ty,wrapx,wrapy) {
 	if (!typecheckInt(tx,"tx")) return;
 	if (!typecheckInt(ty,"ty")) return;
-	if (ty<0 || ty>=this.nrtilesy
-	||  tx<0 || tx>=this.nrtilesx)
-		return this.offscreentile;
+	if (ty<0 || ty>=this.nrtilesy) {
+		if (wrapy) {
+			while (ty < 0) ty += wrapy;
+			while (ty >= wrapy) ty -= wrapy;
+		} else {
+			return this.offscreentile;
+		}
+	}
+	if (tx<0 || tx>=this.nrtilesx) {
+		if (wrapx) {
+			while (tx < 0) tx += wrapx;
+			while (tx >= wrapx) tx -= wrapx;
+		} else {
+			return this.offscreentile;
+		}
+	}
 	return this.map[ty][tx];
 }
 
